@@ -517,6 +517,9 @@
     <string name="settings_game_java_memory_summary">Minecraft için bellek miktarını ayarla</string>
     <string name="settings_game_java_memory_used_text">Kullanılan: %1$dMB / %2$dMB</string>
     <string name="settings_game_java_memory_allocation_text">Ayrılmış: %dMB</string>
+    <string name="nova_memory_advice_recommended">Bu cihaz için önerilen: %1$dMB (güvenli üst sınır %2$dMB)</string>
+    <string name="nova_memory_advice_above_limit">Seçilen değer bu cihaz için güvenli sınırın üzerinde. Oyun çalışırken sistem takılabilir.</string>
+    <string name="nova_memory_advice_device">Cihaz: %1$s • %2$d çekirdek • %3$dMB RAM • OpenGL ES %4$d.%5$d</string>
     <string name="settings_game_jvm_args_title">JVM Argümanları</string>
     <string name="settings_game_jvm_args_summary">JVM başlatılırken eklenen JVM parametreleri; emin olunmadan değiştirilmesi önerilmez, çünkü bu çökme olasılığını artırabilir</string>
     <string name="settings_game_show_log_automatic_title">Otomatik Olarak Günlükleri Göster</string>

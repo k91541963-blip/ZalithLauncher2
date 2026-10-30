@@ -1781,6 +1781,12 @@
     <string name="settings_game_java_memory_used_text">Used: %1$dMB / %2$dMB</string>
     <!-- Preview under the memory allocation slider; %d is the memory allocated to the game in MB -->
     <string name="settings_game_java_memory_allocation_text">Allocated: %dMB</string>
+    <!-- Shown under the memory allocation slider; %1$d is the recommended memory and %2$d the safe maximum, in MB -->
+    <string name="nova_memory_advice_recommended">Recommended for this device: %1$dMB (safe maximum %2$dMB)</string>
+    <!-- Shown under the memory allocation slider when the selected value is too high; no placeholders -->
+    <string name="nova_memory_advice_above_limit">The selected value is above the safe limit for this device. The system may stutter while the game is running.</string>
+    <!-- Shown under the memory allocation slider; %1$s is the device name, %2$d cores, %3$d total RAM in MB, %4$d and %5$d are the OpenGL ES version parts -->
+    <string name="nova_memory_advice_device">Device: %1$s • %2$d cores • %3$dMB RAM • OpenGL ES %4$d.%5$d</string>
     <!-- Settings item title in the Game tab that lists the native library plugins -->
     <string name="settings_game_native_lib_plugin_title">Native Library Plugins</string>
     <!-- Summary of the native library plugins item in the Game settings tab -->

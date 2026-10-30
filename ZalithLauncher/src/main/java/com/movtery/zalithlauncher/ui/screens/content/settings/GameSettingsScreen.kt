@@ -231,6 +231,9 @@ fun GameSettingsScreen(
                                     stringResource(R.string.settings_game_java_memory_allocation_text, preview.toInt())
                                 }
                             )
+                            MemoryAdviceHint(
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     )
 
