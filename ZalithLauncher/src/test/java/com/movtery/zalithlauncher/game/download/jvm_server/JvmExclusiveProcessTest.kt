@@ -29,7 +29,7 @@ import org.junit.Test
  */
 class JvmExclusiveProcessTest {
 
-    private val main = "com.movtery.zalithlauncher.v2.debug"
+    private val main = "com.nova.launcher"
 
     @Test
     fun `jvm and game processes are exclusive`() {

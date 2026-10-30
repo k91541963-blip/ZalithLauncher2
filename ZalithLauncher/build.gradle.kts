@@ -64,8 +64,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = zalithPackageName
-        applicationIdSuffix = ".v2"
+        applicationId = "com.nova.launcher"
         minSdk = 26
         targetSdk = 34
         versionCode = launcherVersionCode

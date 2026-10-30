@@ -1,3 +1,11 @@
+# NovaLauncher
+
+> [!NOTE]
+> **NovaLauncher**, [Zalith Launcher 2](https://github.com/ZalithLauncher/ZalithLauncher2) tabanlı bir fork'tur.
+> Orijinal proje GPL-3.0 lisanslıdır ve telif hakkı MovTery ile katkıda bulunanlara aittir.
+> Bu fork da GPL-3.0 altında dağıtılır; değişikliklerin listesi `docs/NOVA_ROADMAP.md` ve commit geçmişinde tutulur.
+> "Zalith" adı ve logosu bu forkta kullanılmaz; orijinal projeye atıf korunur.
+
 # Zalith Launcher 2
 ![Downloads](https://img.shields.io/github/downloads/ZalithLauncher/ZalithLauncher2/total)
 [![Sponsor](https://img.shields.io/badge/sponsor-30363D?logo=GitHub-Sponsors)](https://afdian.com/a/MovTery)
