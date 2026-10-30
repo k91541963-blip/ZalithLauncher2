@@ -24,37 +24,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
-import com.movtery.zalithlauncher.game.performance.HardwareProfile
 import com.movtery.zalithlauncher.game.performance.MemoryAdvisor
 import com.movtery.zalithlauncher.setting.AllSettings
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * Shows the memory recommendation for the current device under the memory allocation slider.
  *
- * The hardware profile is read once on a background dispatcher. When detection fails the
- * hint stays hidden instead of showing a guessed value.
+ * The hint stays hidden until the hardware profile is available, and is hidden for good when
+ * detection failed, instead of showing a guessed value.
  */
 @Composable
 fun MemoryAdviceHint(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-
-    val profile by produceState<HardwareProfile?>(initialValue = null) {
-        value = withContext(Dispatchers.IO) {
-            runCatching { HardwareProfile.detect(context.applicationContext) }.getOrNull()
-        }
-    }
-
-    val detected = profile ?: return
+    val detected = rememberHardwareProfile() ?: return
     val advice = remember(detected) { MemoryAdvisor.advise(detected) }
     val selected = AllSettings.ramAllocation.state ?: advice.recommendedMb
 

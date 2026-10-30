@@ -387,6 +387,8 @@ fun RendererSummaryLayout(renderer: RendererInterface) {
                 Text(text = summary, style = MaterialTheme.typography.labelSmall)
             }
 
+            RendererCompatibilityBadge(renderer = renderer)
+
             val minVer = getDisplayMinMCVersion()
             val maxVer = getDisplayMaxMCVersion()
 
