@@ -1831,6 +1831,8 @@
     <string name="nova_mod_dep_note">Only Fabric and Quilt metadata is checked. Forge mods are not verified.</string>
     <!-- Shown instead of a version number when the installed version is unknown -->
     <string name="nova_mod_dep_unknown_version">unknown</string>
+    <!-- Heading above the analyzer's findings on the crash screen -->
+    <string name="nova_crash_analysis_title">Likely cause</string>
     <!-- Title of the log analysis banner and dialog shown in the log viewer -->
     <string name="nova_log_analysis_title">Log analysis</string>
     <!-- Button in the log analysis banner that opens the full report -->

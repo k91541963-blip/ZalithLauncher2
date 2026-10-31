@@ -34,6 +34,7 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.context.COPY_LABEL_LINK
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.ui.base.BaseAppCompatActivity
+import com.movtery.zalithlauncher.ui.screens.main.CrashAnalysisSection
 import com.movtery.zalithlauncher.ui.screens.main.ErrorScreen
 import com.movtery.zalithlauncher.ui.screens.main.crashlogs.ShareLinkOperation
 import com.movtery.zalithlauncher.ui.theme.ZalithLauncherTheme
@@ -176,6 +177,9 @@ class ErrorActivity : BaseAppCompatActivity() {
                             text = errorMessage.messageBody,
                             style = MaterialTheme.typography.bodyMedium
                         )
+                        if (logExists) {
+                            CrashAnalysisSection(logFile = logFile)
+                        }
                     }
                 }
             }

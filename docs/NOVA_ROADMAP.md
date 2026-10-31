@@ -32,21 +32,32 @@
 | Mod yükleyiciler | **VAR** | fabriclike (Fabric/Quilt), forgelike (Forge/NeoForge), OptiFine |
 | Mod indirme | **VAR** | Modrinth + CurseForge istemcileri |
 | Türkçe arayüz | **VAR** | `values-tr` |
-| Çökme logu | **KISMİ** | `crashlogs/` (mclogs yükleme), analiz yok |
-| Donanım profili / RAM önerisi | **YOK** | — |
-| Performans profilleri (kaydet/geri al) | **YOK** | — |
-| Renderer uyumluluk ön kontrolü | **YOK** | — |
-| Mod bağımlılık kontrolü | **YOK** | — |
-| Log analizi (neden + kanıt + çözüm) | **YOK** | — |
-| Düşük donanım arayüz modu | **YOK** | — |
+| Çökme logu | **KISMİ** | `crashlogs/` (mclogs yükleme) + `game/diagnostics/` analiz motoru, `LogViewScreen` bandı |
+| Donanım profili / RAM önerisi | **VAR** | `game/performance/HardwareProfile.kt`, `MemoryAdvisor.kt`, bellek ayarı altında öneri |
+| Performans profilleri (kaydet/geri al) | **VAR** | `PerformancePresets` + Oyun ayarlarında "Performans profili" kartı |
+| Renderer uyumluluk ön kontrolü | **VAR** | `RendererCompatibility` + renderer listesinde rozet |
+| Mod bağımlılık kontrolü | **VAR (Fabric/Quilt)** | `game/version/mod/dependency/`, mod listesinde uyarı şeridi; Forge henüz yok |
+| Log analizi (neden + kanıt + çözüm) | **VAR** | `LogAnalyzer` (15 kural, kanıt satırı, `Caused by` zinciri), log görüntüleyici bandı |
+| Düşük donanım arayüz modu | **KISMİ** | Düşük donanım profili bellek/GC/çözünürlüğü düşürür; arayüz animasyonlarını azaltan mod henüz yok |
 
 ## 4. Aşamalar
 
 - **Aşama 1 — Anlama:** ✅ tamamlandı (bu belge)
-- **Aşama 2 — Fork altyapısı:** isim, paket adı, ikon, renk, GPL atıf; mevcut işlevlerin korunduğunun doğrulanması
-- **Aşama 3 — Performans + kontrol:** donanım profili, RAM önerisi, performans profilleri, renderer ön kontrolü, düşük donanım modu
-- **Aşama 4 — Mod + log:** bağımlılık kontrolü, profil bazlı mod yönetimi, log analiz motoru
-- **Aşama 5 — Test + dağıtım:** gerçek cihaz testleri, sürüm notları, APK yayını
+- **Aşama 2 — Fork altyapısı:** ✅ isim `Nova Launcher`, `applicationId com.nova.launcher`, adaptive + monochrome ikon, GPL atıf; derleme doğrulandı
+- **Aşama 3 — Performans + kontrol:** ✅ donanım profili, RAM önerisi, performans profilleri, renderer ön kontrolü; düşük donanım arayüz modu kısmi
+- **Aşama 4 — Mod + log:** ✅ log analiz motoru, Fabric/Quilt bağımlılık denetimi; Forge bağımlılıkları ve profil bazlı mod yönetimi açık
+- **Aşama 5 — Test + dağıtım:** cihaz testleri, sürüm notları, APK yayını
+
+### Doğrulanmış derlemeler
+
+| Commit | İçerik | Sonuç |
+|---|---|---|
+| `9f50cde` | performans çekirdeği + bellek önerisi | ✅ |
+| `ccac850` | renderer uyumluluk rozeti | ✅ |
+| `22dc028` | log analiz motoru (çekirdek + 11 test) | ✅ |
+| `05cec0c` | log görüntüleyici analiz bandı | ✅ |
+| `ccf9bc5` | performans profili kartı | ✅ |
+| `28c8f22` | performans profili testleri | ✅ |
 
 ## 5. Kısıtlar
 

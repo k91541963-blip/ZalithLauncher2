@@ -99,7 +99,7 @@ fun LogAnalysisBanner(
 }
 
 @Composable
-private fun LogAnalysisDetails(analysis: LogAnalysis) {
+internal fun LogAnalysisDetails(analysis: LogAnalysis) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val versions = listOfNotNull(
             analysis.mcVersion?.let { "Minecraft $it" },
@@ -196,13 +196,13 @@ private fun severityColor(severity: LogSeverity) = when (severity) {
     LogSeverity.WARNING -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
-private fun severityRes(severity: LogSeverity) = when (severity) {
+internal fun severityRes(severity: LogSeverity) = when (severity) {
     LogSeverity.FATAL -> R.string.nova_log_severity_fatal
     LogSeverity.ERROR -> R.string.nova_log_severity_error
     LogSeverity.WARNING -> R.string.nova_log_severity_warning
 }
 
-private fun findingTitleRes(ruleId: String) = when (ruleId) {
+internal fun findingTitleRes(ruleId: String) = when (ruleId) {
     "heap_oom" -> R.string.nova_log_rule_heap_oom
     "native_oom" -> R.string.nova_log_rule_native_oom
     "heap_too_large" -> R.string.nova_log_rule_heap_too_large
@@ -221,7 +221,7 @@ private fun findingTitleRes(ruleId: String) = when (ruleId) {
     else -> R.string.nova_log_rule_unknown
 }
 
-private fun adviceRes(advice: LogAdvice) = when (advice) {
+internal fun adviceRes(advice: LogAdvice) = when (advice) {
     LogAdvice.INCREASE_MEMORY -> R.string.nova_log_advice_increase_memory
     LogAdvice.LOWER_MEMORY -> R.string.nova_log_advice_lower_memory
     LogAdvice.FREE_MEMORY -> R.string.nova_log_advice_free_memory
