@@ -50,7 +50,9 @@ class VersionRangeTest {
     fun `caret range stays inside the major version`() {
         assertTrue(VersionRange.satisfies("1.20.1", "^1.20.1"))
         assertTrue(VersionRange.satisfies("1.20.9", "^1.20.1"))
-        assertFalse(VersionRange.satisfies("1.21.0", "^1.20.1"))
+        // semver: ^1.20.1 == >=1.20.1 <2.0.0
+        assertTrue(VersionRange.satisfies("1.21.0", "^1.20.1"))
+        assertFalse(VersionRange.satisfies("2.0.0", "^1.20.1"))
         assertFalse(VersionRange.satisfies("1.20.0", "^1.20.1"))
     }
 
