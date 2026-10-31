@@ -95,7 +95,7 @@ jobs:
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew ZalithLauncher:testDebugUnitTest --tests "com.movtery.zalithlauncher.game.performance.*" --tests "com.movtery.zalithlauncher.game.diagnostics.*" -Darch=all 2>&1 | tee gradle-test.log
+          ./gradlew ZalithLauncher:testDebugUnitTest --tests "com.movtery.zalithlauncher.game.performance.*" --tests "com.movtery.zalithlauncher.game.diagnostics.*" --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*" -Darch=all 2>&1 | tee gradle-test.log
 
       - name: Report unit test errors
         if: inputs.variant == 'Debug' && steps.tests.outcome == 'failure'

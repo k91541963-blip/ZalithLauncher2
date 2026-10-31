@@ -109,6 +109,8 @@ import com.movtery.zalithlauncher.game.version.installed.VersionFolders
 import com.movtery.zalithlauncher.game.version.mod.AllModReader
 import com.movtery.zalithlauncher.game.version.mod.LocalMod
 import com.movtery.zalithlauncher.game.version.mod.RemoteMod
+import com.movtery.zalithlauncher.game.version.mod.dependency.ModDependencyChecker
+import com.movtery.zalithlauncher.game.version.mod.dependency.ModManifest as DependencyManifest
 import com.movtery.zalithlauncher.game.version.mod.isDisabled
 import com.movtery.zalithlauncher.game.version.mod.isEnabled
 import com.movtery.zalithlauncher.game.version.mod.update.ModManifest
@@ -138,6 +140,7 @@ import com.movtery.zalithlauncher.ui.screens.content.elements.rememberMultipleUr
 import com.movtery.zalithlauncher.ui.screens.content.versions.elements.ByteArrayIcon
 import com.movtery.zalithlauncher.ui.screens.content.versions.elements.DeleteAllOperation
 import com.movtery.zalithlauncher.ui.screens.content.versions.elements.LoadingState
+import com.movtery.zalithlauncher.ui.screens.content.versions.elements.ModDependencyBanner
 import com.movtery.zalithlauncher.ui.screens.content.versions.elements.ModStateFilter
 import com.movtery.zalithlauncher.ui.screens.content.versions.elements.ModsConfirmOperation
 import com.movtery.zalithlauncher.ui.screens.content.versions.elements.ModsOperation
@@ -747,6 +750,37 @@ fun ModsManagerScreen(
                             refresh = { viewModel.refresh(context) },
                             submitError = submitError
                         )
+
+                        val dependencyIssues = remember(viewModel.allMods) {
+                            val enabledMods = viewModel.allMods.filter { mod ->
+                                !mod.localMod.notMod && mod.localMod.file.isEnabled()
+                            }
+                            val disabledModIds = viewModel.allMods
+                                .filter { it.localMod.file.isDisabled() }
+                                .mapNotNull { it.localMod.id.takeIf { id -> id.isNotBlank() } }
+                                .toSet()
+
+                            ModDependencyChecker.check(
+                                enabledMods = enabledMods.map { mod ->
+                                    DependencyManifest(
+                                        id = mod.localMod.id,
+                                        name = mod.localMod.name,
+                                        version = mod.localMod.version,
+                                        dependencies = mod.localMod.dependencies
+                                    )
+                                },
+                                disabledModIds = disabledModIds
+                            )
+                        }
+
+                        if (dependencyIssues.isNotEmpty()) {
+                            ModDependencyBanner(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                issues = dependencyIssues
+                            )
+                        }
 
                         ModsList(
                             modifier = Modifier

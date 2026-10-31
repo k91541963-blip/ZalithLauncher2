@@ -18,10 +18,13 @@
 
 package com.movtery.zalithlauncher.game.version.mod.reader
 
+import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
+import com.google.gson.JsonPrimitive
 import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.version.mod.LocalMod
 import com.movtery.zalithlauncher.game.version.mod.ModMetadataReader
+import com.movtery.zalithlauncher.game.version.mod.dependency.ModDependency
 import com.movtery.zalithlauncher.game.version.mod.meta.FabricModMetadata
 import com.movtery.zalithlauncher.utils.GSON
 import com.movtery.zalithlauncher.utils.file.UnpackZipException
@@ -77,7 +80,8 @@ object FabricModMetadataReader : ModMetadataReader {
             description = metadata.description,
             version = metadata.version,
             authors = authors,
-            icon = icon
+            icon = icon,
+            dependencies = parseDependencies(metadata.depends)
         )
     }
 
@@ -106,7 +110,8 @@ object FabricModMetadataReader : ModMetadataReader {
                     description = metadata.description,
                     version = metadata.version,
                     authors = authors,
-                    icon = icon
+                    icon = icon,
+                    dependencies = parseDependencies(metadata.depends)
                 )
             }
         }
@@ -114,5 +119,28 @@ object FabricModMetadataReader : ModMetadataReader {
 
     private fun parseAuthors(authors: List<FabricModMetadata.FabricModAuthor>?): List<String> {
         return authors?.mapNotNull { it.name } ?: emptyList()
+    }
+
+    /**
+     * Converts the `depends` block into [ModDependency] entries.
+     *
+     * Fabric allows either a single range or an array of alternative ranges per mod id;
+     * loader provided ids (`minecraft`, `java`, `fabricloader`) are kept and filtered later
+     * by the dependency checker.
+     */
+    private fun parseDependencies(depends: Map<String, JsonElement>?): List<ModDependency> {
+        if (depends.isNullOrEmpty()) return emptyList()
+        return depends.mapNotNull { (id, element) ->
+            if (id.isBlank()) return@mapNotNull null
+            val ranges = when {
+                element.isJsonArray -> element.asJsonArray.mapNotNull { it.asStringOrNull() }
+                else -> listOfNotNull(element.asStringOrNull())
+            }
+            ModDependency(id = id, versionRanges = ranges, required = true)
+        }
+    }
+
+    private fun JsonElement.asStringOrNull(): String? {
+        return (this as? JsonPrimitive)?.takeIf { it.isString }?.asString
     }
 }

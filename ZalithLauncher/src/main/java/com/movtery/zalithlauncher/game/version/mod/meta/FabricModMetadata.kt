@@ -43,7 +43,13 @@ data class FabricModMetadata(
     @SerializedName("authors")
     val authors: List<FabricModAuthor>? = null,
     @SerializedName("contact")
-    val contact: Map<String, String>? = null
+    val contact: Map<String, String>? = null,
+    /**
+     * Declared dependencies, keyed by mod id. A value is either a version range string or an
+     * array of acceptable ranges. Optional suggestions are not part of this map.
+     */
+    @SerializedName("depends")
+    val depends: Map<String, JsonElement>? = null
 ) {
     @JsonAdapter(FabricModAuthorSerializer::class)
     data class FabricModAuthor(

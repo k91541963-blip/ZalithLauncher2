@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
+import com.movtery.zalithlauncher.game.version.mod.dependency.ModDependency
 import com.movtery.zalithlauncher.utils.logging.Logger
 import kotlinx.io.IOException
 import org.apache.commons.io.FileUtils
@@ -69,6 +70,11 @@ class LocalMod(
      * 是否从远端获取模组信息
      */
     val checkRemote: Boolean = true,
+
+    /**
+     * 模组声明的依赖，来自模组元数据；为空表示未读取或不支持
+     */
+    val dependencies: List<ModDependency> = emptyList(),
 ) {
     var file by mutableStateOf(modFile)
         private set

@@ -534,6 +534,14 @@
     <string name="nova_preset_quality_description">Güvenli üst bellek sınırı ve tam çözünürlük. Yalnızca 6 GB ve üzeri RAM\'de anlamlı.</string>
     <string name="nova_preset_values">%1$dMB bellek • %2$d%% çözünürlük</string>
     <string name="nova_preset_apply">Uygula</string>
+    <string name="nova_mod_dep_title">Bağımlılık denetimi</string>
+    <string name="nova_mod_dep_summary">%1$d mod bağımlılık sorunu bulundu</string>
+    <string name="nova_mod_dep_details">Ayrıntılar</string>
+    <string name="nova_mod_dep_missing">%1$s, kurulu olmayan %2$s moduna ihtiyaç duyuyor</string>
+    <string name="nova_mod_dep_disabled">%1$s, devre dışı olan %2$s moduna ihtiyaç duyuyor</string>
+    <string name="nova_mod_dep_version">%1$s, %2$s %3$s sürümünü istiyor, ancak %4$s sürümü kurulu</string>
+    <string name="nova_mod_dep_note">Yalnızca Fabric ve Quilt meta verisi denetlenir. Forge modları doğrulanmaz.</string>
+    <string name="nova_mod_dep_unknown_version">bilinmiyor</string>
     <string name="nova_log_analysis_title">Log analizi</string>
     <string name="nova_log_analysis_details">Ayrıntılar</string>
     <string name="nova_log_analysis_truncated">Bu log çok uzun; yalnızca başı incelendi.</string>

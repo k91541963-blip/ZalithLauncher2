@@ -1815,6 +1815,22 @@
     <string name="nova_preset_values">%1$dMB memory • %2$d%% resolution</string>
     <!-- Button in the performance preset dialog that applies the selected profile -->
     <string name="nova_preset_apply">Apply</string>
+    <!-- Title of the dependency warning strip above the mod list and its dialog -->
+    <string name="nova_mod_dep_title">Dependency check</string>
+    <!-- Summary of the dependency warning strip; %1$d is the number of problems -->
+    <string name="nova_mod_dep_summary">%1$d mod dependency problems found</string>
+    <!-- Button that opens the dependency problem list -->
+    <string name="nova_mod_dep_details">Details</string>
+    <!-- Dependency problem line when the required mod is not installed; %1$s is the mod, %2$s the missing dependency id -->
+    <string name="nova_mod_dep_missing">%1$s requires %2$s, which is not installed</string>
+    <!-- Dependency problem line when the required mod is disabled; %1$s is the mod, %2$s the dependency id -->
+    <string name="nova_mod_dep_disabled">%1$s requires %2$s, which is disabled</string>
+    <!-- Dependency problem line for a version mismatch; %1$s mod, %2$s dependency id, %3$s required range, %4$s installed version -->
+    <string name="nova_mod_dep_version">%1$s requires %2$s %3$s, but version %4$s is installed</string>
+    <!-- Note in the dependency dialog about which mod loaders are checked -->
+    <string name="nova_mod_dep_note">Only Fabric and Quilt metadata is checked. Forge mods are not verified.</string>
+    <!-- Shown instead of a version number when the installed version is unknown -->
+    <string name="nova_mod_dep_unknown_version">unknown</string>
     <!-- Title of the log analysis banner and dialog shown in the log viewer -->
     <string name="nova_log_analysis_title">Log analysis</string>
     <!-- Button in the log analysis banner that opens the full report -->
