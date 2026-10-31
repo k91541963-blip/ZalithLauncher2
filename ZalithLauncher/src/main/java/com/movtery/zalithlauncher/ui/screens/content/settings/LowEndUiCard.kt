@@ -19,11 +19,6 @@
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.movtery.zalithlauncher.R
@@ -41,23 +36,13 @@ import com.movtery.zalithlauncher.utils.animation.TransitionAnimationType
  */
 @Composable
 fun LowEndUiCard(modifier: Modifier = Modifier) {
-    val enabled = AllSettings.lowEndUi.state
-    var initialised by remember { mutableStateOf(false) }
-
-    LaunchedEffect(enabled) {
-        if (!initialised) {
-            initialised = true
-            return@LaunchedEffect
-        }
-        applyLowEndUi(enabled)
-    }
-
     SwitchSettingsCard(
         modifier = modifier,
         position = CardPosition.Middle,
         unit = AllSettings.lowEndUi,
         title = stringResource(R.string.nova_low_end_ui_title),
-        summary = stringResource(R.string.nova_low_end_ui_summary)
+        summary = stringResource(R.string.nova_low_end_ui_summary),
+        onCheckedChange = { enabled -> applyLowEndUi(enabled) }
     )
 }
 
