@@ -523,6 +523,17 @@
     <string name="nova_renderer_supported">Uyumlu</string>
     <string name="nova_renderer_unverified">Doğrulanmadı</string>
     <string name="nova_renderer_unsupported">Uyumsuz</string>
+    <string name="nova_preset_title">Performans profili</string>
+    <string name="nova_preset_summary">Bu cihaz için hazır bellek, JVM ve çözünürlük değerleri</string>
+    <string name="nova_preset_note">Profil uygulamak aşağıdaki bellek, JVM argümanları ve çözünürlük ölçeğinin üzerine yazar. Renderer değişmez. Bu profiller oyunun FPS\'ini tek başına artırmaz.</string>
+    <string name="nova_preset_low_end_title">Düşük donanım</string>
+    <string name="nova_preset_low_end_description">Az bellek, seri GC ve %75 çözünürlük. Eski ve giriş seviyesi cihazlar için.</string>
+    <string name="nova_preset_balanced_title">Dengeli</string>
+    <string name="nova_preset_balanced_description">Önerilen bellek, G1 GC ve tam çözünürlük. Çoğu cihaz için güvenli varsayılan.</string>
+    <string name="nova_preset_quality_title">Yüksek kalite</string>
+    <string name="nova_preset_quality_description">Güvenli üst bellek sınırı ve tam çözünürlük. Yalnızca 6 GB ve üzeri RAM\'de anlamlı.</string>
+    <string name="nova_preset_values">%1$dMB bellek • %2$d%% çözünürlük</string>
+    <string name="nova_preset_apply">Uygula</string>
     <string name="nova_log_analysis_title">Log analizi</string>
     <string name="nova_log_analysis_details">Ayrıntılar</string>
     <string name="nova_log_analysis_truncated">Bu log çok uzun; yalnızca başı incelendi.</string>

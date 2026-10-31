@@ -209,6 +209,10 @@ fun GameSettingsScreen(
                         )
                     }
 
+                    PerformancePresetCard(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     IntSliderSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,

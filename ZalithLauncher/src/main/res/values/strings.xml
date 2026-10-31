@@ -1793,6 +1793,28 @@
     <string name="nova_renderer_unverified">Not verified</string>
     <!-- Compatibility badge in the renderer list when a local check rules the renderer out; no placeholders -->
     <string name="nova_renderer_unsupported">Not compatible</string>
+    <!-- Title of the performance preset card in the Game settings tab -->
+    <string name="nova_preset_title">Performance profile</string>
+    <!-- Summary of the performance preset card in the Game settings tab -->
+    <string name="nova_preset_summary">Ready-made memory, JVM and resolution values for this device</string>
+    <!-- Warning shown in the performance preset dialog before applying a profile -->
+    <string name="nova_preset_note">Applying a profile overwrites the memory, JVM arguments and resolution scale below. The renderer is not changed. These profiles do not raise the game\'s FPS by themselves.</string>
+    <!-- Name of the low-end performance profile -->
+    <string name="nova_preset_low_end_title">Low-end device</string>
+    <!-- Description of the low-end performance profile -->
+    <string name="nova_preset_low_end_description">Less memory, serial GC and 75% resolution. For older and entry-level devices.</string>
+    <!-- Name of the balanced performance profile -->
+    <string name="nova_preset_balanced_title">Balanced</string>
+    <!-- Description of the balanced performance profile -->
+    <string name="nova_preset_balanced_description">Recommended memory, G1 GC and full resolution. A safe default for most devices.</string>
+    <!-- Name of the high quality performance profile -->
+    <string name="nova_preset_quality_title">High quality</string>
+    <!-- Description of the high quality performance profile -->
+    <string name="nova_preset_quality_description">Safe upper memory limit and full resolution. Only meaningful with 6 GB RAM or more.</string>
+    <!-- Values of a performance profile; %1$d is the memory in MB, %2$d the resolution percentage -->
+    <string name="nova_preset_values">%1$dMB memory • %2$d%% resolution</string>
+    <!-- Button in the performance preset dialog that applies the selected profile -->
+    <string name="nova_preset_apply">Apply</string>
     <!-- Title of the log analysis banner and dialog shown in the log viewer -->
     <string name="nova_log_analysis_title">Log analysis</string>
     <!-- Button in the log analysis banner that opens the full report -->

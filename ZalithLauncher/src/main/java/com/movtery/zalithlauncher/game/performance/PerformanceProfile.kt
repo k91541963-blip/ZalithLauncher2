@@ -22,29 +22,29 @@ package com.movtery.zalithlauncher.game.performance
  * A named bundle of launcher settings that can be applied and rolled back as a unit.
  *
  * The launcher only changes what the user explicitly applies. Nothing here is enforced at
- * launch time, so an existing setup keeps working after an update.
+ * launch time, so an existing setup keeps working after an update. Titles and descriptions
+ * live in the UI layer so every language can be translated.
  *
  * @param ramMb JVM heap size, or `null` to keep the current value
  * @param jvmArgs extra JVM arguments, empty string means "no extra arguments"
  * @param rendererId preferred renderer id, or `null` to keep the current renderer
- * @param lowEndUi true when the lighter UI mode should be enabled
+ * @param resolutionRatio render scale percentage, or `null` to keep the current value
  */
 data class PerformancePreset(
     val id: String,
-    val displayName: String,
-    val description: String,
     val ramMb: Int?,
     val jvmArgs: String,
     val rendererId: String?,
-    val lowEndUi: Boolean
+    val resolutionRatio: Int?
 )
 
 /**
  * Built-in presets.
  *
  * These are starting points built from the device profile, not performance promises.
- * Launcher-side optimisations (UI, background work, memory pressure) do not raise the
- * game's frame rate by themselves; they only leave more resources for the game.
+ * Launcher-side presets (memory, GC, resolution) do not raise the game's frame rate by
+ * themselves; they only leave more resources for the game and avoid settings the device
+ * cannot handle.
  */
 object PerformancePresets {
 
@@ -60,30 +60,24 @@ object PerformancePresets {
         return listOf(
             PerformancePreset(
                 id = ID_LOW_END,
-                displayName = "Düşük donanım",
-                description = "Az RAM, seri GC, hafif arayüz. Eski ve giriş seviyesi cihazlar için.",
                 ramMb = lowEndRam,
                 jvmArgs = "-XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:+DisableExplicitGC",
                 rendererId = null,
-                lowEndUi = true
+                resolutionRatio = 75
             ),
             PerformancePreset(
                 id = ID_BALANCED,
-                displayName = "Dengeli",
-                description = "Önerilen bellek, G1 GC. Çoğu cihaz için güvenli varsayılan.",
                 ramMb = advice.recommendedMb,
                 jvmArgs = "-XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:MaxMetaspaceSize=192m",
                 rendererId = null,
-                lowEndUi = false
+                resolutionRatio = 100
             ),
             PerformancePreset(
                 id = ID_QUALITY,
-                displayName = "Yüksek kalite",
-                description = "Bu cihaz için güvenli üst sınır. Yalnızca 6 GB ve üzeri RAM'de anlamlı.",
                 ramMb = qualityRam,
                 jvmArgs = "-XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:MaxMetaspaceSize=256m",
                 rendererId = null,
-                lowEndUi = false
+                resolutionRatio = 100
             )
         )
     }
