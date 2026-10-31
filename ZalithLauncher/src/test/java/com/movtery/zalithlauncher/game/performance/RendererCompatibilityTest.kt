@@ -67,7 +67,7 @@ class RendererCompatibilityTest {
         val result = RendererCompatibility.assess(profile(), renderer, "1.21.5")
 
         assertEquals(RendererSupport.UNSUPPORTED, result.support)
-        assertTrue(result.reasons.isNotEmpty())
+        assertTrue(result.issues.isNotEmpty())
     }
 
     @Test
@@ -84,7 +84,7 @@ class RendererCompatibilityTest {
         val result = RendererCompatibility.assess(profile(is64Bit = false), renderer, "1.21.1")
 
         assertEquals(RendererSupport.UNSUPPORTED, result.support)
-        assertTrue(result.reasons.any { it.contains("64-bit") })
+        assertTrue(result.issues.contains(RendererIssue.REQUIRES_64_BIT))
     }
 
     @Test

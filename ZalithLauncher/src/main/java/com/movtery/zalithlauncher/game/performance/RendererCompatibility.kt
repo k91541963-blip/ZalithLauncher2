@@ -33,15 +33,33 @@ enum class RendererSupport {
 }
 
 /**
- * @param reasons blocking facts, e.g. the game version is out of the renderer's range
+ * Facts the local check can prove about a renderer on this device.
+ *
+ * Codes instead of text: every language renders them in the UI layer.
+ */
+enum class RendererIssue {
+    MC_VERSION_OUT_OF_RANGE,
+    GLES_TOO_LOW,
+    GLES_AT_LIMIT,
+    REQUIRES_64_BIT,
+    VULKAN_NEEDS_NEWER_ANDROID,
+    FREEDRENO_NEEDS_ADRENO,
+    PANFROST_NEEDS_MALI,
+    GPU_FAMILY_UNKNOWN,
+    VIRGL_NEEDS_ENVIRONMENT,
+    GLES_VERSION_UNKNOWN
+}
+
+/**
+ * @param issues blocking facts, e.g. the game version is out of the renderer's range
  * @param warnings non blocking hints the user should know about
  */
 data class RendererAssessment(
     val rendererId: String,
     val rendererName: String,
     val support: RendererSupport,
-    val reasons: List<String>,
-    val warnings: List<String>
+    val issues: List<RendererIssue>,
+    val warnings: List<RendererIssue>
 ) {
     val isUsable: Boolean
         get() = support != RendererSupport.UNSUPPORTED
@@ -68,66 +86,58 @@ object RendererCompatibility {
         renderer: RendererInterface,
         mcVersion: String? = null
     ): RendererAssessment {
-        val reasons = mutableListOf<String>()
-        val warnings = mutableListOf<String>()
+        val issues = mutableListOf<RendererIssue>()
+        val warnings = mutableListOf<RendererIssue>()
 
         val min = renderer.getMinMCVersion()
         val max = renderer.getMaxMCVersion()
         if (!McVersion.isInRange(mcVersion, min, max)) {
-            reasons += buildString {
-                append("Bu renderer Minecraft ")
-                append(mcVersion)
-                append(" sürümünü desteklemiyor (desteklenen aralık: ")
-                append(min ?: "-")
-                append(" – ")
-                append(max ?: "-")
-                append(").")
-            }
+            issues += RendererIssue.MC_VERSION_OUT_OF_RANGE
         }
 
         when (renderer.getRendererId()) {
-            "opengles2" -> requireGles(profile, GLES_2, renderer, reasons, warnings)
-            "opengles3" -> requireGles(profile, GLES_3, renderer, reasons, warnings)
+            "opengles2" -> requireGles(profile, GLES_2, issues, warnings)
+            "opengles3" -> requireGles(profile, GLES_3, issues, warnings)
 
             "opengles3_desktopgl_zink_kopper" -> {
-                requireGles(profile, GLES_3, renderer, reasons, warnings)
+                requireGles(profile, GLES_3, issues, warnings)
                 if (!profile.is64Bit) {
-                    reasons += "Zink (Kopper) 64-bit süreç gerektirir; bu cihaz 32-bit."
+                    issues += RendererIssue.REQUIRES_64_BIT
                 }
                 if (profile.androidSdk < 29) {
-                    warnings += "Vulkan sürücüsü Android 10 ve üzerinde daha kararlı çalışır."
+                    warnings += RendererIssue.VULKAN_NEEDS_NEWER_ANDROID
                 }
             }
 
             "gallium_freedreno" -> {
                 if (profile.gpuFamily != GpuFamily.ADRENO) {
-                    reasons += "Freedreno yalnızca Adreno GPU'larda çalışır."
+                    issues += RendererIssue.FREEDRENO_NEEDS_ADRENO
                 }
                 if (profile.gpuFamily == GpuFamily.UNKNOWN) {
-                    warnings += "GPU ailesi tespit edilemedi; Adreno olduğundan emin değilseniz seçmeyin."
+                    warnings += RendererIssue.GPU_FAMILY_UNKNOWN
                 }
             }
 
             "gallium_panfrost" -> {
                 if (profile.gpuFamily != GpuFamily.MALI) {
-                    reasons += "Panfrost yalnızca Mali GPU'larda çalışır."
+                    issues += RendererIssue.PANFROST_NEEDS_MALI
                 }
                 if (profile.gpuFamily == GpuFamily.UNKNOWN) {
-                    warnings += "GPU ailesi tespit edilemedi; Mali olduğundan emin değilseniz seçmeyin."
+                    warnings += RendererIssue.GPU_FAMILY_UNKNOWN
                 }
             }
 
             "gallium_virgl" -> {
-                warnings += "VirGL ek bir virglrenderer ortamı gerektirir; performansı cihaza göre değişir."
+                warnings += RendererIssue.VIRGL_NEEDS_ENVIRONMENT
             }
         }
 
         if (profile.glEsVersionCode == 0) {
-            warnings += "OpenGL ES sürümü okunamadı; uyumluluk doğrulanamadı."
+            warnings += RendererIssue.GLES_VERSION_UNKNOWN
         }
 
         val support = when {
-            reasons.isNotEmpty() -> RendererSupport.UNSUPPORTED
+            issues.isNotEmpty() -> RendererSupport.UNSUPPORTED
             profile.glEsVersionCode == 0 -> RendererSupport.UNKNOWN
             warnings.isNotEmpty() && renderer.getRendererId() == "gallium_virgl" -> RendererSupport.UNKNOWN
             else -> RendererSupport.SUPPORTED
@@ -137,7 +147,7 @@ object RendererCompatibility {
             rendererId = renderer.getRendererId(),
             rendererName = renderer.getRendererName(),
             support = support,
-            reasons = reasons,
+            issues = issues,
             warnings = warnings
         )
     }
@@ -165,17 +175,15 @@ object RendererCompatibility {
     private fun requireGles(
         profile: HardwareProfile,
         required: Int,
-        renderer: RendererInterface,
-        reasons: MutableList<String>,
-        warnings: MutableList<String>
+        issues: MutableList<RendererIssue>,
+        warnings: MutableList<RendererIssue>
     ) {
         val detected = profile.glEsVersionCode
         if (detected == 0) return // unknown, reported once by the caller
         if (detected < required) {
-            reasons += "${renderer.getRendererName()} en az OpenGL ES " +
-                "${required / 10}.${required % 10} gerektirir; cihazda ${profile.glEsMajor}.${profile.glEsMinor} var."
+            issues += RendererIssue.GLES_TOO_LOW
         } else if (detected == required) {
-            warnings += "Cihaz tam sınırda: OpenGL ES ${profile.glEsMajor}.${profile.glEsMinor}."
+            warnings += RendererIssue.GLES_AT_LIMIT
         }
     }
 }
