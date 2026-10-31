@@ -1833,6 +1833,10 @@
     <string name="nova_mod_dep_unknown_version">unknown</string>
     <!-- Heading above the analyzer's findings on the crash screen -->
     <string name="nova_crash_analysis_title">Likely cause</string>
+    <!-- Title of the low-end interface switch in the Game settings tab -->
+    <string name="nova_low_end_ui_title">Low-end interface</string>
+    <!-- Summary of the low-end interface switch in the Game settings tab -->
+    <string name="nova_low_end_ui_summary">Faster animations, no page transitions and no background blur. Keeps the launcher responsive on older devices; it does not change the game itself.</string>
     <!-- Title of the log analysis banner and dialog shown in the log viewer -->
     <string name="nova_log_analysis_title">Log analysis</string>
     <!-- Button in the log analysis banner that opens the full report -->

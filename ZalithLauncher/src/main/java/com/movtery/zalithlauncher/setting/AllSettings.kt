@@ -408,6 +408,11 @@ object AllSettings : SettingsRegistry() {
     val launcherAnimateSpeed = intSetting("launcherAnimateSpeed", 5, 0..10)
 
     /**
+     * 低配设备界面模式：缩短动画、关闭页面切换动画与背景模糊
+     */
+    val lowEndUi = boolSetting("lowEndUi", false)
+
+    /**
      * 动画幅度
      */
     val launcherAnimateExtent = intSetting("launcherAnimateExtent", 5, 0..10)

@@ -213,6 +213,10 @@ fun GameSettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    LowEndUiCard(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     IntSliderSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,
