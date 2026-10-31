@@ -1793,6 +1793,86 @@
     <string name="nova_renderer_unverified">Not verified</string>
     <!-- Compatibility badge in the renderer list when a local check rules the renderer out; no placeholders -->
     <string name="nova_renderer_unsupported">Not compatible</string>
+    <!-- Title of the log analysis banner and dialog shown in the log viewer -->
+    <string name="nova_log_analysis_title">Log analysis</string>
+    <!-- Button in the log analysis banner that opens the full report -->
+    <string name="nova_log_analysis_details">Details</string>
+    <!-- Note in the log analysis dialog when the log was longer than the scan limit -->
+    <string name="nova_log_analysis_truncated">This log is very long; only its beginning was analysed.</string>
+    <!-- Heading above the log lines that a finding was derived from -->
+    <string name="nova_log_analysis_evidence">Evidence</string>
+    <!-- One evidence line in the log analysis dialog; %1$d is the line number, %2$s the line text -->
+    <string name="nova_log_analysis_evidence_line">%1$d: %2$s</string>
+    <!-- Heading above the suggested actions of a finding -->
+    <string name="nova_log_analysis_advice">What to try</string>
+    <!-- Heading above the "Caused by" exception chain in the log analysis dialog -->
+    <string name="nova_log_analysis_root_causes">Caused by</string>
+    <!-- Severity label for a finding that stopped the game from running -->
+    <string name="nova_log_severity_fatal">Fatal</string>
+    <!-- Severity label for a finding that broke part of the game -->
+    <string name="nova_log_severity_error">Error</string>
+    <!-- Severity label for a finding that may explain bad performance -->
+    <string name="nova_log_severity_warning">Warning</string>
+    <!-- Log finding title when the game ran out of Java heap memory -->
+    <string name="nova_log_rule_heap_oom">The game ran out of Java heap memory</string>
+    <!-- Log finding title when the device ran out of native memory -->
+    <string name="nova_log_rule_native_oom">The device ran out of memory</string>
+    <!-- Log finding title when the configured memory is larger than the device can reserve -->
+    <string name="nova_log_rule_heap_too_large">The memory allocation cannot be reserved on this device</string>
+    <!-- Log finding title when the graphics context could not be created -->
+    <string name="nova_log_rule_renderer_context">The graphics context could not be created</string>
+    <!-- Log finding title when a renderer native library failed to load -->
+    <string name="nova_log_rule_renderer_native">A renderer library failed to load</string>
+    <!-- Log finding title when a mod is missing a required dependency -->
+    <string name="nova_log_rule_mod_missing_dependency">A mod is missing a required dependency</string>
+    <!-- Log finding title when a mod failed to apply its mixins -->
+    <string name="nova_log_rule_mod_mixin_failure">A mod failed to apply its patches</string>
+    <!-- Log finding title when the same mod is installed more than once -->
+    <string name="nova_log_rule_mod_duplicate">The same mod is installed twice</string>
+    <!-- Log finding title when the Java runtime is too old for the game or a mod -->
+    <string name="nova_log_rule_java_version">The Java version is too old for this game or mod</string>
+    <!-- Log finding title when the main class could not be loaded, usually damaged game files -->
+    <string name="nova_log_rule_java_main_class">The game files look incomplete or corrupted</string>
+    <!-- Log finding title when a network request failed -->
+    <string name="nova_log_rule_network_failure">A network request failed</string>
+    <!-- Log finding title when game files could not be read or written -->
+    <string name="nova_log_rule_storage_failure">The device could not read or write game files</string>
+    <!-- Log finding title when an account could not be authenticated -->
+    <string name="nova_log_rule_account_failure">The account could not be authenticated</string>
+    <!-- Log finding title when the game process crashed in native code -->
+    <string name="nova_log_rule_native_crash">The game process crashed in native code</string>
+    <!-- Log finding title when the log contains a Minecraft crash report -->
+    <string name="nova_log_rule_crash_report">The game reported a crash</string>
+    <!-- Log finding title used when a rule has no localized title yet -->
+    <string name="nova_log_rule_unknown">A problem was detected in this log</string>
+    <!-- Log advice shown for an out of memory finding -->
+    <string name="nova_log_advice_increase_memory">Increase the memory allocation in Game settings, but stay under the safe limit.</string>
+    <!-- Log advice shown when the selected memory cannot be reserved -->
+    <string name="nova_log_advice_lower_memory">Lower the memory allocation; this value cannot be reserved on this device.</string>
+    <!-- Log advice shown when the device is low on free memory -->
+    <string name="nova_log_advice_free_memory">Close other apps to free RAM, then try again.</string>
+    <!-- Log advice shown for graphics or driver failures -->
+    <string name="nova_log_advice_switch_renderer">Try another renderer in Renderer settings.</string>
+    <!-- Log advice shown when the GPU is under too much load -->
+    <string name="nova_log_advice_lower_graphics">Lower the render distance and the resolution scale.</string>
+    <!-- Log advice shown for a missing mod dependency -->
+    <string name="nova_log_advice_install_missing_mods">Install the missing dependency mods, or remove the mod that requires them.</string>
+    <!-- Log advice shown for conflicting or duplicated mods -->
+    <string name="nova_log_advice_remove_conflicting_mods">Remove one of the conflicting mods.</string>
+    <!-- Log advice shown for outdated mods or mod loaders -->
+    <string name="nova_log_advice_update_mods">Update the mods and the mod loader to matching versions.</string>
+    <!-- Log advice shown for an outdated Java runtime -->
+    <string name="nova_log_advice_update_java">Install a newer Java runtime in Java settings.</string>
+    <!-- Log advice shown when game files may be damaged -->
+    <string name="nova_log_advice_verify_game_files">Reinstall or repair the game files.</string>
+    <!-- Log advice shown for network failures -->
+    <string name="nova_log_advice_check_network">Check the connection and try again; a VPN or a different DNS may help.</string>
+    <!-- Log advice shown for storage or permission failures -->
+    <string name="nova_log_advice_check_storage">Free up storage space and check file permissions.</string>
+    <!-- Log advice shown for account authentication failures -->
+    <string name="nova_log_advice_sign_in_again">Sign in to the account again.</string>
+    <!-- Log advice shown when a crash report is available -->
+    <string name="nova_log_advice_read_crash_report">Open the crash report in crash-reports for the full stack trace.</string>
     <!-- Settings item title in the Game tab that lists the native library plugins -->
     <string name="settings_game_native_lib_plugin_title">Native Library Plugins</string>
     <!-- Summary of the native library plugins item in the Game settings tab -->

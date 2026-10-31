@@ -27,8 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavBackStack
+import com.movtery.zalithlauncher.game.diagnostics.LogAnalysis
+import com.movtery.zalithlauncher.game.diagnostics.LogAnalyzer
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.code_editor.EditorState
@@ -93,9 +97,11 @@ fun LogViewScreen(
     val context = LocalContext.current
 
     var editorState by remember { mutableStateOf<EditorState>(EditorState.Loading) }
+    var analysis by remember { mutableStateOf<LogAnalysis?>(null) }
 
     LaunchedEffect(key) {
         editorState = EditorState.Loading
+        analysis = null
         val content = withContext(Dispatchers.IO) {
             runCatching {
                 readLog(File(key.logPath))
@@ -105,6 +111,9 @@ fun LogViewScreen(
             }
         }
         editorState = EditorState.Success(Content(content))
+        analysis = withContext(Dispatchers.Default) {
+            runCatching { LogAnalyzer.analyze(content.toString()) }.getOrNull()
+        }
     }
 
     BaseScreen(
@@ -131,7 +140,16 @@ fun LogViewScreen(
                 scheme = scheme ?: fallbackScheme,
                 language = language,
                 isReadOnly = true,
-                onSaveClick = {}
+                onSaveClick = {},
+                content = {
+                    val result = analysis
+                    if (result != null && result.findings.isNotEmpty()) {
+                        LogAnalysisBanner(
+                            analysis = result,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
+                    }
+                }
             )
         }
     }
