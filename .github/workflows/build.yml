@@ -25,6 +25,8 @@ jobs:
   build:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         arch: ${{ fromJSON(inputs.arches || '["all","arm","arm64","x86","x86_64"]') }}
@@ -147,3 +149,24 @@ jobs:
         with:
           name: debug apk (${{ matrix.arch }})
           path: ZalithLauncher/build/outputs/apk/debug/*.apk
+
+      - name: Prepare release asset
+        if: inputs.variant == 'Debug' && matrix.arch == 'arm64'
+        shell: bash
+        run: |
+          mkdir -p release-assets
+          cp ZalithLauncher/build/outputs/apk/debug/*.apk release-assets/NovaLauncher-arm64-debug.apk
+
+      - name: Publish APK to release
+        if: inputs.variant == 'Debug' && matrix.arch == 'arm64'
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Nova Launcher (arm64 debug)
+          body: |
+            Debug APK built from commit ${{ github.sha }}.
+            Direct download: NovaLauncher-arm64-debug.apk
+          files: release-assets/NovaLauncher-arm64-debug.apk
+          prerelease: true
+          make_latest: false

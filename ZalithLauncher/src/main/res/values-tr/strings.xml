@@ -543,6 +543,7 @@
     <string name="nova_mod_dep_note">Yalnızca Fabric ve Quilt meta verisi denetlenir. Forge modları doğrulanmaz.</string>
     <string name="nova_mod_dep_unknown_version">bilinmiyor</string>
     <string name="nova_crash_analysis_title">Olası neden</string>
+    <string name="nova_offline_account_add">Çevrimdışı hesap</string>
     <string name="nova_low_end_ui_title">Düşük donanım arayüzü</string>
     <string name="nova_low_end_ui_summary">Daha hızlı animasyonlar, sayfa geçişi yok ve arka plan bulanıklığı kapalı. Eski cihazlarda arayüzü akıcı tutar; oyunun kendisini değiştirmez.</string>
     <string name="nova_log_analysis_title">Log analizi</string>

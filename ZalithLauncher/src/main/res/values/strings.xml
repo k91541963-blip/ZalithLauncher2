@@ -1833,6 +1833,8 @@
     <string name="nova_mod_dep_unknown_version">unknown</string>
     <!-- Heading above the analyzer's findings on the crash screen -->
     <string name="nova_crash_analysis_title">Likely cause</string>
+    <!-- Button on the account screen that opens the offline account dialog directly -->
+    <string name="nova_offline_account_add">Offline account</string>
     <!-- Title of the low-end interface switch in the Game settings tab -->
     <string name="nova_low_end_ui_title">Low-end interface</string>
     <!-- Summary of the low-end interface switch in the Game settings tab -->
