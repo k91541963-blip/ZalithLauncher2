@@ -23,6 +23,7 @@ import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.version.mod.LocalMod
 import com.movtery.zalithlauncher.game.version.mod.ModMetadataReader
 import com.movtery.zalithlauncher.game.version.mod.meta.ForgeNewModMetadata
+import com.movtery.zalithlauncher.game.version.mod.dependency.ForgeDependencyParser
 import com.movtery.zalithlauncher.utils.GSON
 import com.movtery.zalithlauncher.utils.file.UnpackZipException
 import com.movtery.zalithlauncher.utils.logging.Logger
@@ -116,7 +117,8 @@ object ForgeNewModMetadataReader : ModMetadataReader {
                 description = mod.description,
                 version = resolvedVersion,
                 authors = mod.authors ?: emptyList(),
-                icon = icon
+                icon = icon,
+                dependencies = ForgeDependencyParser.parse(tomlMap, mod.modId)
             )
         }
     }
@@ -202,7 +204,8 @@ object ForgeNewModMetadataReader : ModMetadataReader {
                 description = mod.description,
                 version = resolvedVersion,
                 authors = mod.authors ?: emptyList(),
-                icon = icon
+                icon = icon,
+                dependencies = ForgeDependencyParser.parse(tomlMap, mod.modId)
             )
         }
     }

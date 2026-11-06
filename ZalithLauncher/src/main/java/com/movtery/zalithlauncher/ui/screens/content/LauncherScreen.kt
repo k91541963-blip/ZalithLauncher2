@@ -92,6 +92,7 @@ import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.PetModelView
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
+import com.movtery.zalithlauncher.ui.components.SimpleAlertDialog
 import com.movtery.zalithlauncher.ui.guide.GuideKeys
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
@@ -289,13 +290,29 @@ private fun AccountAvatarCenter(
     modifier: Modifier = Modifier,
     account: Account?,
     refreshKey: Any? = null,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onSwitchAccount: (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
             .clip(shape = MaterialTheme.shapes.extraLarge)
             .clickable(onClick = onClick)
     ) {
+        if (onSwitchAccount != null) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(32.dp),
+                onClick = onSwitchAccount
+            ) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    painter = painterResource(R.drawable.ic_group_filled),
+                    contentDescription = stringResource(R.string.nova_account_switch)
+                )
+            }
+        }
+
         Column(
             modifier = Modifier.padding(all = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -338,6 +355,7 @@ private fun AccountAvatarRow(
     modifier: Modifier = Modifier,
     account: Account?,
     refreshKey: Any? = null,
+    onSwitchAccount: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.padding(all = 12.dp),
@@ -375,7 +393,77 @@ private fun AccountAvatarRow(
                 )
             }
         }
+
+        if (onSwitchAccount != null) {
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = onSwitchAccount
+            ) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    painter = painterResource(R.drawable.ic_group_filled),
+                    contentDescription = stringResource(R.string.nova_account_switch)
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun AccountSwitcherDialog(
+    accounts: List<Account>,
+    currentAccount: Account?,
+    onSelect: (Account) -> Unit,
+    onManageAccounts: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    SimpleAlertDialog(
+        title = stringResource(R.string.nova_account_switch_title),
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                accounts.forEach { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(shape = MaterialTheme.shapes.large)
+                            .clickable { onSelect(item) }
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PlayerFace(
+                            account = item,
+                            avatarSize = 32.dp
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = item.username,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                text = getAccountTypeName(item),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                        if (item.uniqueUUID == currentAccount?.uniqueUUID) {
+                            Icon(
+                                modifier = Modifier.size(20.dp),
+                                painter = painterResource(R.drawable.ic_check),
+                                contentDescription = stringResource(R.string.nova_account_switch_current),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmText = stringResource(R.string.nova_account_manage),
+        dismissText = stringResource(R.string.generic_cancel),
+        onConfirm = onManageAccounts,
+        onCancel = onDismiss,
+        onDismissRequest = onDismiss
+    )
 }
 
 @Composable
@@ -500,6 +588,7 @@ private fun VersionsContent(
 private fun ActionMenuCardContent(
     modifier: Modifier = Modifier,
     account: Account?,
+    onSwitchAccount: (() -> Unit)?,
     onLaunchGame: (Version?) -> Unit,
     toAccountManageScreen: () -> Unit,
     toVersionManageScreen: () -> Unit,
@@ -529,7 +618,8 @@ private fun ActionMenuCardContent(
                         preferSide = GuideSide.Below
                     ),
                 account = account,
-                onClick = toAccountManageScreen
+                onClick = toAccountManageScreen,
+                onSwitchAccount = onSwitchAccount
             )
 
             VersionsContent(
@@ -550,6 +640,7 @@ private fun ActionMenuCardContent(
 private fun ActionMenuTallerContent(
     modifier: Modifier = Modifier,
     account: Account?,
+    onSwitchAccount: (() -> Unit)?,
     dockedSide: ActionMenuSide,
     onLaunchGame: (Version?) -> Unit,
     toAccountManageScreen: () -> Unit,
@@ -613,6 +704,7 @@ private fun ActionMenuTallerContent(
             AccountAvatarRow(
                 modifier = Modifier.fillMaxWidth(),
                 account = account,
+                onSwitchAccount = onSwitchAccount
             )
         }
 
@@ -650,6 +742,30 @@ private fun ActionMenu(
     )
 
     val account by AccountsManager.currentAccountFlow.collectAsStateWithLifecycle()
+    val accounts by AccountsManager.accountsFlow.collectAsStateWithLifecycle()
+    var showAccountSwitcher by remember { mutableStateOf(false) }
+    // Only offer the shortcut when there is actually something to switch to.
+    val onSwitchAccount: (() -> Unit)? = if (accounts.size > 1) {
+        { showAccountSwitcher = true }
+    } else {
+        null
+    }
+
+    if (showAccountSwitcher) {
+        AccountSwitcherDialog(
+            accounts = accounts,
+            currentAccount = account,
+            onSelect = { selected ->
+                AccountsManager.setCurrentAccount(selected)
+                showAccountSwitcher = false
+            },
+            onManageAccounts = {
+                showAccountSwitcher = false
+                toAccountManageScreen()
+            },
+            onDismiss = { showAccountSwitcher = false }
+        )
+    }
 
     val contentModifier = modifier.graphicsLayer {
         val scale = pickUpScale()
@@ -661,6 +777,7 @@ private fun ActionMenu(
         ActionMenuTallerContent(
             modifier = contentModifier,
             account = account,
+            onSwitchAccount = onSwitchAccount,
             dockedSide = dockedSide,
             onLaunchGame = onLaunchGame,
             toAccountManageScreen = toAccountManageScreen,
@@ -671,6 +788,7 @@ private fun ActionMenu(
         ActionMenuCardContent(
             modifier = contentModifier,
             account = account,
+            onSwitchAccount = onSwitchAccount,
             onLaunchGame = onLaunchGame,
             toAccountManageScreen = toAccountManageScreen,
             toVersionManageScreen = toVersionManageScreen,

@@ -72,6 +72,9 @@ import com.movtery.zalithlauncher.game.account.accountErrorText
 import com.movtery.zalithlauncher.game.account.auth_server.AuthServerHelper
 import com.movtery.zalithlauncher.game.account.isMicrosoftAccount
 import com.movtery.zalithlauncher.game.account.microsoftLogin
+import com.movtery.zalithlauncher.game.performance.LaunchHealth
+import com.movtery.zalithlauncher.game.performance.LaunchHealthCheck
+import com.movtery.zalithlauncher.game.performance.LaunchWarning
 import com.movtery.zalithlauncher.game.plugin.ApkPlugin
 import com.movtery.zalithlauncher.game.plugin.natives.NativePluginManager
 import com.movtery.zalithlauncher.game.plugin.renderer.RendererPluginManager
@@ -152,6 +155,13 @@ sealed interface LaunchGameOperation {
         val version: Version,
         val quickPlay: QuickPlay?
     ): LaunchGameOperation
+
+    /** 设备状态不理想，启动前提示用户 */
+    data class HealthWarning(
+        val version: Version,
+        val quickPlay: QuickPlay?,
+        val health: LaunchHealth
+    ) : LaunchGameOperation
 
     /** 尝试启动：启动前检查一些东西 */
     data class TryLaunch(
@@ -278,6 +288,44 @@ fun LaunchGameOperation(
                 }
             )
         }
+        is LaunchGameOperation.HealthWarning -> {
+            val version = operation.version
+            val quickPlay = operation.quickPlay
+            val health = operation.health
+            val message = buildString {
+                append(
+                    activity.getString(
+                        R.string.nova_launch_health_summary,
+                        health.freeRamMb,
+                        health.freeStorageMb
+                    )
+                )
+                health.warnings.forEach { warning ->
+                    append("\n\n")
+                    append(
+                        when (warning) {
+                            LaunchWarning.LOW_MEMORY ->
+                                activity.getString(R.string.nova_launch_health_low_memory, health.freeRamMb)
+                            LaunchWarning.LOW_STORAGE ->
+                                activity.getString(R.string.nova_launch_health_low_storage, health.freeStorageMb)
+                            LaunchWarning.THERMAL ->
+                                activity.getString(R.string.nova_launch_health_thermal)
+                        }
+                    )
+                }
+            }
+            SimpleAlertDialog(
+                title = stringResource(R.string.nova_launch_health_title),
+                text = message,
+                confirmText = stringResource(R.string.generic_anyway),
+                onConfirm = {
+                    launchGameViewModel.updateOperation(LaunchGameOperation.RealLaunch(version, quickPlay))
+                },
+                onDismiss = {
+                    launchGameViewModel.updateOperation(LaunchGameOperation.None)
+                }
+            )
+        }
         is LaunchGameOperation.TryLaunch -> {
             LaunchedEffect(Unit) {
                 val version = operation.version ?: run {
@@ -332,6 +380,17 @@ fun LaunchGameOperation(
                     RendererPluginManager.isConfigurablePlugin(version.getRenderer())
                 ) {
                     launchGameViewModel.updateOperation(LaunchGameOperation.RendererNoStoragePermission(currentRenderer, version, quickPlay))
+                    return@LaunchedEffect
+                }
+
+                // 启动前检查设备状态（内存、存储、温度）。这只是提示，绝不阻止启动。
+                val health = withContext(Dispatchers.IO) {
+                    LaunchHealthCheck.check(activity.applicationContext, version.getGameDir())
+                }
+                if (health.warnings.isNotEmpty()) {
+                    launchGameViewModel.updateOperation(
+                        LaunchGameOperation.HealthWarning(version, quickPlay, health)
+                    )
                     return@LaunchedEffect
                 }
 

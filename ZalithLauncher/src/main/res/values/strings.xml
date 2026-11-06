@@ -1828,7 +1828,7 @@
     <!-- Dependency problem line for a version mismatch; %1$s mod, %2$s dependency id, %3$s required range, %4$s installed version -->
     <string name="nova_mod_dep_version">%1$s requires %2$s %3$s, but version %4$s is installed</string>
     <!-- Note in the dependency dialog about which mod loaders are checked -->
-    <string name="nova_mod_dep_note">Only Fabric and Quilt metadata is checked. Forge mods are not verified.</string>
+    <string name="nova_mod_dep_note">Fabric, Quilt, Forge and NeoForge metadata is checked. Optional and server-only dependencies are ignored.</string>
     <!-- Shown instead of a version number when the installed version is unknown -->
     <string name="nova_mod_dep_unknown_version">unknown</string>
     <!-- Heading above the analyzer's findings on the crash screen -->
@@ -3063,4 +3063,40 @@
     <string name="guide_tip_blank">Tap any blank area to continue to the next step</string>
     <!-- Next-step hint shown near a screen corner during the final guide step; tapping any blank area finishes the whole guide -->
     <string name="guide_tip_finish">Tap any blank area to finish the guide</string>
+
+    <!-- Tooltip on the button that zips every world of the selected version into the backups folder -->
+    <string name="nova_saves_backup_all">Back up all worlds</string>
+    <!-- Toast shown after every world was zipped; %1$s is the archive file name -->
+    <string name="nova_saves_backup_done">All worlds backed up to %1$s</string>
+    <!-- Toast shown when the world backup archive could not be created -->
+    <string name="nova_saves_backup_failed">Could not back up worlds</string>
+
+    <!-- Title of the dialog shown before launch when the device is low on memory, storage or overheated -->
+    <string name="nova_launch_health_title">Device may struggle to run the game</string>
+    <!-- Summary line of the pre-launch health dialog; %1$d is free RAM in MB, %2$d is free storage in MB -->
+    <string name="nova_launch_health_summary">Free memory: %1$d MB · Free storage: %2$d MB</string>
+    <!-- Warning shown when free RAM is low; %1$d is the free RAM in MB -->
+    <string name="nova_launch_health_low_memory">Free memory is very low (%1$d MB). The game may stutter or be closed by the system.</string>
+    <!-- Warning shown when free storage is low; %1$d is the free storage in MB -->
+    <string name="nova_launch_health_low_storage">Free storage is very low (%1$d MB). Saving worlds or installing mods may fail.</string>
+    <!-- Warning shown when the device thermal status reports a severe or worse state -->
+    <string name="nova_launch_health_thermal">The device is running hot. Performance may drop and the game could slow down.</string>
+
+    <!-- Tooltip on the log viewer button that copies the whole log text to the clipboard -->
+    <string name="nova_log_copy_all">Copy whole log</string>
+    <!-- Toast in the log viewer when there is no text to copy -->
+    <string name="nova_log_copy_empty">Nothing to copy</string>
+    <!-- Tooltip on the log viewer button that shares the log file -->
+    <string name="nova_log_share">Share log file</string>
+    <!-- Toast in the log viewer when the log file no longer exists -->
+    <string name="nova_log_share_missing">Log file not found</string>
+
+    <!-- Tooltip on the account avatar shortcut that opens the quick account switcher -->
+    <string name="nova_account_switch">Switch account</string>
+    <!-- Title of the quick account switcher dialog -->
+    <string name="nova_account_switch_title">Switch account</string>
+    <!-- Content description of the check mark next to the account that is currently in use -->
+    <string name="nova_account_switch_current">Current account</string>
+    <!-- Button in the quick account switcher that opens the full account management screen -->
+    <string name="nova_account_manage">Manage accounts</string>
 </resources>

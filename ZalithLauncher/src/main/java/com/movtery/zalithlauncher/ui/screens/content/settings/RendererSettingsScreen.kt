@@ -53,6 +53,7 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.plugin.driver.Driver
 import com.movtery.zalithlauncher.game.plugin.driver.DriverPluginManager
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.RendererV2Data
+import com.movtery.zalithlauncher.game.performance.GpuFamily
 import com.movtery.zalithlauncher.game.renderer.RendererInterface
 import com.movtery.zalithlauncher.game.renderer.Renderers
 import com.movtery.zalithlauncher.game.version.installed.GraphicsApi
@@ -83,7 +84,6 @@ import com.movtery.zalithlauncher.utils.customResolutionRange
 import com.movtery.zalithlauncher.utils.device.checkVulkanSupport
 import com.movtery.zalithlauncher.utils.ensureCustomResolutionInitialized
 import com.movtery.zalithlauncher.utils.getRealScreenSize
-import com.movtery.zalithlauncher.utils.isAdrenoGPU
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.sendDLPlugin
 
@@ -324,8 +324,16 @@ fun RendererSettingsScreen(
                         summary = stringResource(R.string.settings_renderer_max_refresh_rate_summary)
                     )
 
-                    if (checkVulkanSupport(LocalContext.current.packageManager)) {
+                    val packageManager = LocalContext.current.packageManager
+                    val vulkanSupported = remember(packageManager) {
+                        checkVulkanSupport(packageManager)
+                    }
+                    if (vulkanSupported) {
                         var adrenoGPUAlert by remember { mutableStateOf(false) }
+                        // The GPU family comes from the cached hardware profile (device strings).
+                        // Never run an EGL context query from a click handler: it blocks the main
+                        // thread and terminating EGL_DEFAULT_DISPLAY can break the app renderer.
+                        val profile = rememberHardwareProfile()
 
                         SwitchSettingsCard(
                             modifier = Modifier.fillMaxWidth(),
@@ -334,7 +342,9 @@ fun RendererSettingsScreen(
                             title = stringResource(R.string.settings_renderer_vulkan_driver_system_title),
                             summary = stringResource(R.string.settings_renderer_vulkan_driver_system_summary),
                             onCheckedChange = { checked ->
-                                if (checked && isAdrenoGPU()) adrenoGPUAlert = true
+                                if (checked && profile?.gpuFamily == GpuFamily.ADRENO) {
+                                    adrenoGPUAlert = true
+                                }
                             }
                         )
 

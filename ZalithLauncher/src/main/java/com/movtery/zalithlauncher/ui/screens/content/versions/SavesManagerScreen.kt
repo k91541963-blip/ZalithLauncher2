@@ -19,6 +19,7 @@
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.Orientation
@@ -406,6 +407,31 @@ fun SavesManagerScreen(
                             savesDir = savesDir,
                             swapToDownload = swapToDownload,
                             refreshSaves = { viewModel.refresh() },
+                            backupAllSaves = {
+                                val backupDir = File(savesDir.parentFile, "backups")
+                                if (!backupDir.exists() && !backupDir.mkdirs()) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.nova_saves_backup_failed,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    val target = File(backupDir, "worlds-${System.currentTimeMillis()}.zip")
+                                    operationScope.launch(Dispatchers.IO) {
+                                        savesOperation = SavesOperation.Progress
+                                        val result = runCatching { zipDirectory(savesDir, target) }
+                                        savesOperation = SavesOperation.None
+                                        withContext(Dispatchers.Main) {
+                                            val message = if (result.isSuccess) {
+                                                context.getString(R.string.nova_saves_backup_done, target.name)
+                                            } else {
+                                                context.getString(R.string.nova_saves_backup_failed)
+                                            }
+                                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+                            },
                             submitError = submitError
                         )
 
@@ -449,6 +475,7 @@ private fun SavesActionsHeader(
     savesDir: File,
     swapToDownload: () -> Unit,
     refreshSaves: () -> Unit,
+    backupAllSaves: () -> Unit,
     submitError: (ErrorViewModel.ThrowableMessage) -> Unit,
     inputFieldColor: Color = itemColor(),
     inputFieldContentColor: Color = onItemColor()
@@ -549,6 +576,15 @@ private fun SavesActionsHeader(
                             )
                         }
                     )
+
+                    IconButton(
+                        onClick = backupAllSaves
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_archive_filled),
+                            contentDescription = stringResource(R.string.nova_saves_backup_all)
+                        )
+                    }
 
                     IconTextButton(
                         onClick = swapToDownload,

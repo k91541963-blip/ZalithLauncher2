@@ -540,7 +540,7 @@
     <string name="nova_mod_dep_missing">%1$s, kurulu olmayan %2$s moduna ihtiyaç duyuyor</string>
     <string name="nova_mod_dep_disabled">%1$s, devre dışı olan %2$s moduna ihtiyaç duyuyor</string>
     <string name="nova_mod_dep_version">%1$s, %2$s %3$s sürümünü istiyor, ancak %4$s sürümü kurulu</string>
-    <string name="nova_mod_dep_note">Yalnızca Fabric ve Quilt meta verisi denetlenir. Forge modları doğrulanmaz.</string>
+    <string name="nova_mod_dep_note">Fabric, Quilt, Forge ve NeoForge meta verisi denetlenir. İsteğe bağlı ve yalnızca sunucuya özel bağımlılıklar yok sayılır.</string>
     <string name="nova_mod_dep_unknown_version">bilinmiyor</string>
     <string name="nova_crash_analysis_title">Olası neden</string>
     <string name="nova_offline_account_add">Çevrimdışı hesap</string>
@@ -1301,4 +1301,24 @@
     <string name="guide_editor_save">Düzenlemeyi bitirdiğinde kontrol düzenini kaydetmeyi unutma!</string>
     <string name="guide_tip_blank">Sonraki adıma geçmek için boş bir yere dokunun</string>
     <string name="guide_tip_finish">Rehberi tamamlamak için boş bir yere dokunun</string>
+
+    <string name="nova_saves_backup_all">Tüm dünyaları yedekle</string>
+    <string name="nova_saves_backup_done">Tüm dünyalar %1$s dosyasına yedeklendi</string>
+    <string name="nova_saves_backup_failed">Dünyalar yedeklenemedi</string>
+
+    <string name="nova_launch_health_title">Cihaz oyunu zor çalıştırabilir</string>
+    <string name="nova_launch_health_summary">Boş bellek: %1$d MB · Boş depolama: %2$d MB</string>
+    <string name="nova_launch_health_low_memory">Boş bellek çok az (%1$d MB). Oyun takılabilir veya sistem tarafından kapatılabilir.</string>
+    <string name="nova_launch_health_low_storage">Boş depolama çok az (%1$d MB). Dünya kaydetme veya mod kurma başarısız olabilir.</string>
+    <string name="nova_launch_health_thermal">Cihaz ısınıyor. Performans düşebilir ve oyun yavaşlayabilir.</string>
+
+    <string name="nova_log_copy_all">Tüm günlüğü kopyala</string>
+    <string name="nova_log_copy_empty">Kopyalanacak metin yok</string>
+    <string name="nova_log_share">Günlük dosyasını paylaş</string>
+    <string name="nova_log_share_missing">Günlük dosyası bulunamadı</string>
+
+    <string name="nova_account_switch">Hesap değiştir</string>
+    <string name="nova_account_switch_title">Hesap değiştir</string>
+    <string name="nova_account_switch_current">Geçerli hesap</string>
+    <string name="nova_account_manage">Hesapları yönet</string>
 </resources>

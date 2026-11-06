@@ -18,9 +18,15 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavBackStack
+import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.diagnostics.LogAnalysis
 import com.movtery.zalithlauncher.game.diagnostics.LogAnalyzer
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
@@ -43,6 +52,8 @@ import com.movtery.zalithlauncher.ui.code_editor.scheme.SchemeIDEALight
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
 import com.movtery.zalithlauncher.ui.screens.navigateTo
+import com.movtery.zalithlauncher.utils.copyText
+import com.movtery.zalithlauncher.utils.file.shareFile
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
 import io.github.rosemoe.sora.lang.Language
@@ -88,6 +99,7 @@ private fun readLog(file: File): String {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogViewScreen(
     key: NormalNavKey.LogView,
@@ -141,6 +153,51 @@ fun LogViewScreen(
                 language = language,
                 isReadOnly = true,
                 onSaveClick = {},
+                topBar = {
+                    TopAppBar(
+                        title = { Text(text = stringResource(R.string.versions_overview_log)) },
+                        actions = {
+                            IconButton(
+                                onClick = {
+                                    val text = (editorState as? EditorState.Success)?.content?.toString()
+                                    if (text.isNullOrEmpty()) {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.nova_log_copy_empty,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        copyText(null, text, context)
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_copy_all_filled),
+                                    contentDescription = stringResource(R.string.nova_log_copy_all)
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    val logFile = File(key.logPath)
+                                    if (logFile.exists()) {
+                                        shareFile(context, logFile)
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.nova_log_share_missing,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_share_filled),
+                                    contentDescription = stringResource(R.string.nova_log_share)
+                                )
+                            }
+                        }
+                    )
+                },
                 content = {
                     val result = analysis
                     if (result != null && result.findings.isNotEmpty()) {
