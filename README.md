@@ -22,6 +22,8 @@
 > Durum ve yol haritası: [`docs/AETHERLITE_ROADMAP.md`](docs/AETHERLITE_ROADMAP.md)
 > AetherRender tasarımı ve sınırları: [`docs/AETHERRENDER.md`](docs/AETHERRENDER.md)
 > Derleme ve test: [`docs/BUILD_AND_TEST.md`](docs/BUILD_AND_TEST.md)
+> ARM64 debug APK: [AetherLite-arm64-debug.apk](https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk)
+> (CI derlemesi; boyut/SHA-256: [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md))
 
 
 # Zalith Launcher 2

@@ -70,7 +70,11 @@
 | `22dc028` | log analiz motoru | ✅ CI |
 | `498acbe` | mod bağımlılık denetimi | ✅ CI |
 | `cb6c8da` | hesap değiştirme, yedekleme, sağlık kontrolü | ✅ CI |
-| `6f4df7d` | AetherLite kimliği + AetherRender v1 | CI kaydı: `docs/TEST_REPORT.md` |
+| `6f4df7d` | AetherLite kimliği + AetherRender v1 | ✅ CI |
+| `da256b5` | AetherRender/derleme/cihaz testi belgeleri | ✅ CI |
+| `61a49cf` | test beklentileri + `eglSurfaceAttrib_p` bağlayıcı düzeltmesi | ✅ CI, APK yayınlandı |
+
+Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
 ## 6. Bilinen Kısıtlar
 
@@ -78,9 +82,10 @@
 - **Henüz gerçek Mali cihazda oyun içi ölçüm yapılmadı.** AetherRender'ın EGL seçimi
   ve tampon politikası kod olarak doğrulanabilir, ancak FPS/frametime iddiası için
   cihaz testi zorunludur.
-- NG-GL4ES ("Krypton Wrapper") `libng_gl4es.so` bu forkta paketlenmiyor; seçilirse
-  başlatma başarısız olabilir. AetherRender bilinçli olarak paketli `libgl4es_114.so`
-  kullanır.
+- NG-GL4ES ("Krypton Wrapper") `libng_gl4es.so` `NG-GL4ES-release.aar` içinden
+  APK'ya paketleniyor ve ayrı bir renderer olarak seçilebilir. AetherRender v1 ise
+  bilinçli olarak kanıtlanmış `libgl4es_114.so` çekirdeğini kullanır; NG-GL4ES
+  arka ucu henüz AetherRender ile birleştirilmedi.
 - Vulkan/Zink yolu yalnızca gerçek Mesa sürücüsü olan cihazlarda anlamlıdır.
 
 ## 7. Sonraki Adımlar (öncelik sırası)

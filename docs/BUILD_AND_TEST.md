@@ -96,7 +96,7 @@ adb install -r AetherLite-arm64-debug.apk
 |---|---|
 | `compileSdk 37 not found` | SDK manager'da API 37 + build-tools kurulu olmalı |
 | NDK bulunamadı | `ndkVersion 25.2.9519653` tam sürümü kurulmalı |
-| `libng_gl4es.so` yok | Bilinen sınır; AetherRender/GL4ES kullanın |
+| `libng_gl4es.so` çalışmıyor | NG-GL4ES AAR (`ZalithLauncher/libs/NG-GL4ES-release.aar`) projede olmalı; dosya APK'da `lib/arm64-v8a/` altında doğrulanabilir |
 | Release imzalanmadı | `STORE_PASSWORD`, `KEY_PASSWORD` ve keystore gerekli |
 | `eglSurfaceAttrib` derleme hatası | `egl_loader.h/c` güncel mi kontrol edin |
 
