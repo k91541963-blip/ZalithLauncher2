@@ -105,6 +105,7 @@ import com.movtery.zalithlauncher.ui.screens.content.VersionsManageScreen
 import com.movtery.zalithlauncher.ui.screens.content.WebViewScreen
 import com.movtery.zalithlauncher.ui.screens.content.assetinfo.AssetInfoScreen
 import com.movtery.zalithlauncher.ui.screens.content.navigateToDownload
+import com.movtery.zalithlauncher.ui.screens.content.performance.PerformanceCenterScreen
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
@@ -203,6 +204,12 @@ fun MainScreen(
                         screenKey = NormalNavKey.Multiplayer
                     )
                 },
+                toPerformanceCenter = {
+                    screenBackStackModel.mainScreen.removeAndNavigateTo(
+                        removes = screenBackStackModel.clearBeforeNavKeys,
+                        screenKey = NormalNavKey.PerformanceCenter
+                    )
+                },
                 openFileManager = {
                     eventViewModel.sendEvent(
                         EventViewModel.Event.OpenFileManager(
@@ -261,6 +268,7 @@ private fun <E: TitledNavKey> TopBar(
     toSettingsScreen: () -> Unit,
     toDownloadScreen: () -> Unit,
     toMultiplayerScreen: () -> Unit,
+    toPerformanceCenter: () -> Unit,
     openFileManager: () -> Unit,
     changeExpandedState: () -> Unit,
 ) {
@@ -269,6 +277,7 @@ private fun <E: TitledNavKey> TopBar(
     val inMultiplayerScreen = mainScreenKey is NormalNavKey.Multiplayer
     val inDownloadScreen = mainScreenKey is NestedNavKey.Download
     val inSettingsScreen = mainScreenKey is NestedNavKey.Settings
+    val inPerformanceCenter = mainScreenKey is NormalNavKey.PerformanceCenter
 
     CompositionLocalProvider(
         LocalContentColor provides contentColor
@@ -420,6 +429,15 @@ private fun <E: TitledNavKey> TopBar(
                 }
 
                 TopBarRailItem(
+                    selected = inPerformanceCenter,
+                    painter = painterResource(R.drawable.ic_speed_filled),
+                    text = stringResource(R.string.aether_perf_center_short),
+                    onClick = {
+                        if (!inPerformanceCenter) toPerformanceCenter()
+                    },
+                )
+
+                TopBarRailItem(
                     selected = inMultiplayerScreen,
                     painter = painterResource(R.drawable.ic_group_filled),
                     text = stringResource(R.string.terracotta),
@@ -555,6 +573,12 @@ private fun NavigationUI(
                         startGuideOnce = { keys ->
                             eventViewModel.sendStartGuideOnce(keys)
                         }
+                    )
+                }
+                entry<NormalNavKey.PerformanceCenter> { key ->
+                    PerformanceCenterScreen(
+                        key = key,
+                        backStackViewModel = screenBackStackModel
                     )
                 }
                 entry<NestedNavKey.Settings> { key ->

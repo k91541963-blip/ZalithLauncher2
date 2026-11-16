@@ -37,8 +37,14 @@ class AetherRendererTest {
 
     @Test
     fun `enables the native tuning layer`() {
-        assertEquals("1", AetherRenderer.getRendererEnv().value["AETHER_RENDER"])
-        assertEquals("2", AetherRenderer.getRendererEnv().value["LIBGL_ES"])
+        val env = AetherRenderer.getRendererEnv().value
+        assertEquals("1", env["AETHER_RENDER"])
+        assertEquals("2", env["LIBGL_ES"])
+        // The mode is always passed explicitly so the native layer never has to guess.
+        assertTrue(
+            env["AETHER_RENDER_MODE"] in
+                listOf("native", "balanced", "lite", "performance", "compatibility")
+        )
     }
 
     @Test

@@ -96,7 +96,18 @@ object HomeCards {
     val userCardTypes: List<CardType> = listOf(versionCardType, serverCardType)
 
     /** 系统卡片（不可变更） */
-    fun systemCards(): List<SystemCard> = buildList {
+    fun systemCards(
+        isVisible: Boolean,
+        onOpenPerformanceCenter: () -> Unit
+    ): List<SystemCard> = buildList {
+        add(
+            SystemCard(id = "system_performance") {
+                PerformanceSummaryCard(
+                    isVisible = isVisible,
+                    onOpen = onOpenPerformanceCenter
+                )
+            }
+        )
         if (BuildConfig.DEBUG) {
             add(debugWarningCard())
         }

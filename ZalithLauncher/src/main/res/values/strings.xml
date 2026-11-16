@@ -3135,4 +3135,60 @@
     <string name="aether_thermal_status_critical">Critical</string>
     <string name="aether_thermal_status_emergency">Emergency</string>
     <string name="aether_thermal_status_shutdown">Shutdown</string>
+
+    <!-- Aether 2.0 palettes -->
+    <string name="theme_color_aether_blue">Aether Blue</string>
+    <string name="theme_color_purple_nebula">Purple Nebula</string>
+    <string name="theme_color_emerald">Emerald</string>
+    <string name="theme_color_crimson">Crimson</string>
+    <string name="theme_color_midnight">Midnight</string>
+    <!-- AMOLED surfaces are true black when the launcher uses the dark theme -->
+    <string name="theme_color_amoled_black">AMOLED Black</string>
+
+    <!-- Performance Center -->
+    <string name="aether_perf_center_title">Performance Center</string>
+    <string name="aether_perf_center_short">Performance</string>
+    <string name="aether_perf_center_summary">Live CPU, RAM, GPU and thermal readings from this device.</string>
+    <string name="aether_perf_live_note">Values are read from Android APIs and /proc. Missing readings are shown as unknown; nothing is estimated. In-game FPS is measured by the in-game overlay, never by the launcher.</string>
+    <string name="aether_perf_cpu">CPU load</string>
+    <string name="aether_perf_cpu_value">%1$d%% • %2$d cores</string>
+    <string name="aether_perf_cpu_measuring">Measuring…</string>
+    <string name="aether_perf_ram">System RAM</string>
+    <string name="aether_perf_ram_value">%1$d / %2$d MB used</string>
+    <string name="aether_perf_app_memory">Launcher process memory (PSS)</string>
+    <string name="aether_perf_jvm_heap">Java heap</string>
+    <string name="aether_perf_jvm_heap_value">%1$d / %2$d MB</string>
+    <string name="aether_perf_memory_unavailable">Not reported</string>
+    <string name="aether_perf_low_memory">Android reports low memory; close background apps before launching.</string>
+    <string name="aether_perf_refresh">Refresh</string>
+    <string name="aether_perf_presets_title">Performance presets</string>
+    <string name="aether_perf_presets_summary">Applying a preset writes memory, JVM arguments and resolution scale. It does not change the renderer.</string>
+    <string name="aether_perf_home_summary">CPU, RAM, GPU and temperature</string>
+    <string name="aether_perf_home_cpu">CPU</string>
+    <string name="aether_perf_home_ram">RAM</string>
+    <string name="aether_perf_home_gpu">GPU</string>
+    <string name="aether_perf_home_temp">Temp</string>
+    <string name="aether_perf_home_cpu_value">%1$d%%</string>
+    <string name="aether_perf_home_ram_value">%1$d/%2$d MB</string>
+    <string name="aether_perf_home_temp_value">%1$.0f °C</string>
+    <string name="aether_perf_home_hint">Tap to open Performance Center</string>
+    <string name="aether_perf_home_open">Open Performance Center</string>
+    <string name="aether_perf_home_reading">Reading…</string>
+    <string name="aether_perf_ingame_title">In-game FPS and frametime</string>
+    <string name="aether_perf_ingame_note" formatted="false">FPS, 1% low, frametime, chunk loading and render-thread state only exist while Minecraft is running. They are collected by the in-game overlay; this screen does not invent numbers when the game is closed.</string>
+
+    <!-- AetherRender modes -->
+    <string name="aether_render_mode_title">AetherRender mode</string>
+    <string name="aether_render_mode_summary">EGL policy for the AetherRender renderer. Applies on the next game launch.</string>
+    <string name="aether_render_mode_native">Aether Native (stock EGL)</string>
+    <string name="aether_render_mode_balanced">Aether Balanced</string>
+    <string name="aether_render_mode_lite">Aether Lite (no alpha/stencil)</string>
+    <string name="aether_render_mode_performance">Aether Performance (16-bit colour)</string>
+    <string name="aether_render_mode_compatibility">Aether Compatibility (stock EGL)</string>
+    <string name="aether_render_mode_note">Lite and Performance change the EGL surface only; they do not change Minecraft\'s chunk renderer. Performance may cause colour banding. No FPS is promised.</string>
+    <string name="aether_render_mode_native_desc">No AetherRender EGL changes; useful when a driver update breaks the tuned path.</string>
+    <string name="aether_render_mode_balanced_desc">Default: no multisampling, 8-bit colour, 24-bit depth and a discard-after-swap hint.</string>
+    <string name="aether_render_mode_lite_desc">Also prefers opaque, stencil-free surfaces to reduce per-pixel state and memory.</string>
+    <string name="aether_render_mode_performance_desc">Opt-in 16-bit RGB565 window format; saves bandwidth but may band colours.</string>
+    <string name="aether_render_mode_compatibility_desc">Stock EGL selection plus no surface hints, kept for support reports.</string>
 </resources>

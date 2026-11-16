@@ -179,6 +179,12 @@ fun RendererSettingsScreen(
                         )
                     }
 
+                    //AetherRender 的 EGL 模式（仅对 AetherRender 渲染器生效）
+                    AetherRenderModeCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle
+                    )
+
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,

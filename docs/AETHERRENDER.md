@@ -1,4 +1,4 @@
-# AetherRender v1 — Tasarım, Entegrasyon ve Sınırlar
+# AetherRender 2.0 — Tasarım, Entegrasyon ve Sınırlar
 
 > Bu belge AetherRender'ın **ne yaptığını**, **ne yapmadığını** ve nasıl
 > doğrulanacağını anlatır. Pazarlama metni değildir.
@@ -59,7 +59,7 @@ Vendor EGL/GLES sürücüsü (Mali, Adreno, …)
     önekiyle başlayan kimlikleri `RENDERER_GL4ES` yoluna bağlar. Bu önek değişirse
     swap/make-current sessizce bozulur.
 - Kitaplık: paketli `libgl4es_114.so` (kanıtlanmış çekirdek)
-- Ortam: `AETHER_RENDER=1`, `LIBGL_ES=2`, GL4ES güvenli ayarları
+- Ortam: `AETHER_RENDER=1`, `AETHER_RENDER_MODE=<mod>`, `LIBGL_ES=2`, GL4ES güvenli ayarları
 - Sürüm aralığı: en fazla Minecraft 1.21.4 (GL4ES çekirdeğinin sınırı)
 
 ### 3.2 EGL config seçimi
@@ -74,9 +74,27 @@ Vendor EGL/GLES sürücüsü (Mali, Adreno, …)
    - depth ≥ 24 → artı, depth < 16 → büyük ceza,
    - `EGL_CONFIG_CAVEAT != EGL_NONE` → ceza,
    - pencere desteği ve ES2 renderable zorunlu.
-4. Seçilen config'in depth/samples/visual değerlerini loglar.
+4. Seçilen config'in renk/alpha/depth/samples/visual değerlerini loglar.
 
-### 3.3 Yüzey politikası
+### 3.3 Renderer modları (2.0)
+
+Mod, `AllSettings.aetherRenderMode` üzerinden seçilir ve **bir sonraki oyun
+başlatmasında** `AETHER_RENDER_MODE` ortam değişkeniyle yerel katmana iletilir.
+Yalnızca launcher'ın gerçekten kontrol ettiği EGL kararlarını değiştirir.
+
+| Mod | EGL davranışı | Not |
+|---|---|---|
+| Aether Native | Stok EGL seçimi, yüzey ipucu yok | Sürücü sorunlarını izole etmek için |
+| Aether Balanced (varsayılan) | MSAA yok, RGB888 + alpha 8, depth 24, `EGL_BUFFER_DESTROYED` | Önceki v1 davranışı |
+| Aether Lite | Ek olarak alpha ve stencil içermeyen config tercih edilir | Daha az piksel durumu/bellek |
+| Aether Performance | RGB565 pencere config'i tercih edilir (opt-in) | Bant genişliği kazancı; renk bantlanması olabilir |
+| Aether Compatibility | Stok EGL seçimi, yüzey ipucu yok | Destek raporları için Native ile aynı |
+
+Moda özel istek hiçbir config bulamazsa dengeli attribute setine geri düşer;
+başlatma başarısız edilmez. `native`/`compatibility` modlarında EGL seçimi ve
+yüzey davranışı stok yola bırakılır.
+
+### 3.4 Yüzey politikası
 
 `aether_render_on_surface_created()` pencere ve pbuffer yüzeylerinde
 `eglSurfaceAttrib(EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED)` dener.
@@ -85,7 +103,7 @@ Vendor EGL/GLES sürücüsü (Mali, Adreno, …)
   trafiği demektir; `DESTROYED` bunu engeller.
 - Sürücü reddederse yalnızca uyarı loglanır; **başlatma devam eder**.
 
-### 3.4 Telemetri
+### 3.5 Telemetri
 
 `aether_render_on_context_created()` oyun bağlamı current olduktan sonra bir kez
 `GL_VENDOR`, `GL_RENDERER`, `GL_VERSION`, `GL_SHADING_LANGUAGE_VERSION` yazar.
@@ -99,17 +117,17 @@ adb logcat -s AetherRender
 Beklenen satırlar:
 
 ```
-AetherRender enabled
-EGL config: depth=24 samples=0 sample_buffers=0 visual=0x1
-Surface swap behaviour: EGL_BUFFER_DESTROYED
-GPU vendor=ARM renderer=Mali-G57 ... version=OpenGL ES 3.2 ...
+AetherRender enabled (mode=balanced)
+EGL config: mode=balanced rgb=8/8/8 alpha=8 depth=24 samples=0 sample_buffers=0 visual=0x1
+Surface swap behaviour: EGL_BUFFER_DESTROYED (mode=balanced)
+GPU vendor=ARM renderer=Mali-G57 ... version=OpenGL ES 3.2 ... mode=balanced
 ```
 
 ## 4. Geri Dönüş (Fallback)
 
 - `AETHER_RENDER` yoksa/0 ise tüm yeni kod eski davranışı birebir izler.
-- Config seçimi başarısız olursa başlatma hata verir; bu durum önceki kodda da
-  aynıydı (uygun EGL config yoksa bağlam kurulamaz).
+- Moda özel config isteği boş dönerse dengeli attribute setine, o da boş dönerse
+  stok davranışa düşülür; mod seçimi başlatmayı kilitlemez.
 - Yüzey politikası reddedilirse sessizce devam edilir.
 - Renderer seçimi kullanıcı ayarıdır; AetherRender seçili değilken hiçbir yeni
   ortam değişkeni gönderilmez.
@@ -131,12 +149,17 @@ GPU vendor=ARM renderer=Mali-G57 ... version=OpenGL ES 3.2 ...
 
 | Dosya | Görev |
 |---|---|
-| `jni/aetherrender/aether_render.c` | EGL seçimi, yüzey politikası, telemetri |
+| `jni/aetherrender/aether_render.c` | Mod bazlı EGL seçimi, yüzey politikası, telemetri |
 | `jni/aetherrender/aether_render.h` | C arayüzü |
 | `jni/ctxbridges/gl_bridge.c` | Entegrasyon noktaları |
 | `jni/ctxbridges/egl_loader.c/h` | `eglSurfaceAttrib` yüklemesi |
-| `game/renderer/renderers/AetherRenderer.kt` | Renderer kaydı ve ortam |
+| `game/renderer/renderers/AetherRenderer.kt` | Renderer kaydı, mod ortamı |
+| `setting/enums/AetherRenderMode.kt` | Beş mod ve `AETHER_RENDER_MODE` değerleri |
+| `ui/.../settings/AetherRenderModeCard.kt` | Mod seçim arayüzü |
 | `game/performance/GpuInfo.kt` | Launcher tarafı EGL probe + Mali modeli |
 | `game/performance/ThermalInfo.kt` | Batarya/thermal zone okuma |
+| `game/performance/PerformanceMonitor.kt` | Canlı CPU/RAM/GPU/ısı ölçümü |
+| `ui/.../performance/PerformanceCenterScreen.kt` | Canlı Performans Merkezi |
+| `ui/.../home/PerformanceSummaryCard.kt` | Ana ekran performans kartı |
 | `ui/.../DeviceInfoCard.kt` | Cihaz ve GPU paneli |
-| `test/.../GpuInfoTest.kt`, `ThermalInfoTest.kt`, `AetherRendererTest.kt` | Birim testleri |
+| `test/.../CpuUsageTest.kt`, `GpuInfoTest.kt`, `ThermalInfoTest.kt`, `AetherRendererTest.kt` | Birim testleri |

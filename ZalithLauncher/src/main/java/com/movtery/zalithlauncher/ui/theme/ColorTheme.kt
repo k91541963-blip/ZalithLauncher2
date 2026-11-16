@@ -39,5 +39,26 @@ enum class ColorThemeType {
     VERDANTFIELD,
     URBAN_ASH,
     VERDANT_DAWN,
+    AETHER_BLUE,
+    PURPLE_NEBULA,
+    EMERALD,
+    CRIMSON,
+    MIDNIGHT,
+    AMOLED_BLACK,
     CUSTOM
+}
+
+/**
+ * Seed colours for the Aether 2.0 palettes.
+ *
+ * They are seeds for `dynamicColorScheme`, not the final surface colours. AMOLED uses
+ * a teal accent and then overrides every surface to true black in [Theme.kt].
+ */
+object AetherThemeColors {
+    val AETHER_BLUE = 0xFF2F81F7.toInt()
+    val PURPLE_NEBULA = 0xFF8B5CF6.toInt()
+    val EMERALD = 0xFF10B981.toInt()
+    val CRIMSON = 0xFFE11D48.toInt()
+    val MIDNIGHT = 0xFF3B5BDB.toInt()
+    val AMOLED_BLACK = 0xFF00C2A8.toInt()
 }

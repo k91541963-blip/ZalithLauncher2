@@ -599,6 +599,38 @@ private fun customDark(
     )
 }
 
+private fun aetherLight(seed: Int, style: PaletteStyle = PaletteStyle.TonalSpot): ColorScheme =
+    customLight(Color(seed), style)
+
+private fun aetherDark(seed: Int, style: PaletteStyle = PaletteStyle.TonalSpot): ColorScheme =
+    customDark(Color(seed), style)
+
+/**
+ * AMOLED palette: the same tonal scheme, then every background surface is forced to
+ * true black. `on*` colours are kept light so contrast stays readable. This is a real
+ * surface override, not a black overlay: it also repaints cards, dialogs and the
+ * navigation rail.
+ */
+private fun amoledDark(seed: Int): ColorScheme {
+    val base = aetherDark(seed, PaletteStyle.Vibrant)
+    return base.copy(
+        background = Color.Black,
+        surface = Color.Black,
+        surfaceDim = Color.Black,
+        surfaceBright = Color(0xFF1C1C1C),
+        surfaceContainerLowest = Color.Black,
+        surfaceContainerLow = Color(0xFF0A0A0A),
+        surfaceContainer = Color(0xFF121212),
+        surfaceContainerHigh = Color(0xFF1A1A1A),
+        surfaceContainerHighest = Color(0xFF242424),
+        onBackground = Color(0xFFE8E8E8),
+        onSurface = Color(0xFFE8E8E8),
+        onSurfaceVariant = Color(0xFFC6C6C6),
+        outline = Color(0xFF6F6F6F),
+        outlineVariant = Color(0xFF3A3A3A)
+    )
+}
+
 @Composable
 fun ZalithLauncherTheme(
     darkTheme: Boolean = isLauncherInDarkTheme(),
@@ -629,6 +661,12 @@ fun ZalithLauncherTheme(
                 ColorThemeType.VERDANTFIELD -> verdantFieldDark
                 ColorThemeType.URBAN_ASH -> urbanAshDark
                 ColorThemeType.VERDANT_DAWN -> verdantDawnDark
+                ColorThemeType.AETHER_BLUE -> aetherDark(AetherThemeColors.AETHER_BLUE)
+                ColorThemeType.PURPLE_NEBULA -> aetherDark(AetherThemeColors.PURPLE_NEBULA)
+                ColorThemeType.EMERALD -> aetherDark(AetherThemeColors.EMERALD)
+                ColorThemeType.CRIMSON -> aetherDark(AetherThemeColors.CRIMSON)
+                ColorThemeType.MIDNIGHT -> aetherDark(AetherThemeColors.MIDNIGHT)
+                ColorThemeType.AMOLED_BLACK -> amoledDark(AetherThemeColors.AMOLED_BLACK)
                 ColorThemeType.CUSTOM -> customDark(
                     color = customColor,
                     style = customPaletteStyle
@@ -644,6 +682,12 @@ fun ZalithLauncherTheme(
                 ColorThemeType.VERDANTFIELD -> verdantFieldLight
                 ColorThemeType.URBAN_ASH -> urbanAshLight
                 ColorThemeType.VERDANT_DAWN -> verdantDawnLight
+                ColorThemeType.AETHER_BLUE -> aetherLight(AetherThemeColors.AETHER_BLUE)
+                ColorThemeType.PURPLE_NEBULA -> aetherLight(AetherThemeColors.PURPLE_NEBULA)
+                ColorThemeType.EMERALD -> aetherLight(AetherThemeColors.EMERALD)
+                ColorThemeType.CRIMSON -> aetherLight(AetherThemeColors.CRIMSON)
+                ColorThemeType.MIDNIGHT -> aetherLight(AetherThemeColors.MIDNIGHT)
+                ColorThemeType.AMOLED_BLACK -> aetherLight(AetherThemeColors.AMOLED_BLACK)
                 ColorThemeType.CUSTOM -> customLight(
                     color = customColor,
                     style = customPaletteStyle

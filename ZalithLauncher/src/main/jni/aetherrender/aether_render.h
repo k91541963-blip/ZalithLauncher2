@@ -33,10 +33,15 @@ extern "C" {
 bool aether_render_enabled(void);
 
 /**
- * Picks an EGL config. With AetherRender disabled this reproduces the previous
- * "first matching config" behaviour. With it enabled the config is scored for
- * tile-based GPUs: no multisample, 8-bit colour, 24-bit depth and a non-caveat
- * config are preferred.
+ * Picks an EGL config according to `AETHER_RENDER_MODE`:
+ *  - `native` / `compatibility`: stock first-matching config, no scoring;
+ *  - `balanced` (default): no MSAA, 8-bit colour, 24-bit depth;
+ *  - `lite`: also prefers no alpha and no stencil;
+ *  - `performance`: prefers a 16-bit RGB565 window format (opt-in, may band).
+ *
+ * With AetherRender disabled this reproduces the previous "first matching config"
+ * behaviour. If the mode-specific request finds no config, it falls back to the
+ * balanced attribute set instead of failing the launch.
  *
  * @param out_format receives EGL_NATIVE_VISUAL_ID for the chosen config
  * @return the chosen config or NULL when no config matches
@@ -45,8 +50,9 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format);
 
 /**
  * Applies per-surface policies after eglCreateWindowSurface/eglCreatePbufferSurface.
- * Currently asks the driver to use EGL_BUFFER_DESTROYED so the back buffer does not
- * need to be preserved across swaps. Failures are logged and ignored.
+ * Balanced, lite and performance ask the driver to use EGL_BUFFER_DESTROYED so the
+ * back buffer does not need to be preserved across swaps. Native and compatibility
+ * leave the driver default untouched. Failures are logged and ignored.
  */
 void aether_render_on_surface_created(EGLDisplay display, EGLSurface surface);
 

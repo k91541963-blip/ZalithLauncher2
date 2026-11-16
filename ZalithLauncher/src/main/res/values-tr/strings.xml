@@ -1357,4 +1357,60 @@
     <string name="aether_thermal_status_critical">Kritik</string>
     <string name="aether_thermal_status_emergency">Acil</string>
     <string name="aether_thermal_status_shutdown">Kapanma</string>
+
+    <!-- Aether 2.0 paletleri -->
+    <string name="theme_color_aether_blue">Aether Mavisi</string>
+    <string name="theme_color_purple_nebula">Mor Nebula</string>
+    <string name="theme_color_emerald">Zümrüt</string>
+    <string name="theme_color_crimson">Kızıl</string>
+    <string name="theme_color_midnight">Gece Yarısı</string>
+    <!-- AMOLED yüzeyleri koyu temada gerçek siyah olur -->
+    <string name="theme_color_amoled_black">AMOLED Siyah</string>
+
+    <!-- Performans Merkezi -->
+    <string name="aether_perf_center_title">Performans Merkezi</string>
+    <string name="aether_perf_center_short">Performans</string>
+    <string name="aether_perf_center_summary">Bu cihazdan canlı CPU, RAM, GPU ve ısı ölçümleri.</string>
+    <string name="aether_perf_live_note">Değerler Android API\'lerinden ve /proc üzerinden okunur. Eksik ölçümler bilinmiyor olarak gösterilir; hiçbir değer tahmin edilmez. Oyun içi FPS, launcher tarafından değil oyun içi katman tarafından ölçülür.</string>
+    <string name="aether_perf_cpu">CPU yükü</string>
+    <string name="aether_perf_cpu_value">%1$d%% • %2$d çekirdek</string>
+    <string name="aether_perf_cpu_measuring">Ölçülüyor…</string>
+    <string name="aether_perf_ram">Sistem RAM\'i</string>
+    <string name="aether_perf_ram_value">%1$d / %2$d MB kullanımda</string>
+    <string name="aether_perf_app_memory">Launcher süreç belleği (PSS)</string>
+    <string name="aether_perf_jvm_heap">Java yığını</string>
+    <string name="aether_perf_jvm_heap_value">%1$d / %2$d MB</string>
+    <string name="aether_perf_memory_unavailable">Bildirilmiyor</string>
+    <string name="aether_perf_low_memory">Android düşük bellek bildiriyor; oyunu başlatmadan önce arka plan uygulamalarını kapatın.</string>
+    <string name="aether_perf_refresh">Yenile</string>
+    <string name="aether_perf_presets_title">Performans profilleri</string>
+    <string name="aether_perf_presets_summary">Profil uygulamak bellek, JVM argümanları ve çözünürlük ölçeğini yazar. Renderer\'ı değiştirmez.</string>
+    <string name="aether_perf_home_summary">CPU, RAM, GPU ve sıcaklık</string>
+    <string name="aether_perf_home_cpu">CPU</string>
+    <string name="aether_perf_home_ram">RAM</string>
+    <string name="aether_perf_home_gpu">GPU</string>
+    <string name="aether_perf_home_temp">Sıcaklık</string>
+    <string name="aether_perf_home_cpu_value">%%%1$d</string>
+    <string name="aether_perf_home_ram_value">%1$d/%2$d MB</string>
+    <string name="aether_perf_home_temp_value">%1$.0f °C</string>
+    <string name="aether_perf_home_hint">Performans Merkezi\'ni açmak için dokunun</string>
+    <string name="aether_perf_home_open">Performans Merkezi\'ni aç</string>
+    <string name="aether_perf_home_reading">Okunuyor…</string>
+    <string name="aether_perf_ingame_title">Oyun içi FPS ve frametime</string>
+    <string name="aether_perf_ingame_note">FPS, yüzde 1 düşük değer, frametime, chunk yükleme ve render thread durumu yalnızca Minecraft çalışırken vardır. Bunlar oyun içi katman tarafından toplanır; oyun kapalıyken bu ekran sayı uydurmaz.</string>
+
+    <!-- AetherRender modları -->
+    <string name="aether_render_mode_title">AetherRender modu</string>
+    <string name="aether_render_mode_summary">AetherRender renderer\'ı için EGL ilkesi. Bir sonraki oyun başlatmasında uygulanır.</string>
+    <string name="aether_render_mode_native">Aether Native (stok EGL)</string>
+    <string name="aether_render_mode_balanced">Aether Balanced</string>
+    <string name="aether_render_mode_lite">Aether Lite (alfa/şablon yok)</string>
+    <string name="aether_render_mode_performance">Aether Performance (16-bit renk)</string>
+    <string name="aether_render_mode_compatibility">Aether Compatibility (stok EGL)</string>
+    <string name="aether_render_mode_note">Lite ve Performance yalnızca EGL yüzeyini değiştirir; Minecraft\'ın chunk renderer\'ını değiştirmez. Performance renk bantlanmasına yol açabilir. FPS garantisi verilmez.</string>
+    <string name="aether_render_mode_native_desc">AetherRender EGL değişikliği yok; sürücü güncellemesi ayarlı yolu bozduğunda kullanışlıdır.</string>
+    <string name="aether_render_mode_balanced_desc">Varsayılan: çoklu örnekleme yok, 8-bit renk, 24-bit derinlik ve takas sonrası atma ipucu.</string>
+    <string name="aether_render_mode_lite_desc">Piksel başına durumu ve belleği azaltmak için opak, şablonsuz yüzeyleri tercih eder.</string>
+    <string name="aether_render_mode_performance_desc">İsteğe bağlı 16-bit RGB565 pencere formatı; bant genişliği kazandırır ama renk bantlanması yapabilir.</string>
+    <string name="aether_render_mode_compatibility_desc">Stok EGL seçimi ve yüzey ipucu yok; destek raporları için tutulur.</string>
 </resources>

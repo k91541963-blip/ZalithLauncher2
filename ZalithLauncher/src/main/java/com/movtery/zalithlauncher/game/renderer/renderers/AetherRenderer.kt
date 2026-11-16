@@ -19,14 +19,17 @@
 package com.movtery.zalithlauncher.game.renderer.renderers
 
 import com.movtery.zalithlauncher.game.renderer.RendererInterface
+import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
 
 /**
- * AetherRender v1.
+ * AetherRender 2.0.
  *
  * The GL translation itself is the proven GL4ES 1.1.4 core. AetherRender adds a native
  * EGL layer (`jni/aetherrender/aether_render.c`) that:
  *  - picks a tile-GPU friendly EGL config (no MSAA, 24-bit depth),
- *  - requests `EGL_BUFFER_DESTROYED` for window surfaces,
+ *  - asks the driver to discard the back buffer after swap on tile-based GPUs,
+ *  - applies one of five honest, selectable EGL policies (see [AetherRenderMode]),
  *  - logs the real GL strings for support reports.
  *
  * It makes no claim about FPS and does not replace Minecraft's chunk renderer. If the
@@ -41,18 +44,28 @@ object AetherRenderer : RendererInterface {
 
     override fun getMaxMCVersion(): String = "1.21.4"
 
-    override fun getRendererEnv(): Lazy<Map<String, String>> = lazy {
-        mapOf(
-            "AETHER_RENDER" to "1",
-            "LIBGL_ES" to "2",
-            "LIBGL_MIPMAP" to "3",
-            "LIBGL_NOERROR" to "1",
-            "LIBGL_NOINTOVLHACK" to "1",
-            "LIBGL_NORMALIZE" to "1"
-        )
-    }
+    /**
+     * The environment is built lazily on the launch path, so a mode change applies to
+     * the next launch without restarting the launcher. Reading the setting is guarded
+     * because unit tests do not initialize the settings storage.
+     */
+    override fun getRendererEnv(): Lazy<Map<String, String>> = lazy { buildEnv() }
 
     override fun getDlopenLibrary(): Lazy<List<String>> = lazy { emptyList() }
 
     override fun getRendererLibrary(): String = "libgl4es_114.so"
+
+    private fun buildEnv(): Map<String, String> = mapOf(
+        "AETHER_RENDER" to "1",
+        "AETHER_RENDER_MODE" to currentMode().envValue,
+        "LIBGL_ES" to "2",
+        "LIBGL_MIPMAP" to "3",
+        "LIBGL_NOERROR" to "1",
+        "LIBGL_NOINTOVLHACK" to "1",
+        "LIBGL_NORMALIZE" to "1"
+    )
+
+    private fun currentMode(): AetherRenderMode =
+        runCatching { AllSettings.aetherRenderMode.state }
+            .getOrDefault(AetherRenderMode.BALANCED)
 }

@@ -210,6 +210,12 @@ private fun getPredefinedSeedColor(theme: ColorThemeType, darkTheme: Boolean): I
         ColorThemeType.VERDANTFIELD -> if (darkTheme) 0xFFD2C972.toInt() else 0xFF676014.toInt()
         ColorThemeType.URBAN_ASH -> if (darkTheme) 0xFFC7C6C6.toInt() else 0xFF5E5E5F.toInt()
         ColorThemeType.VERDANT_DAWN -> if (darkTheme) 0xFF8ED88E.toInt() else 0xFF004814.toInt()
+        ColorThemeType.AETHER_BLUE -> if (darkTheme) 0xFF9CC4FF.toInt() else AetherThemeColors.AETHER_BLUE
+        ColorThemeType.PURPLE_NEBULA -> if (darkTheme) 0xFFD0BCFF.toInt() else AetherThemeColors.PURPLE_NEBULA
+        ColorThemeType.EMERALD -> if (darkTheme) 0xFF7FE6C4.toInt() else AetherThemeColors.EMERALD
+        ColorThemeType.CRIMSON -> if (darkTheme) 0xFFFFB1C1.toInt() else AetherThemeColors.CRIMSON
+        ColorThemeType.MIDNIGHT -> if (darkTheme) 0xFFB4C5FF.toInt() else AetherThemeColors.MIDNIGHT
+        ColorThemeType.AMOLED_BLACK -> if (darkTheme) 0xFF5FE6D0.toInt() else 0xFF00A38C.toInt()
         else -> 0xFFA63A17.toInt()
     }
 }

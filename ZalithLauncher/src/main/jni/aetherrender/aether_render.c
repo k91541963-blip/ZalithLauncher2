@@ -17,11 +17,13 @@
  */
 
 /*
- * AetherRender v1 — EGL/tile-GPU tuning layer.
+ * AetherRender 2.0 — EGL/tile-GPU tuning layer.
  *
  * This file is intentionally small and only touches things the launcher can prove:
  *  - it chooses an EGL config without multisampling and with a 24-bit depth buffer,
  *  - it asks the driver to discard the back buffer after swap on tile-based GPUs,
+ *  - it applies one of five selectable policies (native, balanced, lite, performance,
+ *    compatibility) and logs every decision,
  *  - it logs the real GL strings for support reports.
  *
  * It does not translate desktop GL (GL4ES does that), does not rewrite Minecraft's
@@ -52,9 +54,20 @@
 #define GL_VERSION 0x1F02
 #define GL_SHADING_LANGUAGE_VERSION 0x8B8C
 
+typedef enum {
+    MODE_NATIVE = 0,
+    MODE_BALANCED,
+    MODE_LITE,
+    MODE_PERFORMANCE,
+    MODE_COMPATIBILITY
+} AetherMode;
+
 static int g_enabled = -1;
+static int g_mode_loaded = 0;
+static AetherMode g_mode = MODE_BALANCED;
 static int g_gpu_logged = 0;
 static int g_surface_logged = 0;
+static int g_config_logged = 0;
 
 static int env_is_enabled(const char *value) {
     if (value == NULL) return 0;
@@ -64,27 +77,52 @@ static int env_is_enabled(const char *value) {
            strcmp(value, "TRUE") == 0;
 }
 
+static const char *mode_name(AetherMode mode) {
+    switch (mode) {
+        case MODE_NATIVE: return "native";
+        case MODE_LITE: return "lite";
+        case MODE_PERFORMANCE: return "performance";
+        case MODE_COMPATIBILITY: return "compatibility";
+        case MODE_BALANCED:
+        default: return "balanced";
+    }
+}
+
+static AetherMode parse_mode(const char *value) {
+    if (value == NULL || value[0] == '\0') return MODE_BALANCED;
+    if (strcmp(value, "native") == 0) return MODE_NATIVE;
+    if (strcmp(value, "lite") == 0) return MODE_LITE;
+    if (strcmp(value, "performance") == 0) return MODE_PERFORMANCE;
+    if (strcmp(value, "compatibility") == 0) return MODE_COMPATIBILITY;
+    return MODE_BALANCED;
+}
+
+static AetherMode aether_mode(void) {
+    if (!g_mode_loaded) {
+        g_mode = parse_mode(getenv("AETHER_RENDER_MODE"));
+        g_mode_loaded = 1;
+    }
+    return g_mode;
+}
+
 bool aether_render_enabled(void) {
     if (g_enabled < 0) {
         g_enabled = env_is_enabled(getenv("AETHER_RENDER"));
         __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
-                            "AetherRender %s", g_enabled ? "enabled" : "disabled");
+                            "AetherRender %s (mode=%s)",
+                            g_enabled ? "enabled" : "disabled",
+                            mode_name(aether_mode()));
     }
     return g_enabled == 1;
 }
 
-EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
-    const EGLint attributes[] = {
-            EGL_BLUE_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_RED_SIZE, 8,
-            EGL_ALPHA_SIZE, 8,
-            EGL_DEPTH_SIZE, 24,
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_NONE
-    };
+/** True when the mode only logs and leaves EGL selection to the stock path. */
+static bool mode_is_stock_egl(AetherMode mode) {
+    return mode == MODE_NATIVE || mode == MODE_COMPATIBILITY;
+}
 
+static EGLConfig choose_stock(EGLDisplay display, const EGLint *attributes,
+                              EGLint *out_format) {
     EGLConfig configs[64];
     EGLint num_configs = 0;
     if (eglChooseConfig_p == NULL ||
@@ -100,63 +138,171 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
     }
 
     EGLConfig chosen = configs[0];
-    if (aether_render_enabled() && eglGetConfigAttrib_p != NULL) {
-        long best_score = LONG_MIN;
-        int best_index = 0;
-
-        for (EGLint i = 0; i < num_configs; i++) {
-            EGLint surface_type = 0, renderable_type = 0;
-            EGLint red = 0, green = 0, blue = 0, alpha = 0, depth = 0, stencil = 0;
-            EGLint samples = 0, sample_buffers = 0, caveat = EGL_NONE;
-
-            eglGetConfigAttrib_p(display, configs[i], EGL_SURFACE_TYPE, &surface_type);
-            eglGetConfigAttrib_p(display, configs[i], EGL_RENDERABLE_TYPE, &renderable_type);
-            eglGetConfigAttrib_p(display, configs[i], EGL_RED_SIZE, &red);
-            eglGetConfigAttrib_p(display, configs[i], EGL_GREEN_SIZE, &green);
-            eglGetConfigAttrib_p(display, configs[i], EGL_BLUE_SIZE, &blue);
-            eglGetConfigAttrib_p(display, configs[i], EGL_ALPHA_SIZE, &alpha);
-            eglGetConfigAttrib_p(display, configs[i], EGL_DEPTH_SIZE, &depth);
-            eglGetConfigAttrib_p(display, configs[i], EGL_STENCIL_SIZE, &stencil);
-            eglGetConfigAttrib_p(display, configs[i], EGL_SAMPLES, &samples);
-            eglGetConfigAttrib_p(display, configs[i], EGL_SAMPLE_BUFFERS, &sample_buffers);
-            eglGetConfigAttrib_p(display, configs[i], EGL_CONFIG_CAVEAT, &caveat);
-
-            if ((surface_type & EGL_WINDOW_BIT) == 0) continue;
-            if ((renderable_type & EGL_OPENGL_ES2_BIT) == 0) continue;
-            if (red < 8 || green < 8 || blue < 8) continue;
-
-            long score = 0;
-            // Multisampling is the single most expensive mistake on bandwidth-limited GPUs.
-            score -= (long) samples * 20;
-            score -= (long) sample_buffers * 40;
-            // Minecraft needs a depth buffer; 24 bits avoids z-fighting at distance.
-            score += depth >= 24 ? 60 : (depth >= 16 ? 10 : -100);
-            score += alpha >= 8 ? 10 : 0;
-            score += stencil >= 8 ? 2 : 0;
-            score += caveat == EGL_NONE ? 20 : -20;
-
-            if (score > best_score) {
-                best_score = score;
-                best_index = i;
-            }
-        }
-        chosen = configs[best_index];
-    }
-
     EGLint visual = 0;
     if (eglGetConfigAttrib_p != NULL) {
         eglGetConfigAttrib_p(display, chosen, EGL_NATIVE_VISUAL_ID, &visual);
     }
     if (out_format != NULL) *out_format = visual;
+    return chosen;
+}
 
-    if (aether_render_enabled() && eglGetConfigAttrib_p != NULL) {
-        EGLint depth = 0, samples = 0, sample_buffers = 0;
+/** Scores one config for the active mode. lower-than-LLONG_MIN means "reject". */
+static long score_config(EGLDisplay display, EGLConfig config, AetherMode mode) {
+    EGLint surface_type = 0, renderable_type = 0;
+    EGLint red = 0, green = 0, blue = 0, alpha = 0, depth = 0, stencil = 0;
+    EGLint samples = 0, sample_buffers = 0, caveat = EGL_NONE;
+
+    eglGetConfigAttrib_p(display, config, EGL_SURFACE_TYPE, &surface_type);
+    eglGetConfigAttrib_p(display, config, EGL_RENDERABLE_TYPE, &renderable_type);
+    eglGetConfigAttrib_p(display, config, EGL_RED_SIZE, &red);
+    eglGetConfigAttrib_p(display, config, EGL_GREEN_SIZE, &green);
+    eglGetConfigAttrib_p(display, config, EGL_BLUE_SIZE, &blue);
+    eglGetConfigAttrib_p(display, config, EGL_ALPHA_SIZE, &alpha);
+    eglGetConfigAttrib_p(display, config, EGL_DEPTH_SIZE, &depth);
+    eglGetConfigAttrib_p(display, config, EGL_STENCIL_SIZE, &stencil);
+    eglGetConfigAttrib_p(display, config, EGL_SAMPLES, &samples);
+    eglGetConfigAttrib_p(display, config, EGL_SAMPLE_BUFFERS, &sample_buffers);
+    eglGetConfigAttrib_p(display, config, EGL_CONFIG_CAVEAT, &caveat);
+
+    if ((surface_type & EGL_WINDOW_BIT) == 0) return LONG_MIN;
+    if ((renderable_type & EGL_OPENGL_ES2_BIT) == 0) return LONG_MIN;
+    if (red < 5 || green < 5 || blue < 5) return LONG_MIN;
+
+    long score = 0;
+    // Multisampling is the single most expensive mistake on bandwidth-limited GPUs.
+    score -= (long) samples * 20;
+    score -= (long) sample_buffers * 40;
+    // Minecraft needs a depth buffer; 24 bits avoids z-fighting at distance.
+    score += depth >= 24 ? 60 : (depth >= 16 ? 10 : -100);
+    score += caveat == EGL_NONE ? 20 : -20;
+
+    const bool is_565 = red == 5 && green == 6 && blue == 5;
+    const bool is_888 = red >= 8 && green >= 8 && blue >= 8;
+
+    switch (mode) {
+        case MODE_LITE:
+            // Favour opaque, stencil-free configs: fewer bytes per pixel and less state.
+            score += alpha == 0 ? 30 : 0;
+            score += stencil == 0 ? 10 : 0;
+            score += is_888 ? 10 : 0;
+            break;
+
+        case MODE_PERFORMANCE:
+            // Opt-in 16-bit colour: halves the window bandwidth at the cost of banding.
+            score += is_565 ? 150 : 0;
+            score += alpha == 0 ? 20 : 0;
+            score += stencil == 0 ? 10 : 0;
+            score += is_888 ? 5 : 0;
+            break;
+
+        case MODE_BALANCED:
+        case MODE_NATIVE:
+        case MODE_COMPATIBILITY:
+        default:
+            score += is_888 ? 30 : 0;
+            score += alpha >= 8 ? 10 : 0;
+            score += stencil >= 8 ? 2 : 0;
+            break;
+    }
+
+    return score;
+}
+
+EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
+    const AetherMode mode = aether_mode();
+
+    if (!aether_render_enabled() || mode_is_stock_egl(mode)) {
+        const EGLint stock_attributes[] = {
+                EGL_BLUE_SIZE, 8,
+                EGL_GREEN_SIZE, 8,
+                EGL_RED_SIZE, 8,
+                EGL_ALPHA_SIZE, 8,
+                EGL_DEPTH_SIZE, 24,
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL_NONE
+        };
+        EGLConfig config = choose_stock(display, stock_attributes, out_format);
+        if (!g_config_logged) {
+            __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
+                                "EGL config: stock path (mode=%s)", mode_name(mode));
+            g_config_logged = 1;
+        }
+        return config;
+    }
+
+    // Lite skips alpha; performance asks for at least RGB565 so 16-bit configs qualify.
+    EGLint attributes[32];
+    int index = 0;
+    attributes[index++] = EGL_BLUE_SIZE;
+    attributes[index++] = (mode == MODE_PERFORMANCE) ? 5 : 8;
+    attributes[index++] = EGL_GREEN_SIZE;
+    attributes[index++] = (mode == MODE_PERFORMANCE) ? 6 : 8;
+    attributes[index++] = EGL_RED_SIZE;
+    attributes[index++] = (mode == MODE_PERFORMANCE) ? 5 : 8;
+    if (mode != MODE_LITE && mode != MODE_PERFORMANCE) {
+        attributes[index++] = EGL_ALPHA_SIZE;
+        attributes[index++] = 8;
+    }
+    attributes[index++] = EGL_DEPTH_SIZE;
+    attributes[index++] = 24;
+    attributes[index++] = EGL_SURFACE_TYPE;
+    attributes[index++] = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
+    attributes[index++] = EGL_RENDERABLE_TYPE;
+    attributes[index++] = EGL_OPENGL_ES2_BIT;
+    attributes[index] = EGL_NONE;
+
+    EGLConfig configs[64];
+    EGLint num_configs = 0;
+    if (eglChooseConfig_p == NULL ||
+        eglChooseConfig_p(display, attributes, configs, 64, &num_configs) != EGL_TRUE ||
+        num_configs <= 0) {
+        __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
+                            "No config for mode=%s, falling back to balanced attributes",
+                            mode_name(mode));
+        const EGLint fallback[] = {
+                EGL_BLUE_SIZE, 8,
+                EGL_GREEN_SIZE, 8,
+                EGL_RED_SIZE, 8,
+                EGL_ALPHA_SIZE, 8,
+                EGL_DEPTH_SIZE, 24,
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL_NONE
+        };
+        return choose_stock(display, fallback, out_format);
+    }
+
+    EGLConfig chosen = configs[0];
+    long best_score = LONG_MIN;
+    for (EGLint i = 0; i < num_configs; i++) {
+        long score = score_config(display, configs[i], mode);
+        if (score != LONG_MIN && score > best_score) {
+            best_score = score;
+            chosen = configs[i];
+        }
+    }
+
+    EGLint visual = 0, depth = 0, alpha = 0, red = 0, green = 0, blue = 0;
+    EGLint samples = 0, sample_buffers = 0;
+    if (eglGetConfigAttrib_p != NULL) {
+        eglGetConfigAttrib_p(display, chosen, EGL_NATIVE_VISUAL_ID, &visual);
         eglGetConfigAttrib_p(display, chosen, EGL_DEPTH_SIZE, &depth);
+        eglGetConfigAttrib_p(display, chosen, EGL_ALPHA_SIZE, &alpha);
+        eglGetConfigAttrib_p(display, chosen, EGL_RED_SIZE, &red);
+        eglGetConfigAttrib_p(display, chosen, EGL_GREEN_SIZE, &green);
+        eglGetConfigAttrib_p(display, chosen, EGL_BLUE_SIZE, &blue);
         eglGetConfigAttrib_p(display, chosen, EGL_SAMPLES, &samples);
         eglGetConfigAttrib_p(display, chosen, EGL_SAMPLE_BUFFERS, &sample_buffers);
+    }
+    if (out_format != NULL) *out_format = visual;
+
+    if (!g_config_logged) {
         __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
-                            "EGL config: depth=%d samples=%d sample_buffers=%d visual=0x%x",
-                            depth, samples, sample_buffers, visual);
+                            "EGL config: mode=%s rgb=%d/%d/%d alpha=%d depth=%d samples=%d sample_buffers=%d visual=0x%x",
+                            mode_name(mode), red, green, blue, alpha, depth,
+                            samples, sample_buffers, visual);
+        g_config_logged = 1;
     }
     return chosen;
 }
@@ -165,19 +311,31 @@ void aether_render_on_surface_created(EGLDisplay display, EGLSurface surface) {
     if (!aether_render_enabled() || display == EGL_NO_DISPLAY || surface == EGL_NO_SURFACE) {
         return;
     }
+
+    const AetherMode mode = aether_mode();
+    if (mode_is_stock_egl(mode)) {
+        if (!g_surface_logged) {
+            __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
+                                "Surface hints disabled (mode=%s)", mode_name(mode));
+            g_surface_logged = 1;
+        }
+        return;
+    }
     if (eglSurfaceAttrib_p == NULL) return;
 
     if (eglSurfaceAttrib_p(display, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED)) {
         if (!g_surface_logged) {
             __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
-                                "Surface swap behaviour: EGL_BUFFER_DESTROYED");
+                                "Surface swap behaviour: EGL_BUFFER_DESTROYED (mode=%s)",
+                                mode_name(mode));
             g_surface_logged = 1;
         }
     } else if (!g_surface_logged) {
         // Not fatal: many drivers only expose the default behaviour.
         __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
-                            "eglSurfaceAttrib(EGL_SWAP_BEHAVIOR) rejected: %04x",
-                            eglGetError_p ? eglGetError_p() : 0);
+                            "eglSurfaceAttrib(EGL_SWAP_BEHAVIOR) rejected: %04x (mode=%s)",
+                            eglGetError_p ? eglGetError_p() : 0,
+                            mode_name(mode));
         g_surface_logged = 1;
     }
 }
@@ -199,10 +357,11 @@ void aether_render_on_context_created(EGLDisplay display, EGLContext context) {
     const char *glsl = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
 
     __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
-                        "GPU vendor=%s renderer=%s version=%s glsl=%s",
+                        "GPU vendor=%s renderer=%s version=%s glsl=%s mode=%s",
                         vendor ? vendor : "?",
                         renderer ? renderer : "?",
                         version ? version : "?",
-                        glsl ? glsl : "?");
+                        glsl ? glsl : "?",
+                        mode_name(aether_mode()));
     g_gpu_logged = 1;
 }

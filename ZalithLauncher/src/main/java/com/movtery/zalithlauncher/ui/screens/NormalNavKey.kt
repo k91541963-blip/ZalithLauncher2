@@ -38,6 +38,10 @@ sealed interface NormalNavKey : TitledNavKey {
     @Serializable data object UnpackDeps: NormalNavKey
     /** 启动器主页屏幕 */
     @Serializable data object LauncherMain : NormalNavKey
+    /** AetherLite 性能中心屏幕 */
+    @Serializable data object PerformanceCenter : NormalNavKey {
+        @Contextual override val title: AndroidStringText = androidText(R.string.aether_perf_center_title)
+    }
     /** 账号管理屏幕 */
     @Serializable data class AccountManager(
         val loginMenu: FirstLoginMenu = FirstLoginMenu.NONE

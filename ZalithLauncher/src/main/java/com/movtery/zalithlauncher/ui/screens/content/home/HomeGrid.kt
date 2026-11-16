@@ -94,6 +94,7 @@ private sealed interface HomeCardOperation {
 fun HomeGrid(
     state: CardGridState,
     isVisible: Boolean,
+    onOpenPerformanceCenter: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -209,7 +210,10 @@ fun HomeGrid(
                 .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            val systemCards = HomeCards.systemCards()
+            val systemCards = HomeCards.systemCards(
+                isVisible = isVisible,
+                onOpenPerformanceCenter = onOpenPerformanceCenter
+            )
             if (!systemCards.isEmpty()) {
                 Column(
                     modifier = Modifier

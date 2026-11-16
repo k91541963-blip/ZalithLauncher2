@@ -213,7 +213,10 @@ fun LauncherScreen(
                         onLaunchGame(version)
                     },
                     onQuickPlayServer = onQuickPlayServer,
-                    onOpenVersionSettings = navigateToVersions
+                    onOpenVersionSettings = navigateToVersions,
+                    onOpenPerformanceCenter = {
+                        backStackViewModel.mainScreen.navigateTo(NormalNavKey.PerformanceCenter)
+                    }
                 )
                 }
 
@@ -262,6 +265,7 @@ private fun ContentMenu(
     onLaunchGame: (Version) -> Unit,
     onQuickPlayServer: (Version?, String) -> Unit,
     onOpenVersionSettings: (Version) -> Unit,
+    onOpenPerformanceCenter: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val yOffset by swapAnimateDpAsState(
@@ -278,6 +282,7 @@ private fun ContentMenu(
         HomeGrid(
             state = gridState,
             isVisible = isVisible,
+            onOpenPerformanceCenter = onOpenPerformanceCenter,
             modifier = modifier
                 .fillMaxSize()
                 .offset { IntOffset(x = 0, y = yOffset.roundToPx()) }

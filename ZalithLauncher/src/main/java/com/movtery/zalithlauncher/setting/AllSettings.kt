@@ -38,6 +38,7 @@ import com.movtery.zalithlauncher.setting.enums.GestureActionType
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
 import com.movtery.zalithlauncher.setting.enums.MouseControlMode
 import com.movtery.zalithlauncher.setting.enums.MouseTouchBlockMode
+import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
 import com.movtery.zalithlauncher.setting.enums.ResolutionRule
 import com.movtery.zalithlauncher.ui.control.HotbarRule
 import com.movtery.zalithlauncher.ui.control.gamepad.JoystickMode
@@ -53,6 +54,12 @@ object AllSettings : SettingsRegistry() {
      * 全局渲染器
      */
     val renderer = stringSetting("renderer", "")
+
+    /**
+     * AetherRender EGL policy. Only used when the AetherRender renderer is selected;
+     * the value is passed to the native layer on the next game launch.
+     */
+    val aetherRenderMode = enumSetting("aetherRenderMode", AetherRenderMode.BALANCED)
 
     /**
      * Vulkan 驱动器
