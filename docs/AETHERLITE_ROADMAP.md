@@ -1,74 +1,92 @@
-# AetherLite — Fork Yol Haritası
+# AetherLite Launcher — Yol Haritası ve Durum
 
-> Zalith Launcher 2 tabanlı, düşük donanım odaklı Android Minecraft: Java Edition launcher fork'u.
-> Bu belge **Aşama 1** (kod tabanını anlama) çıktısıdır. Kod yazılmadan önce gerçek durum tespiti.
+> Zalith Launcher 2 (GPL-3.0) tabanlı, düşük/orta segment Android cihazlarda
+> Minecraft: Java Edition çalıştırmayı hedefleyen fork.
+> Bu belge **kanıtlanmış** durumu anlatır; test edilmemiş hiçbir şey "tamamlandı" sayılmaz.
 
-## 1. Yasal Durum (kritik)
+## 1. Yasal Durum
 
-| Konu | Tespit | Sonuç |
+| Konu | Durum |
+|---|---|
+| Lisans | GPL-3.0 (`LICENSE` korunuyor) |
+| Atıf | README, hakkında ekranı ve kaynak başlıkları MovTery + katkıda bulunanları anar |
+| Marka | "Zalith" adı/logo kullanılmıyor; paket kimliği `com.aetherlite.launcher` |
+| Değişiklik kaydı | Commit geçmişi + bu belge |
+| Üçüncü taraf | `library/_Libraries.kt` ve `res/raw/*license*` dosyaları korunuyor |
+
+## 2. Mimari
+
+- Kotlin + Jetpack Compose, Gradle 9.5, AGP 9.x, Hilt/KSP
+- Modüller: `ZalithLauncher`, `LWJGL`, `Terracotta`, `InputMap`, `CardGrid`,
+  `ColorPicker`, `LayerController`, `PetLib`, `Guide`
+- Başlatma çekirdeği: PojavLauncher tabanlı `jni/` + LWJGL
+- Renderer yolu: `RendererInterface` → `GameLauncher.setRendererEnv` → `pojavexec`
+  → `ctxbridges/gl_bridge.c` → GL4ES / Zink / VirGL
+- Yeni: `jni/aetherrender/` → `gl_bridge.c` içinden çağrılan EGL/tile-GPU katmanı
+
+## 3. Özellik Durumu
+
+| Şartname maddesi | Durum | Kanıt / sınır |
 |---|---|---|
-| Lisans | **GPL-3.0** (`LICENSE`) | Fork GPL-3.0 olarak kalmalı, kaynak açık yayınlanmalı |
-| Atıf | Orijinal: Zalith Launcher / Movtery | README + hakkında ekranında atıf korunmalı |
-| Marka | "Zalith" adı ve logosu | Forkta **kullanılmamalı** (isim, ikon, paket adı değişmeli) |
-| Değişiklik günlüğü | GPL-3.0 gereği | Değiştirilen dosyalar ve tarih belirtilmeli |
-
-## 2. Mevcut Mimari
-
-- Dil: Kotlin + Jetpack Compose, Gradle 9.5, AGP 9.x, KSP, Hilt
-- Modüller: `ZalithLauncher` (uygulama), `LWJGL` (native köprüler), `Terracotta` (oturum/giriş), `InputMap` (girdi eşleme), `CardGrid`, `ColorPicker`, `LayerController`, `PetLib`, `Guide`
-- Uygulama kodu: ~808 Kotlin dosyası
-- `minSdk 26`, `targetSdk 34`, `compileSdk 37`
-- Paket: `com.movtery.zalithlauncher` + `.v2` suffix
-- Marka bilgileri tek yerde: `ZalithLauncher/gradle.properties`
-
-## 3. İstenen Özelliklerin Mevcut Durumu
-
-| İstenen | Durum | Kanıt |
-|---|---|---|
-| Çevrimdışı hesap | **VAR** | `game/account/offline/`, `OfflineYggdrasilServer.kt` |
-| Microsoft girişi | **VAR** | `game/account/microsoft/` |
-| Renderer seçenekleri | **VAR** | GL4ES, NG GL4ES, Kopper-Zink, VirGL, Freedreno, Panfrost + eklenti API v2 |
-| Kontrol düzeni özelleştirme | **VAR** | `InputMap` modülü |
-| Mod yükleyiciler | **VAR** | fabriclike (Fabric/Quilt), forgelike (Forge/NeoForge), OptiFine |
-| Mod indirme | **VAR** | Modrinth + CurseForge istemcileri |
-| Türkçe arayüz | **VAR** | `values-tr` |
-| Çökme logu | **KISMİ** | `crashlogs/` (mclogs yükleme) + `game/diagnostics/` analiz motoru, `LogViewScreen` bandı |
-| Donanım profili / RAM önerisi | **VAR** | `game/performance/HardwareProfile.kt`, `MemoryAdvisor.kt`, bellek ayarı altında öneri |
-| Performans profilleri (kaydet/geri al) | **VAR** | `PerformancePresets` + Oyun ayarlarında "Performans profili" kartı |
-| Renderer uyumluluk ön kontrolü | **VAR** | `RendererCompatibility` + renderer listesinde rozet |
-| Mod bağımlılık kontrolü | **VAR (Fabric/Quilt)** | `game/version/mod/dependency/`, mod listesinde uyarı şeridi; Forge henüz yok |
-| Log analizi (neden + kanıt + çözüm) | **VAR** | `LogAnalyzer` (15 kural, kanıt satırı, `Caused by` zinciri), log görüntüleyici bandı |
-| Düşük donanım arayüz modu | **KISMİ** | Düşük donanım profili bellek/GC/çözünürlüğü düşürür; arayüz animasyonlarını azaltan mod henüz yok |
+| Gerçek Minecraft başlatma | **VAR** (miras) | Pojav çekirdeği, JRE/LWJGL bileşenleri |
+| Microsoft + offline hesap | **VAR** (miras) | `game/account/` |
+| Fabric/Forge/NeoForge/Quilt | **VAR** (miras) | `fabriclike`, `forgelike` |
+| Mod/resource pack/shader/dünya yönetimi | **VAR** (miras) | ilgili ekranlar |
+| Mod çakışma/bağımlılık denetimi | **VAR** | Fabric/Quilt/Forge/NeoForge ayrıştırıcıları + testler |
+| Modpack içe aktarma | **VAR** (miras) | `ModpackImporter`; dışa aktarma yok |
+| RAM/JVM/Java sürüm yönetimi | **VAR** (miras) | ayarlar + `multirt` |
+| Log + çökme raporu + analiz | **VAR** | `LogAnalyzer`, çökme ekranı bandı |
+| FPS/CPU/RAM göstergesi | **VAR** (miras) | oyun içi FPS grafiği; CPU/RAM launcher panelinde |
+| Cihaz/GPU bilgisi | **VAR (yeni)** | `GpuInfo.kt` gerçek EGL pbuffer sorgusu |
+| Sıcaklık | **KISMİ (yeni)** | batarya + okunabilen thermal zone; her cihazda yok |
+| Performans profilleri | **VAR** | Lite/Balanced/Quality, RAM/JVM/çözünürlük |
+| Renderer ön kontrolü | **VAR** | `RendererCompatibility` + rozet |
+| **AetherRender** | **VAR v1 (yeni)** | EGL config + `EGL_BUFFER_DESTROYED` + telemetri |
+| Düşük donanım arayüz modu | **VAR** | animasyon azaltma anahtarı |
+| Modpack dışa aktarma | **YOK** | planlı |
+| Oyun dosyası doğrulama | **KISMİ** | indirme bütünlüğü var; tam tarama yok |
+| Otomatik performans profili | **KISMİ** | öneri var; oyun içi otomatik geçiş yok |
+| Vulkan backend | **YOK (bilinçli)** | yalnızca mevcut Zink/VirGL yolları; uydurma backend yok |
 
 ## 4. Aşamalar
 
-- **Aşama 1 — Anlama:** ✅ tamamlandı (bu belge)
-- **Aşama 2 — Fork altyapısı:** ✅ isim `AetherLite Launcher`, `applicationId com.nova.launcher`, adaptive + monochrome ikon, GPL atıf; derleme doğrulandı
-- **Aşama 3 — Performans + kontrol:** ✅ donanım profili, RAM önerisi, performans profilleri, renderer ön kontrolü; düşük donanım arayüz modu kısmi
-- **Aşama 4 — Mod + log:** ✅ log analiz motoru, Fabric/Quilt bağımlılık denetimi; Forge bağımlılıkları ve profil bazlı mod yönetimi açık
-- **Aşama 5 — Test + dağıtım:** cihaz testleri, sürüm notları, APK yayını
+- **Aşama 1 — Kod tabanı analizi:** ✅
+- **Aşama 2 — Fork kimliği:** ✅ AetherLite adı, `com.aetherlite.launcher`, yeni adaptive +
+  monochrome ikon, GPL atıf
+- **Aşama 3 — Performans çekirdeği:** ✅ donanım profili, RAM önerisi, profiller,
+  renderer uyumluluğu, düşük donanım UI
+- **Aşama 4 — Teşhis + modlar:** ✅ log analizi, çökme nedeni, dört yükleyici için
+  bağımlılık denetimi
+- **Aşama 5 — AetherRender v1:** ✅ EGL katmanı, GPU/termal paneli, birim testleri
+- **Aşama 6 — Cihaz doğrulaması:** ⏳ Mali-G57/G68/G76/G78 için
+  [`DEVICE_TEST_PLAN.md`](DEVICE_TEST_PLAN.md) uygulanacak
+- **Aşama 7 — Dağıtım:** ⏳ imzalı release + sürüm notları
 
-### Doğrulanmış derlemeler
+## 5. Doğrulanmış Derlemeler
 
 | Commit | İçerik | Sonuç |
 |---|---|---|
-| `9f50cde` | performans çekirdeği + bellek önerisi | ✅ |
-| `ccac850` | renderer uyumluluk rozeti | ✅ |
-| `22dc028` | log analiz motoru (çekirdek + 11 test) | ✅ |
-| `05cec0c` | log görüntüleyici analiz bandı | ✅ |
-| `ccf9bc5` | performans profili kartı | ✅ |
-| `28c8f22` | performans profili testleri | ✅ |
+| `9f50cde` | performans çekirdeği | ✅ CI |
+| `22dc028` | log analiz motoru | ✅ CI |
+| `498acbe` | mod bağımlılık denetimi | ✅ CI |
+| `cb6c8da` | hesap değiştirme, yedekleme, sağlık kontrolü | ✅ CI |
+| `6f4df7d` | AetherLite kimliği + AetherRender v1 | CI kaydı: `docs/TEST_REPORT.md` |
 
-## 5. Kısıtlar
+## 6. Bilinen Kısıtlar
 
-- Geliştirme cihazında **JDK ve Android SDK yok** → yerel derleme mümkün değil.
-  - Seçenek A: GitHub Actions ile derleme (repoda `build.yml` / `release_ci.yml` mevcut)
-  - Seçenek B: cihaza JDK 21 + Android SDK kurulumu (yüzlerce MB)
-- `compileSdk 37` çok yeni; CI'da SDK kurulumu doğrulanmalı.
-- Native renderer kütüphaneleri (LWJGL/patches) derleme sırasında indiriliyor; ağ erişimi gerekir.
+- Bu geliştirme ortamında Android SDK/NDK yok; derlemeler GitHub Actions'ta yapılır.
+- **Henüz gerçek Mali cihazda oyun içi ölçüm yapılmadı.** AetherRender'ın EGL seçimi
+  ve tampon politikası kod olarak doğrulanabilir, ancak FPS/frametime iddiası için
+  cihaz testi zorunludur.
+- NG-GL4ES ("Krypton Wrapper") `libng_gl4es.so` bu forkta paketlenmiyor; seçilirse
+  başlatma başarısız olabilir. AetherRender bilinçli olarak paketli `libgl4es_114.so`
+  kullanır.
+- Vulkan/Zink yolu yalnızca gerçek Mesa sürücüsü olan cihazlarda anlamlıdır.
 
-## 6. Doğrulama Kuralları
+## 7. Sonraki Adımlar (öncelik sırası)
 
-- Her aşama sonunda: derleme çıktısı + hangi dosyaların değiştiği + geri alma yöntemi.
-- Doğrulanmamış özellik "tamamlandı" sayılmaz.
-- Orijinal launcher'ın çalışan özellikleri bozulmaz.
+1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
+2. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
+3. Modpack dışa aktarma ve oyun dosyası tam doğrulama.
+4. Oyun içi sıcaklık/frametime telemetrisini launcher paneliyle birleştirme.
+5. İmzalı release hattı ve sürüm notları.

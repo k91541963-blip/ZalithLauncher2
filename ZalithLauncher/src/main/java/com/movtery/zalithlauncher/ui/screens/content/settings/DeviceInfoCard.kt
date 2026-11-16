@@ -153,13 +153,13 @@ fun DeviceInfoCard(
                         profile.totalRamMb
                     )
                 )
-                gpuInfo?.maliModel?.let { model ->
+                val maliModel = gpuInfo?.maliModel
+                if (maliModel != null) {
                     InfoRow(
                         label = stringResource(R.string.aether_device_info_mali_class),
-                        value = maliTierLabel(GpuInfoReader.classifyMali(model))
+                        value = maliTierLabel(GpuInfoReader.classifyMali(maliModel))
                     )
-                }
-            } else {
+                }            } else {
                 InfoRow(
                     label = stringResource(R.string.aether_device_info_gpu),
                     value = stringResource(R.string.aether_device_info_unknown)
