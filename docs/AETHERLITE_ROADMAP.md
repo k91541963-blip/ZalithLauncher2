@@ -1,4 +1,4 @@
-# NovaLauncher — Fork Yol Haritası
+# AetherLite — Fork Yol Haritası
 
 > Zalith Launcher 2 tabanlı, düşük donanım odaklı Android Minecraft: Java Edition launcher fork'u.
 > Bu belge **Aşama 1** (kod tabanını anlama) çıktısıdır. Kod yazılmadan önce gerçek durum tespiti.
@@ -43,7 +43,7 @@
 ## 4. Aşamalar
 
 - **Aşama 1 — Anlama:** ✅ tamamlandı (bu belge)
-- **Aşama 2 — Fork altyapısı:** ✅ isim `Nova Launcher`, `applicationId com.nova.launcher`, adaptive + monochrome ikon, GPL atıf; derleme doğrulandı
+- **Aşama 2 — Fork altyapısı:** ✅ isim `AetherLite Launcher`, `applicationId com.nova.launcher`, adaptive + monochrome ikon, GPL atıf; derleme doğrulandı
 - **Aşama 3 — Performans + kontrol:** ✅ donanım profili, RAM önerisi, performans profilleri, renderer ön kontrolü; düşük donanım arayüz modu kısmi
 - **Aşama 4 — Mod + log:** ✅ log analiz motoru, Fabric/Quilt bağımlılık denetimi; Forge bağımlılıkları ve profil bazlı mod yönetimi açık
 - **Aşama 5 — Test + dağıtım:** cihaz testleri, sürüm notları, APK yayını

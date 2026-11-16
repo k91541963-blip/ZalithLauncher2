@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -80,7 +80,7 @@ fun CrashAnalysisSection(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = stringResource(R.string.nova_crash_analysis_title),
+            text = stringResource(R.string.aether_crash_analysis_title),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary
         )
@@ -98,13 +98,13 @@ fun CrashAnalysisSection(
             }
         }
         TextButton(onClick = { showDetails = true }) {
-            Text(text = stringResource(R.string.nova_log_analysis_details))
+            Text(text = stringResource(R.string.aether_log_analysis_details))
         }
     }
 
     if (showDetails) {
         SimpleAlertDialog(
-            title = stringResource(R.string.nova_log_analysis_title),
+            title = stringResource(R.string.aether_log_analysis_title),
             text = { LogAnalysisDetails(result) },
             confirmText = stringResource(R.string.generic_close),
             onDismiss = { showDetails = false }

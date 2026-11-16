@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,9 @@ enum class RendererIssue {
     PANFROST_NEEDS_MALI,
     GPU_FAMILY_UNKNOWN,
     VIRGL_NEEDS_ENVIRONMENT,
-    GLES_VERSION_UNKNOWN
+    GLES_VERSION_UNKNOWN,
+    /** AetherRender's EGL tuning targets Mali; it still runs on other GPUs. */
+    AETHER_TUNED_FOR_MALI
 }
 
 /**
@@ -97,6 +99,14 @@ object RendererCompatibility {
 
         when (renderer.getRendererId()) {
             "opengles2" -> requireGles(profile, GLES_2, issues, warnings)
+            "opengles2_aether" -> {
+                requireGles(profile, GLES_2, issues, warnings)
+                if (profile.gpuFamily != GpuFamily.MALI &&
+                    profile.gpuFamily != GpuFamily.UNKNOWN
+                ) {
+                    warnings += RendererIssue.AETHER_TUNED_FOR_MALI
+                }
+            }
             "opengles3" -> requireGles(profile, GLES_3, issues, warnings)
 
             "opengles3_desktopgl_zink_kopper" -> {

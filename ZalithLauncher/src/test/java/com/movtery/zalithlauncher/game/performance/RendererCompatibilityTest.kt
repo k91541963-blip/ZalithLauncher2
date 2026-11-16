@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -124,5 +124,28 @@ class RendererCompatibilityTest {
         val ranked = RendererCompatibility.rank(profile(is64Bit = false), renderers)
         assertEquals(RendererSupport.UNSUPPORTED, ranked.last().support)
         assertTrue(ranked.first().support != RendererSupport.UNSUPPORTED)
+    }
+
+    @Test
+    fun `aetherrender is supported on mali without warnings`() {
+        val renderer = FakeRenderer("opengles2_aether", "AetherRender", maxVersion = "1.21.4")
+        val result = RendererCompatibility.assess(
+            profile(gpuFamily = GpuFamily.MALI), renderer, "1.21.1"
+        )
+
+        assertEquals(RendererSupport.SUPPORTED, result.support)
+        assertTrue(result.issues.isEmpty())
+        assertTrue(result.warnings.none { it == RendererIssue.AETHER_TUNED_FOR_MALI })
+    }
+
+    @Test
+    fun `aetherrender warns on non mali gpus but stays usable`() {
+        val renderer = FakeRenderer("opengles2_aether", "AetherRender", maxVersion = "1.21.4")
+        val result = RendererCompatibility.assess(
+            profile(gpuFamily = GpuFamily.ADRENO), renderer, "1.21.1"
+        )
+
+        assertEquals(RendererSupport.SUPPORTED, result.support)
+        assertTrue(result.warnings.contains(RendererIssue.AETHER_TUNED_FOR_MALI))
     }
 }

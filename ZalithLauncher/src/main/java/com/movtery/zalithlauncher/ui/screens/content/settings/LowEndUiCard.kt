@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,8 +40,8 @@ fun LowEndUiCard(modifier: Modifier = Modifier) {
         modifier = modifier,
         position = CardPosition.Middle,
         unit = AllSettings.lowEndUi,
-        title = stringResource(R.string.nova_low_end_ui_title),
-        summary = stringResource(R.string.nova_low_end_ui_summary),
+        title = stringResource(R.string.aether_low_end_ui_title),
+        summary = stringResource(R.string.aether_low_end_ui_summary),
         onCheckedChange = { enabled -> applyLowEndUi(enabled) }
     )
 }

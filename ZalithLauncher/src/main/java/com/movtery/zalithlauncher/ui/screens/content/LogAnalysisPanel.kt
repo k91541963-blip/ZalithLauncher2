@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -72,7 +72,7 @@ fun LogAnalysisBanner(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.nova_log_analysis_title),
+                    text = stringResource(R.string.aether_log_analysis_title),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -83,14 +83,14 @@ fun LogAnalysisBanner(
                 )
             }
             TextButton(onClick = { showDetails = true }) {
-                Text(text = stringResource(R.string.nova_log_analysis_details))
+                Text(text = stringResource(R.string.aether_log_analysis_details))
             }
         }
     }
 
     if (showDetails) {
         SimpleAlertDialog(
-            title = stringResource(R.string.nova_log_analysis_title),
+            title = stringResource(R.string.aether_log_analysis_title),
             text = { LogAnalysisDetails(analysis) },
             confirmText = stringResource(R.string.generic_close),
             onDismiss = { showDetails = false }
@@ -115,7 +115,7 @@ internal fun LogAnalysisDetails(analysis: LogAnalysis) {
 
         if (analysis.truncated) {
             Text(
-                text = stringResource(R.string.nova_log_analysis_truncated),
+                text = stringResource(R.string.aether_log_analysis_truncated),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.tertiary
             )
@@ -127,7 +127,7 @@ internal fun LogAnalysisDetails(analysis: LogAnalysis) {
 
         if (analysis.rootCauses.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.nova_log_analysis_root_causes),
+                text = stringResource(R.string.aether_log_analysis_root_causes),
                 style = MaterialTheme.typography.titleSmall
             )
             for (cause in analysis.rootCauses) {
@@ -156,14 +156,14 @@ private fun FindingBlock(finding: LogFinding) {
 
         if (finding.evidence.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.nova_log_analysis_evidence),
+                text = stringResource(R.string.aether_log_analysis_evidence),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             for (evidence in finding.evidence) {
                 Text(
                     text = stringResource(
-                        R.string.nova_log_analysis_evidence_line,
+                        R.string.aether_log_analysis_evidence_line,
                         evidence.lineNumber,
                         evidence.text
                     ),
@@ -175,7 +175,7 @@ private fun FindingBlock(finding: LogFinding) {
 
         if (finding.advice.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.nova_log_analysis_advice),
+                text = stringResource(R.string.aether_log_analysis_advice),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -197,43 +197,43 @@ private fun severityColor(severity: LogSeverity) = when (severity) {
 }
 
 internal fun severityRes(severity: LogSeverity) = when (severity) {
-    LogSeverity.FATAL -> R.string.nova_log_severity_fatal
-    LogSeverity.ERROR -> R.string.nova_log_severity_error
-    LogSeverity.WARNING -> R.string.nova_log_severity_warning
+    LogSeverity.FATAL -> R.string.aether_log_severity_fatal
+    LogSeverity.ERROR -> R.string.aether_log_severity_error
+    LogSeverity.WARNING -> R.string.aether_log_severity_warning
 }
 
 internal fun findingTitleRes(ruleId: String) = when (ruleId) {
-    "heap_oom" -> R.string.nova_log_rule_heap_oom
-    "native_oom" -> R.string.nova_log_rule_native_oom
-    "heap_too_large" -> R.string.nova_log_rule_heap_too_large
-    "renderer_context" -> R.string.nova_log_rule_renderer_context
-    "renderer_native" -> R.string.nova_log_rule_renderer_native
-    "mod_missing_dependency" -> R.string.nova_log_rule_mod_missing_dependency
-    "mod_mixin_failure" -> R.string.nova_log_rule_mod_mixin_failure
-    "mod_duplicate" -> R.string.nova_log_rule_mod_duplicate
-    "java_version" -> R.string.nova_log_rule_java_version
-    "java_main_class" -> R.string.nova_log_rule_java_main_class
-    "network_failure" -> R.string.nova_log_rule_network_failure
-    "storage_failure" -> R.string.nova_log_rule_storage_failure
-    "account_failure" -> R.string.nova_log_rule_account_failure
-    "native_crash" -> R.string.nova_log_rule_native_crash
-    "crash_report" -> R.string.nova_log_rule_crash_report
-    else -> R.string.nova_log_rule_unknown
+    "heap_oom" -> R.string.aether_log_rule_heap_oom
+    "native_oom" -> R.string.aether_log_rule_native_oom
+    "heap_too_large" -> R.string.aether_log_rule_heap_too_large
+    "renderer_context" -> R.string.aether_log_rule_renderer_context
+    "renderer_native" -> R.string.aether_log_rule_renderer_native
+    "mod_missing_dependency" -> R.string.aether_log_rule_mod_missing_dependency
+    "mod_mixin_failure" -> R.string.aether_log_rule_mod_mixin_failure
+    "mod_duplicate" -> R.string.aether_log_rule_mod_duplicate
+    "java_version" -> R.string.aether_log_rule_java_version
+    "java_main_class" -> R.string.aether_log_rule_java_main_class
+    "network_failure" -> R.string.aether_log_rule_network_failure
+    "storage_failure" -> R.string.aether_log_rule_storage_failure
+    "account_failure" -> R.string.aether_log_rule_account_failure
+    "native_crash" -> R.string.aether_log_rule_native_crash
+    "crash_report" -> R.string.aether_log_rule_crash_report
+    else -> R.string.aether_log_rule_unknown
 }
 
 internal fun adviceRes(advice: LogAdvice) = when (advice) {
-    LogAdvice.INCREASE_MEMORY -> R.string.nova_log_advice_increase_memory
-    LogAdvice.LOWER_MEMORY -> R.string.nova_log_advice_lower_memory
-    LogAdvice.FREE_MEMORY -> R.string.nova_log_advice_free_memory
-    LogAdvice.SWITCH_RENDERER -> R.string.nova_log_advice_switch_renderer
-    LogAdvice.LOWER_GRAPHICS -> R.string.nova_log_advice_lower_graphics
-    LogAdvice.INSTALL_MISSING_MODS -> R.string.nova_log_advice_install_missing_mods
-    LogAdvice.REMOVE_CONFLICTING_MODS -> R.string.nova_log_advice_remove_conflicting_mods
-    LogAdvice.UPDATE_MODS -> R.string.nova_log_advice_update_mods
-    LogAdvice.UPDATE_JAVA -> R.string.nova_log_advice_update_java
-    LogAdvice.VERIFY_GAME_FILES -> R.string.nova_log_advice_verify_game_files
-    LogAdvice.CHECK_NETWORK -> R.string.nova_log_advice_check_network
-    LogAdvice.CHECK_STORAGE -> R.string.nova_log_advice_check_storage
-    LogAdvice.SIGN_IN_AGAIN -> R.string.nova_log_advice_sign_in_again
-    LogAdvice.READ_CRASH_REPORT -> R.string.nova_log_advice_read_crash_report
+    LogAdvice.INCREASE_MEMORY -> R.string.aether_log_advice_increase_memory
+    LogAdvice.LOWER_MEMORY -> R.string.aether_log_advice_lower_memory
+    LogAdvice.FREE_MEMORY -> R.string.aether_log_advice_free_memory
+    LogAdvice.SWITCH_RENDERER -> R.string.aether_log_advice_switch_renderer
+    LogAdvice.LOWER_GRAPHICS -> R.string.aether_log_advice_lower_graphics
+    LogAdvice.INSTALL_MISSING_MODS -> R.string.aether_log_advice_install_missing_mods
+    LogAdvice.REMOVE_CONFLICTING_MODS -> R.string.aether_log_advice_remove_conflicting_mods
+    LogAdvice.UPDATE_MODS -> R.string.aether_log_advice_update_mods
+    LogAdvice.UPDATE_JAVA -> R.string.aether_log_advice_update_java
+    LogAdvice.VERIFY_GAME_FILES -> R.string.aether_log_advice_verify_game_files
+    LogAdvice.CHECK_NETWORK -> R.string.aether_log_advice_check_network
+    LogAdvice.CHECK_STORAGE -> R.string.aether_log_advice_check_storage
+    LogAdvice.SIGN_IN_AGAIN -> R.string.aether_log_advice_sign_in_again
+    LogAdvice.READ_CRASH_REPORT -> R.string.aether_log_advice_read_crash_report
 }

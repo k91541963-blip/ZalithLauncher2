@@ -64,7 +64,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.nova.launcher"
+        applicationId = "com.aetherlite.launcher"
         minSdk = 26
         targetSdk = 34
         versionCode = launcherVersionCode

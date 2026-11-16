@@ -412,7 +412,7 @@ fun SavesManagerScreen(
                                 if (!backupDir.exists() && !backupDir.mkdirs()) {
                                     Toast.makeText(
                                         context,
-                                        R.string.nova_saves_backup_failed,
+                                        R.string.aether_saves_backup_failed,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
@@ -423,9 +423,9 @@ fun SavesManagerScreen(
                                         savesOperation = SavesOperation.None
                                         withContext(Dispatchers.Main) {
                                             val message = if (result.isSuccess) {
-                                                context.getString(R.string.nova_saves_backup_done, target.name)
+                                                context.getString(R.string.aether_saves_backup_done, target.name)
                                             } else {
-                                                context.getString(R.string.nova_saves_backup_failed)
+                                                context.getString(R.string.aether_saves_backup_failed)
                                             }
                                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                                         }
@@ -582,7 +582,7 @@ private fun SavesActionsHeader(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_archive_filled),
-                            contentDescription = stringResource(R.string.nova_saves_backup_all)
+                            contentDescription = stringResource(R.string.aether_saves_backup_all)
                         )
                     }
 

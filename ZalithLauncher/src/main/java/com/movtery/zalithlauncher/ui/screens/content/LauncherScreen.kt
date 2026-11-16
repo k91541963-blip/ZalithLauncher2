@@ -308,7 +308,7 @@ private fun AccountAvatarCenter(
                 Icon(
                     modifier = Modifier.size(18.dp),
                     painter = painterResource(R.drawable.ic_group_filled),
-                    contentDescription = stringResource(R.string.nova_account_switch)
+                    contentDescription = stringResource(R.string.aether_account_switch)
                 )
             }
         }
@@ -402,7 +402,7 @@ private fun AccountAvatarRow(
                 Icon(
                     modifier = Modifier.size(20.dp),
                     painter = painterResource(R.drawable.ic_group_filled),
-                    contentDescription = stringResource(R.string.nova_account_switch)
+                    contentDescription = stringResource(R.string.aether_account_switch)
                 )
             }
         }
@@ -418,7 +418,7 @@ private fun AccountSwitcherDialog(
     onDismiss: () -> Unit
 ) {
     SimpleAlertDialog(
-        title = stringResource(R.string.nova_account_switch_title),
+        title = stringResource(R.string.aether_account_switch_title),
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 accounts.forEach { item ->
@@ -450,7 +450,7 @@ private fun AccountSwitcherDialog(
                             Icon(
                                 modifier = Modifier.size(20.dp),
                                 painter = painterResource(R.drawable.ic_check),
-                                contentDescription = stringResource(R.string.nova_account_switch_current),
+                                contentDescription = stringResource(R.string.aether_account_switch_current),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -458,7 +458,7 @@ private fun AccountSwitcherDialog(
                 }
             }
         },
-        confirmText = stringResource(R.string.nova_account_manage),
+        confirmText = stringResource(R.string.aether_account_manage),
         dismissText = stringResource(R.string.generic_cancel),
         onConfirm = onManageAccounts,
         onCancel = onDismiss,

@@ -1,10 +1,28 @@
-# NovaLauncher
+# AetherLite Launcher
 
 > [!NOTE]
-> **NovaLauncher**, [Zalith Launcher 2](https://github.com/ZalithLauncher/ZalithLauncher2) tabanlı bir fork'tur.
+> **AetherLite Launcher**, [Zalith Launcher 2](https://github.com/ZalithLauncher/ZalithLauncher2) tabanlı bir fork'tur.
 > Orijinal proje GPL-3.0 lisanslıdır ve telif hakkı MovTery ile katkıda bulunanlara aittir.
-> Bu fork da GPL-3.0 altında dağıtılır; değişikliklerin listesi `docs/NOVA_ROADMAP.md` ve commit geçmişinde tutulur.
+> Bu fork da GPL-3.0 altında dağıtılır; değişikliklerin listesi `docs/AETHERLITE_ROADMAP.md` ve commit geçmişinde tutulur.
 > "Zalith" adı ve logosu bu forkta kullanılmaz; orijinal projeye atıf korunur.
+
+## AetherLite farkları
+
+- **AetherRender v1** — GL4ES çekirdeği üzerinde Mali/tile GPU odaklı EGL katmanı:
+  çok örneklemeli (MSAA) config seçmez, 24-bit derinlik ister, pencere yüzeyinde
+  `EGL_BUFFER_DESTROYED` ister ve gerçek GL sürücü dizelerini loglar.
+  Minecraft'ın chunk renderer'ını değiştirmez; FPS garantisi vermez.
+- **Cihaz ve GPU paneli** — gerçek EGL sorgusu, Mali modeli, OpenGL ES sürümü,
+  SoC, RAM ve okunabiliyorsa batarya/SoC sıcaklığı.
+- **Düşük donanım odaklı performans** — donanım profiline göre RAM/JVM/çözünürlük
+  önerileri, Lite/Balanced/Performance profilleri, renderer uyumluluk rozetleri.
+- **Teşhis** — log analizi, çökme nedeni, Fabric/Quilt/Forge/NeoForge bağımlılık denetimi.
+- **AetherLite kimliği** — yeni uygulama kimliği (`com.aetherlite.launcher`), ikon ve Türkçe arayüz.
+
+> Durum ve yol haritası: [`docs/AETHERLITE_ROADMAP.md`](docs/AETHERLITE_ROADMAP.md)
+> AetherRender tasarımı ve sınırları: [`docs/AETHERRENDER.md`](docs/AETHERRENDER.md)
+> Derleme ve test: [`docs/BUILD_AND_TEST.md`](docs/BUILD_AND_TEST.md)
+
 
 # Zalith Launcher 2
 ![Downloads](https://img.shields.io/github/downloads/ZalithLauncher/ZalithLauncher2/total)

@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -51,9 +51,9 @@ fun RendererCompatibilityBadge(
     }
 
     val labelRes = when (assessment.support) {
-        RendererSupport.SUPPORTED -> R.string.nova_renderer_supported
-        RendererSupport.UNKNOWN -> R.string.nova_renderer_unverified
-        RendererSupport.UNSUPPORTED -> R.string.nova_renderer_unsupported
+        RendererSupport.SUPPORTED -> R.string.aether_renderer_supported
+        RendererSupport.UNKNOWN -> R.string.aether_renderer_unverified
+        RendererSupport.UNSUPPORTED -> R.string.aether_renderer_unsupported
     }
     val color = when (assessment.support) {
         RendererSupport.SUPPORTED -> MaterialTheme.colorScheme.primary

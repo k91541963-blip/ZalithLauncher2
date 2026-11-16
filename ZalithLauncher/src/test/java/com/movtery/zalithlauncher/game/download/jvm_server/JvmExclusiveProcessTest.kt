@@ -29,7 +29,7 @@ import org.junit.Test
  */
 class JvmExclusiveProcessTest {
 
-    private val main = "com.nova.launcher"
+    private val main = "com.aetherlite.launcher"
 
     @Test
     fun `jvm and game processes are exclusive`() {

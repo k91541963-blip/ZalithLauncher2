@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ fun MemoryAdviceHint(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth().padding(top = 4.dp)) {
         Text(
             text = stringResource(
-                R.string.nova_memory_advice_recommended,
+                R.string.aether_memory_advice_recommended,
                 advice.recommendedMb,
                 advice.maxMb
             ),
@@ -56,7 +56,7 @@ fun MemoryAdviceHint(modifier: Modifier = Modifier) {
         )
         Text(
             text = stringResource(
-                R.string.nova_memory_advice_device,
+                R.string.aether_memory_advice_device,
                 detected.deviceName,
                 detected.cpuCores,
                 detected.totalRamMb,
@@ -68,7 +68,7 @@ fun MemoryAdviceHint(modifier: Modifier = Modifier) {
         )
         if (advice.isAboveSafeLimit(selected)) {
             Text(
-                text = stringResource(R.string.nova_memory_advice_above_limit),
+                text = stringResource(R.string.aether_memory_advice_above_limit),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error
             )

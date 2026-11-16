@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -70,27 +70,27 @@ fun ModDependencyBanner(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.nova_mod_dep_title),
+                    text = stringResource(R.string.aether_mod_dep_title),
                     style = MaterialTheme.typography.labelSmall
                 )
                 Text(
-                    text = stringResource(R.string.nova_mod_dep_summary, issues.size),
+                    text = stringResource(R.string.aether_mod_dep_summary, issues.size),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
             TextButton(onClick = { showDetails = true }) {
-                Text(text = stringResource(R.string.nova_mod_dep_details))
+                Text(text = stringResource(R.string.aether_mod_dep_details))
             }
         }
     }
 
     if (showDetails) {
         SimpleAlertDialog(
-            title = stringResource(R.string.nova_mod_dep_title),
+            title = stringResource(R.string.aether_mod_dep_title),
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = stringResource(R.string.nova_mod_dep_note),
+                        text = stringResource(R.string.aether_mod_dep_note),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -113,23 +113,23 @@ private fun issueText(issue: DependencyIssue): String {
     val ranges = issue.requiredRanges.joinToString(" / ")
     return when (issue.problem) {
         DependencyProblem.MISSING -> stringResource(
-            R.string.nova_mod_dep_missing,
+            R.string.aether_mod_dep_missing,
             issue.modName,
             issue.dependencyId
         )
 
         DependencyProblem.DISABLED -> stringResource(
-            R.string.nova_mod_dep_disabled,
+            R.string.aether_mod_dep_disabled,
             issue.modName,
             issue.dependencyId
         )
 
         DependencyProblem.VERSION_MISMATCH -> stringResource(
-            R.string.nova_mod_dep_version,
+            R.string.aether_mod_dep_version,
             issue.modName,
             issue.dependencyId,
             ranges.ifEmpty { "*" },
-            issue.installedVersion ?: stringResource(R.string.nova_mod_dep_unknown_version)
+            issue.installedVersion ?: stringResource(R.string.aether_mod_dep_unknown_version)
         )
     }
 }

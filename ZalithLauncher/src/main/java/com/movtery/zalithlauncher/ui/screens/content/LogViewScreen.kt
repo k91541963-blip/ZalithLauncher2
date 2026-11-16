@@ -163,7 +163,7 @@ fun LogViewScreen(
                                     if (text.isNullOrEmpty()) {
                                         Toast.makeText(
                                             context,
-                                            R.string.nova_log_copy_empty,
+                                            R.string.aether_log_copy_empty,
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
@@ -173,7 +173,7 @@ fun LogViewScreen(
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_copy_all_filled),
-                                    contentDescription = stringResource(R.string.nova_log_copy_all)
+                                    contentDescription = stringResource(R.string.aether_log_copy_all)
                                 )
                             }
                             IconButton(
@@ -184,7 +184,7 @@ fun LogViewScreen(
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            R.string.nova_log_share_missing,
+                                            R.string.aether_log_share_missing,
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -192,7 +192,7 @@ fun LogViewScreen(
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_share_filled),
-                                    contentDescription = stringResource(R.string.nova_log_share)
+                                    contentDescription = stringResource(R.string.aether_log_share)
                                 )
                             }
                         }

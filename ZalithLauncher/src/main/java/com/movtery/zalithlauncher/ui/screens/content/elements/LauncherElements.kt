@@ -295,7 +295,7 @@ fun LaunchGameOperation(
             val message = buildString {
                 append(
                     activity.getString(
-                        R.string.nova_launch_health_summary,
+                        R.string.aether_launch_health_summary,
                         health.freeRamMb,
                         health.freeStorageMb
                     )
@@ -305,17 +305,17 @@ fun LaunchGameOperation(
                     append(
                         when (warning) {
                             LaunchWarning.LOW_MEMORY ->
-                                activity.getString(R.string.nova_launch_health_low_memory, health.freeRamMb)
+                                activity.getString(R.string.aether_launch_health_low_memory, health.freeRamMb)
                             LaunchWarning.LOW_STORAGE ->
-                                activity.getString(R.string.nova_launch_health_low_storage, health.freeStorageMb)
+                                activity.getString(R.string.aether_launch_health_low_storage, health.freeStorageMb)
                             LaunchWarning.THERMAL ->
-                                activity.getString(R.string.nova_launch_health_thermal)
+                                activity.getString(R.string.aether_launch_health_thermal)
                         }
                     )
                 }
             }
             SimpleAlertDialog(
-                title = stringResource(R.string.nova_launch_health_title),
+                title = stringResource(R.string.aether_launch_health_title),
                 text = message,
                 confirmText = stringResource(R.string.generic_anyway),
                 onConfirm = {

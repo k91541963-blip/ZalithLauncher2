@@ -333,7 +333,7 @@ private fun ActionsLayout(
                 actions.onIntent(AccountManageIntent.UpdateLocalLoginOp(LocalLoginOperation.Edit))
             }
         ) {
-            MarqueeText(text = stringResource(R.string.nova_offline_account_add))
+            MarqueeText(text = stringResource(R.string.aether_offline_account_add))
         }
     }
 }

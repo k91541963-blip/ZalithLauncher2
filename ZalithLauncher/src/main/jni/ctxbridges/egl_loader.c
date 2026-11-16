@@ -68,4 +68,5 @@ void dlsym_EGL() {
     eglTerminate_p = GLGetProcAddress(dl_handle, "eglTerminate");
     eglGetCurrentSurface_p = GLGetProcAddress(dl_handle,"eglGetCurrentSurface");
     eglQuerySurface_p = GLGetProcAddress(dl_handle, "eglQuerySurface");
+    eglSurfaceAttrib_p = GLGetProcAddress(dl_handle, "eglSurfaceAttrib");
 }

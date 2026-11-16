@@ -1,5 +1,5 @@
 /*
- * NovaLauncher
+ * AetherLite Launcher
  * Fork of Zalith Launcher 2, original Copyright (C) 2025-2026 MovTery and contributors.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -56,18 +56,18 @@ fun PerformancePresetCard(modifier: Modifier = Modifier) {
     SettingsCard(
         modifier = modifier,
         position = CardPosition.Middle,
-        title = stringResource(R.string.nova_preset_title),
-        summary = stringResource(R.string.nova_preset_summary),
+        title = stringResource(R.string.aether_preset_title),
+        summary = stringResource(R.string.aether_preset_summary),
         onClick = { showDialog = true }
     )
 
     if (showDialog) {
         SimpleAlertDialog(
-            title = stringResource(R.string.nova_preset_title),
+            title = stringResource(R.string.aether_preset_title),
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        text = stringResource(R.string.nova_preset_note),
+                        text = stringResource(R.string.aether_preset_note),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -84,7 +84,7 @@ fun PerformancePresetCard(modifier: Modifier = Modifier) {
                             )
                             Text(
                                 text = stringResource(
-                                    R.string.nova_preset_values,
+                                    R.string.aether_preset_values,
                                     preset.ramMb ?: 0,
                                     preset.resolutionRatio ?: 100
                                 ),
@@ -98,7 +98,7 @@ fun PerformancePresetCard(modifier: Modifier = Modifier) {
                                     showDialog = false
                                 }
                             ) {
-                                Text(text = stringResource(R.string.nova_preset_apply))
+                                Text(text = stringResource(R.string.aether_preset_apply))
                             }
                         }
                     }
@@ -118,15 +118,15 @@ private fun applyPreset(preset: PerformancePreset) {
 }
 
 private fun presetTitleRes(id: String) = when (id) {
-    PerformancePresets.ID_LOW_END -> R.string.nova_preset_low_end_title
-    PerformancePresets.ID_BALANCED -> R.string.nova_preset_balanced_title
-    PerformancePresets.ID_QUALITY -> R.string.nova_preset_quality_title
-    else -> R.string.nova_preset_title
+    PerformancePresets.ID_LOW_END -> R.string.aether_preset_low_end_title
+    PerformancePresets.ID_BALANCED -> R.string.aether_preset_balanced_title
+    PerformancePresets.ID_QUALITY -> R.string.aether_preset_quality_title
+    else -> R.string.aether_preset_title
 }
 
 private fun presetDescriptionRes(id: String) = when (id) {
-    PerformancePresets.ID_LOW_END -> R.string.nova_preset_low_end_description
-    PerformancePresets.ID_BALANCED -> R.string.nova_preset_balanced_description
-    PerformancePresets.ID_QUALITY -> R.string.nova_preset_quality_description
-    else -> R.string.nova_preset_summary
+    PerformancePresets.ID_LOW_END -> R.string.aether_preset_low_end_description
+    PerformancePresets.ID_BALANCED -> R.string.aether_preset_balanced_description
+    PerformancePresets.ID_QUALITY -> R.string.aether_preset_quality_description
+    else -> R.string.aether_preset_summary
 }

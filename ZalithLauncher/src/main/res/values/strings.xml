@@ -1782,143 +1782,143 @@
     <!-- Preview under the memory allocation slider; %d is the memory allocated to the game in MB -->
     <string name="settings_game_java_memory_allocation_text">Allocated: %dMB</string>
     <!-- Shown under the memory allocation slider; %1$d is the recommended memory and %2$d the safe maximum, in MB -->
-    <string name="nova_memory_advice_recommended">Recommended for this device: %1$dMB (safe maximum %2$dMB)</string>
+    <string name="aether_memory_advice_recommended">Recommended for this device: %1$dMB (safe maximum %2$dMB)</string>
     <!-- Shown under the memory allocation slider when the selected value is too high; no placeholders -->
-    <string name="nova_memory_advice_above_limit">The selected value is above the safe limit for this device. The system may stutter while the game is running.</string>
+    <string name="aether_memory_advice_above_limit">The selected value is above the safe limit for this device. The system may stutter while the game is running.</string>
     <!-- Shown under the memory allocation slider; %1$s is the device name, %2$d cores, %3$d total RAM in MB, %4$d and %5$d are the OpenGL ES version parts -->
-    <string name="nova_memory_advice_device">Device: %1$s • %2$d cores • %3$dMB RAM • OpenGL ES %4$d.%5$d</string>
+    <string name="aether_memory_advice_device">Device: %1$s • %2$d cores • %3$dMB RAM • OpenGL ES %4$d.%5$d</string>
     <!-- Compatibility badge in the renderer list when the renderer is expected to work on this device; no placeholders -->
-    <string name="nova_renderer_supported">Compatible</string>
+    <string name="aether_renderer_supported">Compatible</string>
     <!-- Compatibility badge in the renderer list when the launcher cannot verify support without a driver probe; no placeholders -->
-    <string name="nova_renderer_unverified">Not verified</string>
+    <string name="aether_renderer_unverified">Not verified</string>
     <!-- Compatibility badge in the renderer list when a local check rules the renderer out; no placeholders -->
-    <string name="nova_renderer_unsupported">Not compatible</string>
+    <string name="aether_renderer_unsupported">Not compatible</string>
     <!-- Title of the performance preset card in the Game settings tab -->
-    <string name="nova_preset_title">Performance profile</string>
+    <string name="aether_preset_title">Performance profile</string>
     <!-- Summary of the performance preset card in the Game settings tab -->
-    <string name="nova_preset_summary">Ready-made memory, JVM and resolution values for this device</string>
+    <string name="aether_preset_summary">Ready-made memory, JVM and resolution values for this device</string>
     <!-- Warning shown in the performance preset dialog before applying a profile -->
-    <string name="nova_preset_note">Applying a profile overwrites the memory, JVM arguments and resolution scale below. The renderer is not changed. These profiles do not raise the game\'s FPS by themselves.</string>
+    <string name="aether_preset_note">Applying a profile overwrites the memory, JVM arguments and resolution scale below. The renderer is not changed. These profiles do not raise the game\'s FPS by themselves.</string>
     <!-- Name of the low-end performance profile -->
-    <string name="nova_preset_low_end_title">Low-end device</string>
+    <string name="aether_preset_low_end_title">Low-end device</string>
     <!-- Description of the low-end performance profile -->
-    <string name="nova_preset_low_end_description">Less memory, serial GC and 75% resolution. For older and entry-level devices.</string>
+    <string name="aether_preset_low_end_description">Less memory, serial GC and 75% resolution. For older and entry-level devices.</string>
     <!-- Name of the balanced performance profile -->
-    <string name="nova_preset_balanced_title">Balanced</string>
+    <string name="aether_preset_balanced_title">Balanced</string>
     <!-- Description of the balanced performance profile -->
-    <string name="nova_preset_balanced_description">Recommended memory, G1 GC and full resolution. A safe default for most devices.</string>
+    <string name="aether_preset_balanced_description">Recommended memory, G1 GC and full resolution. A safe default for most devices.</string>
     <!-- Name of the high quality performance profile -->
-    <string name="nova_preset_quality_title">High quality</string>
+    <string name="aether_preset_quality_title">High quality</string>
     <!-- Description of the high quality performance profile -->
-    <string name="nova_preset_quality_description">Safe upper memory limit and full resolution. Only meaningful with 6 GB RAM or more.</string>
+    <string name="aether_preset_quality_description">Safe upper memory limit and full resolution. Only meaningful with 6 GB RAM or more.</string>
     <!-- Values of a performance profile; %1$d is the memory in MB, %2$d the resolution percentage -->
-    <string name="nova_preset_values">%1$dMB memory • %2$d%% resolution</string>
+    <string name="aether_preset_values">%1$dMB memory • %2$d%% resolution</string>
     <!-- Button in the performance preset dialog that applies the selected profile -->
-    <string name="nova_preset_apply">Apply</string>
+    <string name="aether_preset_apply">Apply</string>
     <!-- Title of the dependency warning strip above the mod list and its dialog -->
-    <string name="nova_mod_dep_title">Dependency check</string>
+    <string name="aether_mod_dep_title">Dependency check</string>
     <!-- Summary of the dependency warning strip; %1$d is the number of problems -->
-    <string name="nova_mod_dep_summary">%1$d mod dependency problems found</string>
+    <string name="aether_mod_dep_summary">%1$d mod dependency problems found</string>
     <!-- Button that opens the dependency problem list -->
-    <string name="nova_mod_dep_details">Details</string>
+    <string name="aether_mod_dep_details">Details</string>
     <!-- Dependency problem line when the required mod is not installed; %1$s is the mod, %2$s the missing dependency id -->
-    <string name="nova_mod_dep_missing">%1$s requires %2$s, which is not installed</string>
+    <string name="aether_mod_dep_missing">%1$s requires %2$s, which is not installed</string>
     <!-- Dependency problem line when the required mod is disabled; %1$s is the mod, %2$s the dependency id -->
-    <string name="nova_mod_dep_disabled">%1$s requires %2$s, which is disabled</string>
+    <string name="aether_mod_dep_disabled">%1$s requires %2$s, which is disabled</string>
     <!-- Dependency problem line for a version mismatch; %1$s mod, %2$s dependency id, %3$s required range, %4$s installed version -->
-    <string name="nova_mod_dep_version">%1$s requires %2$s %3$s, but version %4$s is installed</string>
+    <string name="aether_mod_dep_version">%1$s requires %2$s %3$s, but version %4$s is installed</string>
     <!-- Note in the dependency dialog about which mod loaders are checked -->
-    <string name="nova_mod_dep_note">Fabric, Quilt, Forge and NeoForge metadata is checked. Optional and server-only dependencies are ignored.</string>
+    <string name="aether_mod_dep_note">Fabric, Quilt, Forge and NeoForge metadata is checked. Optional and server-only dependencies are ignored.</string>
     <!-- Shown instead of a version number when the installed version is unknown -->
-    <string name="nova_mod_dep_unknown_version">unknown</string>
+    <string name="aether_mod_dep_unknown_version">unknown</string>
     <!-- Heading above the analyzer's findings on the crash screen -->
-    <string name="nova_crash_analysis_title">Likely cause</string>
+    <string name="aether_crash_analysis_title">Likely cause</string>
     <!-- Button on the account screen that opens the offline account dialog directly -->
-    <string name="nova_offline_account_add">Offline account</string>
+    <string name="aether_offline_account_add">Offline account</string>
     <!-- Title of the low-end interface switch in the Game settings tab -->
-    <string name="nova_low_end_ui_title">Low-end interface</string>
+    <string name="aether_low_end_ui_title">Low-end interface</string>
     <!-- Summary of the low-end interface switch in the Game settings tab -->
-    <string name="nova_low_end_ui_summary">Faster animations, no page transitions and no background blur. Keeps the launcher responsive on older devices; it does not change the game itself.</string>
+    <string name="aether_low_end_ui_summary">Faster animations, no page transitions and no background blur. Keeps the launcher responsive on older devices; it does not change the game itself.</string>
     <!-- Title of the log analysis banner and dialog shown in the log viewer -->
-    <string name="nova_log_analysis_title">Log analysis</string>
+    <string name="aether_log_analysis_title">Log analysis</string>
     <!-- Button in the log analysis banner that opens the full report -->
-    <string name="nova_log_analysis_details">Details</string>
+    <string name="aether_log_analysis_details">Details</string>
     <!-- Note in the log analysis dialog when the log was longer than the scan limit -->
-    <string name="nova_log_analysis_truncated">This log is very long; only its beginning was analysed.</string>
+    <string name="aether_log_analysis_truncated">This log is very long; only its beginning was analysed.</string>
     <!-- Heading above the log lines that a finding was derived from -->
-    <string name="nova_log_analysis_evidence">Evidence</string>
+    <string name="aether_log_analysis_evidence">Evidence</string>
     <!-- One evidence line in the log analysis dialog; %1$d is the line number, %2$s the line text -->
-    <string name="nova_log_analysis_evidence_line">%1$d: %2$s</string>
+    <string name="aether_log_analysis_evidence_line">%1$d: %2$s</string>
     <!-- Heading above the suggested actions of a finding -->
-    <string name="nova_log_analysis_advice">What to try</string>
+    <string name="aether_log_analysis_advice">What to try</string>
     <!-- Heading above the "Caused by" exception chain in the log analysis dialog -->
-    <string name="nova_log_analysis_root_causes">Caused by</string>
+    <string name="aether_log_analysis_root_causes">Caused by</string>
     <!-- Severity label for a finding that stopped the game from running -->
-    <string name="nova_log_severity_fatal">Fatal</string>
+    <string name="aether_log_severity_fatal">Fatal</string>
     <!-- Severity label for a finding that broke part of the game -->
-    <string name="nova_log_severity_error">Error</string>
+    <string name="aether_log_severity_error">Error</string>
     <!-- Severity label for a finding that may explain bad performance -->
-    <string name="nova_log_severity_warning">Warning</string>
+    <string name="aether_log_severity_warning">Warning</string>
     <!-- Log finding title when the game ran out of Java heap memory -->
-    <string name="nova_log_rule_heap_oom">The game ran out of Java heap memory</string>
+    <string name="aether_log_rule_heap_oom">The game ran out of Java heap memory</string>
     <!-- Log finding title when the device ran out of native memory -->
-    <string name="nova_log_rule_native_oom">The device ran out of memory</string>
+    <string name="aether_log_rule_native_oom">The device ran out of memory</string>
     <!-- Log finding title when the configured memory is larger than the device can reserve -->
-    <string name="nova_log_rule_heap_too_large">The memory allocation cannot be reserved on this device</string>
+    <string name="aether_log_rule_heap_too_large">The memory allocation cannot be reserved on this device</string>
     <!-- Log finding title when the graphics context could not be created -->
-    <string name="nova_log_rule_renderer_context">The graphics context could not be created</string>
+    <string name="aether_log_rule_renderer_context">The graphics context could not be created</string>
     <!-- Log finding title when a renderer native library failed to load -->
-    <string name="nova_log_rule_renderer_native">A renderer library failed to load</string>
+    <string name="aether_log_rule_renderer_native">A renderer library failed to load</string>
     <!-- Log finding title when a mod is missing a required dependency -->
-    <string name="nova_log_rule_mod_missing_dependency">A mod is missing a required dependency</string>
+    <string name="aether_log_rule_mod_missing_dependency">A mod is missing a required dependency</string>
     <!-- Log finding title when a mod failed to apply its mixins -->
-    <string name="nova_log_rule_mod_mixin_failure">A mod failed to apply its patches</string>
+    <string name="aether_log_rule_mod_mixin_failure">A mod failed to apply its patches</string>
     <!-- Log finding title when the same mod is installed more than once -->
-    <string name="nova_log_rule_mod_duplicate">The same mod is installed twice</string>
+    <string name="aether_log_rule_mod_duplicate">The same mod is installed twice</string>
     <!-- Log finding title when the Java runtime is too old for the game or a mod -->
-    <string name="nova_log_rule_java_version">The Java version is too old for this game or mod</string>
+    <string name="aether_log_rule_java_version">The Java version is too old for this game or mod</string>
     <!-- Log finding title when the main class could not be loaded, usually damaged game files -->
-    <string name="nova_log_rule_java_main_class">The game files look incomplete or corrupted</string>
+    <string name="aether_log_rule_java_main_class">The game files look incomplete or corrupted</string>
     <!-- Log finding title when a network request failed -->
-    <string name="nova_log_rule_network_failure">A network request failed</string>
+    <string name="aether_log_rule_network_failure">A network request failed</string>
     <!-- Log finding title when game files could not be read or written -->
-    <string name="nova_log_rule_storage_failure">The device could not read or write game files</string>
+    <string name="aether_log_rule_storage_failure">The device could not read or write game files</string>
     <!-- Log finding title when an account could not be authenticated -->
-    <string name="nova_log_rule_account_failure">The account could not be authenticated</string>
+    <string name="aether_log_rule_account_failure">The account could not be authenticated</string>
     <!-- Log finding title when the game process crashed in native code -->
-    <string name="nova_log_rule_native_crash">The game process crashed in native code</string>
+    <string name="aether_log_rule_native_crash">The game process crashed in native code</string>
     <!-- Log finding title when the log contains a Minecraft crash report -->
-    <string name="nova_log_rule_crash_report">The game reported a crash</string>
+    <string name="aether_log_rule_crash_report">The game reported a crash</string>
     <!-- Log finding title used when a rule has no localized title yet -->
-    <string name="nova_log_rule_unknown">A problem was detected in this log</string>
+    <string name="aether_log_rule_unknown">A problem was detected in this log</string>
     <!-- Log advice shown for an out of memory finding -->
-    <string name="nova_log_advice_increase_memory">Increase the memory allocation in Game settings, but stay under the safe limit.</string>
+    <string name="aether_log_advice_increase_memory">Increase the memory allocation in Game settings, but stay under the safe limit.</string>
     <!-- Log advice shown when the selected memory cannot be reserved -->
-    <string name="nova_log_advice_lower_memory">Lower the memory allocation; this value cannot be reserved on this device.</string>
+    <string name="aether_log_advice_lower_memory">Lower the memory allocation; this value cannot be reserved on this device.</string>
     <!-- Log advice shown when the device is low on free memory -->
-    <string name="nova_log_advice_free_memory">Close other apps to free RAM, then try again.</string>
+    <string name="aether_log_advice_free_memory">Close other apps to free RAM, then try again.</string>
     <!-- Log advice shown for graphics or driver failures -->
-    <string name="nova_log_advice_switch_renderer">Try another renderer in Renderer settings.</string>
+    <string name="aether_log_advice_switch_renderer">Try another renderer in Renderer settings.</string>
     <!-- Log advice shown when the GPU is under too much load -->
-    <string name="nova_log_advice_lower_graphics">Lower the render distance and the resolution scale.</string>
+    <string name="aether_log_advice_lower_graphics">Lower the render distance and the resolution scale.</string>
     <!-- Log advice shown for a missing mod dependency -->
-    <string name="nova_log_advice_install_missing_mods">Install the missing dependency mods, or remove the mod that requires them.</string>
+    <string name="aether_log_advice_install_missing_mods">Install the missing dependency mods, or remove the mod that requires them.</string>
     <!-- Log advice shown for conflicting or duplicated mods -->
-    <string name="nova_log_advice_remove_conflicting_mods">Remove one of the conflicting mods.</string>
+    <string name="aether_log_advice_remove_conflicting_mods">Remove one of the conflicting mods.</string>
     <!-- Log advice shown for outdated mods or mod loaders -->
-    <string name="nova_log_advice_update_mods">Update the mods and the mod loader to matching versions.</string>
+    <string name="aether_log_advice_update_mods">Update the mods and the mod loader to matching versions.</string>
     <!-- Log advice shown for an outdated Java runtime -->
-    <string name="nova_log_advice_update_java">Install a newer Java runtime in Java settings.</string>
+    <string name="aether_log_advice_update_java">Install a newer Java runtime in Java settings.</string>
     <!-- Log advice shown when game files may be damaged -->
-    <string name="nova_log_advice_verify_game_files">Reinstall or repair the game files.</string>
+    <string name="aether_log_advice_verify_game_files">Reinstall or repair the game files.</string>
     <!-- Log advice shown for network failures -->
-    <string name="nova_log_advice_check_network">Check the connection and try again; a VPN or a different DNS may help.</string>
+    <string name="aether_log_advice_check_network">Check the connection and try again; a VPN or a different DNS may help.</string>
     <!-- Log advice shown for storage or permission failures -->
-    <string name="nova_log_advice_check_storage">Free up storage space and check file permissions.</string>
+    <string name="aether_log_advice_check_storage">Free up storage space and check file permissions.</string>
     <!-- Log advice shown for account authentication failures -->
-    <string name="nova_log_advice_sign_in_again">Sign in to the account again.</string>
+    <string name="aether_log_advice_sign_in_again">Sign in to the account again.</string>
     <!-- Log advice shown when a crash report is available -->
-    <string name="nova_log_advice_read_crash_report">Open the crash report in crash-reports for the full stack trace.</string>
+    <string name="aether_log_advice_read_crash_report">Open the crash report in crash-reports for the full stack trace.</string>
     <!-- Settings item title in the Game tab that lists the native library plugins -->
     <string name="settings_game_native_lib_plugin_title">Native Library Plugins</string>
     <!-- Summary of the native library plugins item in the Game settings tab -->
@@ -3065,38 +3065,74 @@
     <string name="guide_tip_finish">Tap any blank area to finish the guide</string>
 
     <!-- Tooltip on the button that zips every world of the selected version into the backups folder -->
-    <string name="nova_saves_backup_all">Back up all worlds</string>
+    <string name="aether_saves_backup_all">Back up all worlds</string>
     <!-- Toast shown after every world was zipped; %1$s is the archive file name -->
-    <string name="nova_saves_backup_done">All worlds backed up to %1$s</string>
+    <string name="aether_saves_backup_done">All worlds backed up to %1$s</string>
     <!-- Toast shown when the world backup archive could not be created -->
-    <string name="nova_saves_backup_failed">Could not back up worlds</string>
+    <string name="aether_saves_backup_failed">Could not back up worlds</string>
 
     <!-- Title of the dialog shown before launch when the device is low on memory, storage or overheated -->
-    <string name="nova_launch_health_title">Device may struggle to run the game</string>
+    <string name="aether_launch_health_title">Device may struggle to run the game</string>
     <!-- Summary line of the pre-launch health dialog; %1$d is free RAM in MB, %2$d is free storage in MB -->
-    <string name="nova_launch_health_summary">Free memory: %1$d MB · Free storage: %2$d MB</string>
+    <string name="aether_launch_health_summary">Free memory: %1$d MB · Free storage: %2$d MB</string>
     <!-- Warning shown when free RAM is low; %1$d is the free RAM in MB -->
-    <string name="nova_launch_health_low_memory">Free memory is very low (%1$d MB). The game may stutter or be closed by the system.</string>
+    <string name="aether_launch_health_low_memory">Free memory is very low (%1$d MB). The game may stutter or be closed by the system.</string>
     <!-- Warning shown when free storage is low; %1$d is the free storage in MB -->
-    <string name="nova_launch_health_low_storage">Free storage is very low (%1$d MB). Saving worlds or installing mods may fail.</string>
+    <string name="aether_launch_health_low_storage">Free storage is very low (%1$d MB). Saving worlds or installing mods may fail.</string>
     <!-- Warning shown when the device thermal status reports a severe or worse state -->
-    <string name="nova_launch_health_thermal">The device is running hot. Performance may drop and the game could slow down.</string>
+    <string name="aether_launch_health_thermal">The device is running hot. Performance may drop and the game could slow down.</string>
 
     <!-- Tooltip on the log viewer button that copies the whole log text to the clipboard -->
-    <string name="nova_log_copy_all">Copy whole log</string>
+    <string name="aether_log_copy_all">Copy whole log</string>
     <!-- Toast in the log viewer when there is no text to copy -->
-    <string name="nova_log_copy_empty">Nothing to copy</string>
+    <string name="aether_log_copy_empty">Nothing to copy</string>
     <!-- Tooltip on the log viewer button that shares the log file -->
-    <string name="nova_log_share">Share log file</string>
+    <string name="aether_log_share">Share log file</string>
     <!-- Toast in the log viewer when the log file no longer exists -->
-    <string name="nova_log_share_missing">Log file not found</string>
+    <string name="aether_log_share_missing">Log file not found</string>
 
     <!-- Tooltip on the account avatar shortcut that opens the quick account switcher -->
-    <string name="nova_account_switch">Switch account</string>
+    <string name="aether_account_switch">Switch account</string>
     <!-- Title of the quick account switcher dialog -->
-    <string name="nova_account_switch_title">Switch account</string>
+    <string name="aether_account_switch_title">Switch account</string>
     <!-- Content description of the check mark next to the account that is currently in use -->
-    <string name="nova_account_switch_current">Current account</string>
+    <string name="aether_account_switch_current">Current account</string>
     <!-- Button in the quick account switcher that opens the full account management screen -->
-    <string name="nova_account_manage">Manage accounts</string>
+    <string name="aether_account_manage">Manage accounts</string>
+
+    <!-- Device information card (renderer settings) -->
+    <string name="aether_device_info_title">Device and GPU</string>
+    <string name="aether_device_info_summary">Read from this device; unknown values are not estimated.</string>
+    <string name="aether_device_info_gpu">GPU</string>
+    <string name="aether_device_info_driver">Driver</string>
+    <string name="aether_device_info_gles">OpenGL ES</string>
+    <string name="aether_device_info_soc">SoC</string>
+    <string name="aether_device_info_ram">RAM (free / total)</string>
+    <string name="aether_device_info_ram_value">%1$d MB / %2$d MB</string>
+    <string name="aether_device_info_mali_class">Mali class (name-based)</string>
+    <string name="aether_device_info_temperature">Temperature</string>
+    <string name="aether_device_info_temp_soc">SoC %1$.1f °C</string>
+    <string name="aether_device_info_temp_battery">Battery %1$.1f °C</string>
+    <string name="aether_device_info_thermal_status">Thermal status</string>
+    <string name="aether_device_info_renderer_state">AetherRender</string>
+    <string name="aether_device_info_renderer_on">Selected — native EGL tuning active</string>
+    <string name="aether_device_info_renderer_off">Not selected</string>
+    <string name="aether_device_info_aether_note">AetherRender selects a tile-GPU friendly EGL config and asks the driver to discard the back buffer after swap. It does not change Minecraft\'s chunk renderer and makes no FPS promise.</string>
+    <string name="aether_device_info_refresh">Refresh GPU information</string>
+    <string name="aether_device_info_unknown">Unknown</string>
+    <string name="aether_gpu_family_mali">Mali (detected from device strings)</string>
+    <string name="aether_gpu_family_adreno">Adreno (detected from device strings)</string>
+    <string name="aether_gpu_family_powervr">PowerVR (detected from device strings)</string>
+    <string name="aether_gpu_family_xclipse">Xclipse (detected from device strings)</string>
+    <string name="aether_mali_class_entry">Entry (name-based estimate)</string>
+    <string name="aether_mali_class_mid">Mid-range (name-based estimate)</string>
+    <string name="aether_mali_class_high">High-end (name-based estimate)</string>
+    <string name="aether_thermal_status_unavailable">Not reported</string>
+    <string name="aether_thermal_status_none">None</string>
+    <string name="aether_thermal_status_light">Light</string>
+    <string name="aether_thermal_status_moderate">Moderate</string>
+    <string name="aether_thermal_status_severe">Severe</string>
+    <string name="aether_thermal_status_critical">Critical</string>
+    <string name="aether_thermal_status_emergency">Emergency</string>
+    <string name="aether_thermal_status_shutdown">Shutdown</string>
 </resources>

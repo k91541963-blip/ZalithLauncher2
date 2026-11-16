@@ -106,6 +106,12 @@ fun RendererSettingsScreen(
             isVisible = isVisible
         ) { scope ->
             AnimatedItem(scope) { yOffset ->
+                DeviceInfoCard(
+                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) }
+                )
+            }
+
+            AnimatedItem(scope) { yOffset ->
                 SettingsCardColumn(
                     modifier = Modifier
                         .fillMaxWidth()
