@@ -40,8 +40,8 @@ class GpuInfoTest {
     }
 
     @Test
-    fun `parses T series`() {
-        assertEquals("Mali-T860", GpuInfoReader.parseMaliModel("Mali-T860 MP4"))
+    fun `parses T series and keeps legacy MP core count`() {
+        assertEquals("Mali-T860 MP4", GpuInfoReader.parseMaliModel("Mali-T860 MP4"))
     }
 
     @Test
@@ -60,7 +60,7 @@ class GpuInfoTest {
     @Test
     fun `classifies the test devices by name`() {
         assertEquals(MaliTier.ENTRY, GpuInfoReader.classifyMali("Mali-G57 MC2"))
-        assertEquals(MaliTier.ENTRY, GpuInfoReader.classifyMali("Mali-G68 MC4"))
+        assertEquals(MaliTier.MID, GpuInfoReader.classifyMali("Mali-G68 MC4"))
         assertEquals(MaliTier.MID, GpuInfoReader.classifyMali("Mali-G76 MP12"))
         assertEquals(MaliTier.HIGH, GpuInfoReader.classifyMali("Mali-G78 MP14"))
         assertEquals(MaliTier.UNKNOWN, GpuInfoReader.classifyMali("Adreno 640"))
