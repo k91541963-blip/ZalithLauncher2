@@ -69,6 +69,8 @@ APK içeriği doğrulandı:
   `AETHER_RENDER` ve `EGL_BUFFER_DESTROYED` dizeleri mevcut.
 - `lib/arm64-v8a/libgl4es_114.so` ve `lib/arm64-v8a/libng_gl4es.so` paketli.
 - Manifest paket adı ve etiketi yukarıdakiyle aynı.
+- ZIP bütünlüğü bozuk giriş içermiyor ve APK v2/v3 imza bloğu mevcut
+  (debug anahtarıyla imzalanmıştır; yayın/release imzası değildir).
 
 > Not: `k91541963-blip/ZalithLauncher2` deposunda GitHub Actions şu an
 > "disabled" döndüğü için derleme, projenin mevcut CI aynası
