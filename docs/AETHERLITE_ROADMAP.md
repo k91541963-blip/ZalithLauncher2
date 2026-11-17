@@ -82,6 +82,7 @@
 | `da256b5` | AetherRender/derleme/cihaz testi belgeleri | ✅ CI |
 | `61a49cf` | test beklentileri + `eglSurfaceAttrib_p` bağlayıcı düzeltmesi | ✅ CI, APK yayınlandı |
 | `48d7919` | Performans Merkezi + Aether paletleri + AetherRender 2.0 modları | ✅ CI, 80/80 test, APK yayınlandı |
+| `26c7bf3` | AetherMetrics kare süresi ölçümü + son oturum raporu | ✅ CI, 93/93 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
