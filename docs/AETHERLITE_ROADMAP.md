@@ -41,7 +41,11 @@
 | Sıcaklık | **KISMİ (yeni)** | batarya + okunabilen thermal zone; her cihazda yok |
 | Performans profilleri | **VAR** | Lite/Balanced/Quality, RAM/JVM/çözünürlük |
 | Renderer ön kontrolü | **VAR** | `RendererCompatibility` + rozet |
-| **AetherRender** | **VAR v1 (yeni)** | EGL config + `EGL_BUFFER_DESTROYED` + telemetri |
+| **AetherRender** | **VAR 2.0 (yeni)** | Beş seçilebilir EGL modu + `EGL_BUFFER_DESTROYED` + telemetri |
+| **Canlı Performans Merkezi** | **VAR (yeni)** | CPU/RAM/PSS/heap/GPU/ısı; 2 sn'de bir, yalnız görünürken |
+| **Ana ekran performans kartı** | **VAR (yeni)** | 5 sn'de bir özet; dokununca Performans Merkezi |
+| **Aether paletleri** | **VAR (yeni)** | Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED |
+| Oyun içi FPS/%1 low/frametime | **VAR (miras, oyun içi)** | Launcher panelinde üretilmez; overlay ölçer |
 | Düşük donanım arayüz modu | **VAR** | animasyon azaltma anahtarı |
 | Modpack dışa aktarma | **YOK** | planlı |
 | Oyun dosyası doğrulama | **KISMİ** | indirme bütünlüğü var; tam tarama yok |
@@ -58,6 +62,8 @@
 - **Aşama 4 — Teşhis + modlar:** ✅ log analizi, çökme nedeni, dört yükleyici için
   bağımlılık denetimi
 - **Aşama 5 — AetherRender v1:** ✅ EGL katmanı, GPU/termal paneli, birim testleri
+- **Aşama 5b — AetherLite 2.0 dilimi:** ✅ canlı Performans Merkezi, ana ekran
+  performans kartı, altı Aether paleti, AetherRender 2.0 modları (80 birim testi)
 - **Aşama 6 — Cihaz doğrulaması:** ⏳ Mali-G57/G68/G76/G78 için
   [`DEVICE_TEST_PLAN.md`](DEVICE_TEST_PLAN.md) uygulanacak
 - **Aşama 7 — Dağıtım:** ⏳ imzalı release + sürüm notları
@@ -73,6 +79,7 @@
 | `6f4df7d` | AetherLite kimliği + AetherRender v1 | ✅ CI |
 | `da256b5` | AetherRender/derleme/cihaz testi belgeleri | ✅ CI |
 | `61a49cf` | test beklentileri + `eglSurfaceAttrib_p` bağlayıcı düzeltmesi | ✅ CI, APK yayınlandı |
+| `48d7919` | Performans Merkezi + Aether paletleri + AetherRender 2.0 modları | ✅ CI, 80/80 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
@@ -83,15 +90,25 @@ Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REP
   ve tampon politikası kod olarak doğrulanabilir, ancak FPS/frametime iddiası için
   cihaz testi zorunludur.
 - NG-GL4ES ("Krypton Wrapper") `libng_gl4es.so` `NG-GL4ES-release.aar` içinden
-  APK'ya paketleniyor ve ayrı bir renderer olarak seçilebilir. AetherRender v1 ise
+  APK'ya paketleniyor ve ayrı bir renderer olarak seçilebilir. AetherRender 2.0 ise
   bilinçli olarak kanıtlanmış `libgl4es_114.so` çekirdeğini kullanır; NG-GL4ES
   arka ucu henüz AetherRender ile birleştirilmedi.
+- Chunk seviyesinde renderer değişikliği, asenkron chunk hazırlama ve draw call
+  birleştirme yapılmadı; bunlar Minecraft/GL4ES içinde ve güvenli değil.
+- AetherTouch markalaması ve tam Bedrock benzeri düzen henüz uygulanmadı; mevcut
+  Zalith kontrol sistemi çalışıyor.
+- Modüler Gradle ayrımı (`launcher-core`, `launcher-ui`, …) henüz yapılmadı;
+  mevcut çalışan modül yapısı korunuyor.
 - Vulkan/Zink yolu yalnızca gerçek Mesa sürücüsü olan cihazlarda anlamlıdır.
 
 ## 7. Sonraki Adımlar (öncelik sırası)
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
-2. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
-3. Modpack dışa aktarma ve oyun dosyası tam doğrulama.
-4. Oyun içi sıcaklık/frametime telemetrisini launcher paneliyle birleştirme.
-5. İmzalı release hattı ve sürüm notları.
+2. Oyun içi FPS/%1 low/frametime telemetrisini Performans Merkezi ile gerçekten
+   birleştir (oyun çalışırken ölçüm aktarımı; oyun kapalıyken asla sayı üretme).
+3. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
+4. Modpack dışa aktarma ve oyun dosyası tam doğrulama.
+5. AetherTouch markalaması ve Bedrock benzeri düzen seçeneği.
+6. Modüler Gradle ayrımı (`launcher-core`, `launcher-performance`, `launcher-renderer`,
+   …) — çalışan davranışı bozmadan kademeli.
+7. İmzalı release hattı ve sürüm notları.

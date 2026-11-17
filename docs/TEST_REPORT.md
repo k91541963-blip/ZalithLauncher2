@@ -6,7 +6,9 @@
 ## 1. Kapsam
 
 - AetherLite kimliği ve paket adı
-- AetherRender v1 (EGL config seçimi, yüzey politikası, telemetri)
+- AetherRender 2.0 (mod bazlı EGL seçimi, yüzey politikası, telemetri)
+- Canlı Performans Merkezi (CPU/RAM/GPU/ısı) ve ana ekran özet kartı
+- Altı Aether paleti (Aether Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED)
 - GPU modeli ve sıcaklık okuma
 - Mevcut performans/teşhis/mod bağımlılık mantığı (regresyon)
 
@@ -21,18 +23,18 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **72 test, 72 geçti, 0 başarısız** (CI çalışması
-[43863986149](https://github.com/k91541963-blip/Zlc/actions/runs/43863986149),
-kaynak commit `61a49cf`).
+Sonuç: **80 test, 80 geçti, 0 başarısız** (CI çalışması
+[43869003165](https://github.com/k91541963-blip/Zlc/actions/runs/43869003165),
+kaynak commit `48d7919`).
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 39 | ✅ geçti |
+| `game.performance` | 47 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **72** | ✅ **geçti** |
+| **Toplam** | **80** | ✅ **geçti** |
 
-İlk CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
+İlk AetherLite CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
 `parseMaliModel("Mali-T860 MP4")` çekirdek sayısını koruyor ve `classifyMali`
 G68'i MID sayıyor. Beklentiler gerçek davranışa göre düzeltildi (`a12fcad`).
 İkinci çalışma (`43862571445`) birim testleri geçti ancak bağlayıcı
@@ -40,9 +42,12 @@ G68'i MID sayıyor. Beklentiler gerçek davranışa göre düzeltildi (`a12fcad`
 
 Yeni eklenenler:
 
+- `CpuUsageTest` — `/proc/stat` ayrıştırma, `iowait`/`guest` kuralı, delta, sıfırlanma
+  ve tutarsız sayaç reddi (8 test)
 - `GpuInfoTest` — Mali model ayrıştırma/normalizasyon, sınıflandırma, negatif durumlar
 - `ThermalInfoTest` — millidegrees/ondalık ayrıştırma, aralık koruması
-- `AetherRendererTest` — `opengles` öneki (native GL4ES yolu), env, kitaplık, kimlik çakışması
+- `AetherRendererTest` — `opengles` öneki (native GL4ES yolu), env,
+  `AETHER_RENDER_MODE` değerinin geçerliliği, kitaplık, kimlik çakışması
 - `RendererCompatibilityTest` — AetherRender Mali/Adreno davranışı
 
 ## 3. Derleme
@@ -50,14 +55,14 @@ Yeni eklenenler:
 | İş | Ortam | Sonuç |
 |---|---|---|
 | Debug ARM64 APK | GitHub Actions (JDK 21, NDK 27, Rust) | ✅ başarılı |
-| Native `pojavexec` (AetherRender dahil) | NDK `ndkBuild` | ✅ başarılı |
+| Native `pojavexec` (AetherRender 2.0 dahil) | NDK `ndkBuild` | ✅ başarılı |
 
 APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.290.874 bayt (≈206,3 MiB) |
-| SHA-256 | `f5cde34782d8f7c5fb6ad070b57568d3f213a1e70196fc950ed242baff9c56ae` |
+| Boyut | 216.369.340 bayt (≈206,3 MiB) |
+| SHA-256 | `368c3d2b5772e0e208447cc9be7aec0bc1b96847c6bbda000fb792a8547c0ded` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -66,10 +71,14 @@ APK içeriği doğrulandı:
 
 - `lib/arm64-v8a/libpojavexec.so` içinde `aether_render_choose_config`,
   `aether_render_on_surface_created`, `aether_render_on_context_created`,
-  `AETHER_RENDER` ve `EGL_BUFFER_DESTROYED` dizeleri mevcut.
+  `AETHER_RENDER`, `AETHER_RENDER_MODE`, `AetherRender`, `EGL_BUFFER_DESTROYED`,
+  `performance` ve `compatibility` dizeleri mevcut.
+- DEX içinde `PerformanceCenterScreen`, `PerformanceSummaryCard`,
+  `AetherRenderModeCard`, `AetherRenderMode` ve `CpuUsage` sınıfları paketli.
 - `lib/arm64-v8a/libgl4es_114.so` ve `lib/arm64-v8a/libng_gl4es.so` paketli.
-- Manifest paket adı ve etiketi yukarıdakiyle aynı.
-- ZIP bütünlüğü bozuk giriş içermiyor ve APK v2/v3 imza bloğu mevcut
+- ZIP bütünlüğü bozuk giriş içermiyor (`unzip -t`: "No errors detected").
+- SHA-256, GitHub release `digest` alanıyla birebir eşleşiyor.
+- Manifest paket adı ve etiketi yukarıdakiyle aynı; APK v2/v3 imza bloğu mevcut
   (debug anahtarıyla imzalanmıştır; yayın/release imzası değildir).
 
 > Not: `k91541963-blip/ZalithLauncher2` deposunda GitHub Actions şu an
@@ -94,13 +103,19 @@ için FPS iddiası yoktur. Uygulanacak adımlar: [`DEVICE_TEST_PLAN.md`](DEVICE_
 
 - `AetherRenderer.getRendererId()` `opengles` ile başlar → `pojavSetWindowHint`
   GL4ES yolunu seçer (birim testi).
+- `AetherRenderer` ortamı `AETHER_RENDER_MODE` değerini her başlatmada yeniden
+  üretir; mod değişikliği launcher'ı yeniden başlatmayı gerektirmez (kod + test).
 - `aether_render_choose_config()` `AETHER_RENDER` yokken ilk uygun config'i
   döndürür → mevcut davranış korunur (kod incelemesi).
+- `native`/`compatibility` modları stok EGL'ye ve yüzey ipucu yokluğuna düşer;
+  moda özel istek boş dönerse dengeli attribute setine geçilir (kod).
 - `eglSurfaceAttrib` başarısız olursa yalnızca log; başlatma durmaz (kod).
 - Launcher tarafındaki EGL probe `eglTerminate` çağırmaz → Compose renderer'ı
   etkilenmez (kod incelemesi).
 - GPU/termal bilinmeyen değerler `null`/“Bilinmiyor” olarak gösterilir; tahmin
   edilmiş sürücü/sıcaklık yoktur (UI kodu).
+- Performans Merkezi ve ana ekran kartı yalnızca ekran görünürken örnek alır;
+  FPS/frametime üretmez, oyun içi katmana yönlendirir (kod + `CpuUsageTest`).
 - `strings.xml` ve `values-tr` XML olarak ayrıştırıldı; tüm `aether_*` anahtarları
   mevcut.
 
@@ -110,8 +125,11 @@ için FPS iddiası yoktur. Uygulanacak adımlar: [`DEVICE_TEST_PLAN.md`](DEVICE_
 - Otomatik çökme sonrası renderer geri dönüşü yok.
 - Modpack dışa aktarma ve tam dosya doğrulama yok.
 - NG-GL4ES APK'da paketli ve ayrı renderer olarak seçilebilir, ancak AetherRender
-  v1 hâlâ `libgl4es_114.so` çekirdeğini kullanır; iki yol birleştirilmedi.
+  2.0 hâlâ `libgl4es_114.so` çekirdeğini kullanır; iki yol birleştirilmedi.
+- Oyun içi FPS/%1 low/frametime/chunk durumu Performans Merkezi'nde gösterilmez;
+  bunlar oyun içi overlay'in işidir ve oyun kapalıyken ölçülemez.
 
-> Rapor son güncelleme: 2026-11-16, kaynak commit `61a49cf`, CI çalışması
-> [43863986149](https://github.com/k91541963-blip/Zlc/actions/runs/43863986149).
-> APK bu commit ile aynı ağaçtan üretildi; sonrasında yalnızca bu belge güncellendi.
+> Rapor son güncelleme: 2026-11-17, kaynak commit `48d7919`, CI çalışması
+> [43869003165](https://github.com/k91541963-blip/Zlc/actions/runs/43869003165).
+> APK bu commit ile aynı ağaçtan üretildi ve SHA-256/ZIP olarak doğrulandı;
+> sonrasında yalnızca bu belge güncellendi.
