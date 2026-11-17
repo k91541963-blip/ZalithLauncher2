@@ -512,6 +512,13 @@ public class CallbackBridge {
     @Keep public static native void nativeSetWindowAttrib(int attrib, int value);
     @Keep public static native void nativeSetGrabbing(boolean grab);
     @Keep public static native int getCurrentFps();
+    /**
+     * AetherMetrics: newest measured frame time deltas in microseconds, oldest first.
+     * @return number of samples written into [out]
+     */
+    @Keep public static native int getFrameTimeSamples(int[] out);
+    /** AetherMetrics: drop captured frame times (call when a new session starts). */
+    @Keep public static native void resetFrameTimeSamples();
 
     private static native ByteBuffer nativeCreateGamepadButtonBuffer();
     private static native ByteBuffer nativeCreateGamepadAxisBuffer();

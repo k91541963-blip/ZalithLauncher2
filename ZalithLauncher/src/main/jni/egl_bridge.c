@@ -27,10 +27,12 @@
 #include <string.h>
 #include <environ/environ.h>
 #include <android/dlext.h>
+#include <stdlib.h>
 #include <time.h>
 #include "utils.h"
 #include "ctxbridges/bridge_tbl.h"
 #include "ctxbridges/osm_bridge.h"
+#include "aetherrender/aether_metrics.h"
 
 #define GLFW_CLIENT_API 0x22001
 /* Consider GLFW_NO_API as Vulkan API */
@@ -312,6 +314,7 @@ static int fps = 0;
 static time_t lastTime = 0;
 
 void calculateFPS() {
+    aether_metrics_on_frame();
     frameCount++;
     time_t currentTime = time(NULL);
 
@@ -346,6 +349,39 @@ Java_org_lwjgl_vulkan_VK_updateFps(ABI_COMPAT JNIEnv *env, ABI_COMPAT jclass thi
 EXTERNAL_API JNIEXPORT jint JNICALL
 Java_org_lwjgl_glfw_CallbackBridge_getCurrentFps(JNIEnv *env, jclass clazz) {
     return fps;
+}
+
+/*
+ * AetherMetrics: copies the newest measured frame time deltas (microseconds) into
+ * the caller's int array, oldest first. Returns the number of written samples.
+ */
+EXTERNAL_API JNIEXPORT jint JNICALL
+Java_org_lwjgl_glfw_CallbackBridge_getFrameTimeSamples(JNIEnv *env, jclass clazz, jintArray out) {
+    if (out == NULL) {
+        return 0;
+    }
+    jsize capacity = (*env)->GetArrayLength(env, out);
+    if (capacity <= 0) {
+        return 0;
+    }
+    if (capacity > AETHER_METRICS_RING) {
+        capacity = AETHER_METRICS_RING;
+    }
+    uint32_t *buffer = (uint32_t *) malloc((size_t) capacity * sizeof(uint32_t));
+    if (buffer == NULL) {
+        return 0;
+    }
+    int count = aether_metrics_copy(buffer, (int) capacity);
+    if (count > 0) {
+        (*env)->SetIntArrayRegion(env, out, 0, (jsize) count, (const jint *) buffer);
+    }
+    free(buffer);
+    return (jint) count;
+}
+
+EXTERNAL_API JNIEXPORT void JNICALL
+Java_org_lwjgl_glfw_CallbackBridge_resetFrameTimeSamples(JNIEnv *env, jclass clazz) {
+    aether_metrics_reset();
 }
 
 EXTERNAL_API JNIEXPORT jlong JNICALL

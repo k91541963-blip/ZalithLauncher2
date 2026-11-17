@@ -1396,8 +1396,32 @@
     <string name="aether_perf_home_hint">Performans Merkezi\'ni açmak için dokunun</string>
     <string name="aether_perf_home_open">Performans Merkezi\'ni aç</string>
     <string name="aether_perf_home_reading">Okunuyor…</string>
-    <string name="aether_perf_ingame_title">Oyun içi FPS ve frametime</string>
-    <string name="aether_perf_ingame_note">FPS, yüzde 1 düşük değer, frametime, chunk yükleme ve render thread durumu yalnızca Minecraft çalışırken vardır. Bunlar oyun içi katman tarafından toplanır; oyun kapalıyken bu ekran sayı uydurmaz.</string>
+    <string name="aether_perf_ingame_title">Oyun içi FPS ve kare süresi</string>
+    <string name="aether_perf_ingame_note" formatted="false">AetherMetrics, Minecraft çalışırken gerçek kare sürelerini takas (swap) yolunda ölçer. Oyun içi katman canlı FPS gösterir; aşağıdaki oturum kartı oyundan çıktığınızda aynı ölçümleri gösterir. Oyun kapalıyken hiçbir değer tahmin edilmez.</string>
+    <string name="aether_perf_session_title">Son oyun oturumu</string>
+    <string name="aether_perf_session_summary">Son başlatmada AetherMetrics ile ölçüldü.</string>
+    <string name="aether_perf_session_empty">Henüz kayıtlı oturum yok. Bir sürüm başlatın: kare süreleri, CPU, RAM ve sıcaklık oyun sırasında kaydedilir ve çıkışta burada özetlenir.</string>
+    <string name="aether_perf_session_avg_fps">Ortalama FPS</string>
+    <string name="aether_perf_session_one_low" formatted="false">Yüzde 1 düşük</string>
+    <string name="aether_perf_session_p99">P99 kare süresi</string>
+    <string name="aether_perf_session_jank">30 FPS altı kareler</string>
+    <string name="aether_perf_session_duration">Süre</string>
+    <string name="aether_perf_session_frames">Ölçülen kare</string>
+    <string name="aether_perf_session_cpu">Ortalama CPU</string>
+    <string name="aether_perf_session_ram">Tepe sistem RAM</string>
+    <string name="aether_perf_session_temp">Tepe SoC sıcaklığı</string>
+    <string name="aether_perf_session_renderer">Renderer modu</string>
+    <string name="aether_perf_session_version">Sürüm</string>
+    <string name="aether_perf_session_when">Kayıt zamanı</string>
+    <string name="aether_perf_session_truncated">Kare tamponu sınırına ulaşıldı: yalnızca ilk %1$d kare dahil edildi.</string>
+    <string name="aether_perf_session_clear">Kaydı sil</string>
+    <string name="aether_perf_session_graph">10 sn\'lik pencere başına FPS</string>
+    <string name="aether_perf_session_fps_value">%1$.1f FPS</string>
+    <string name="aether_perf_session_ms_value">%1$.1f ms</string>
+    <string name="aether_perf_session_percent_value">%1$.1f%%</string>
+    <string name="aether_perf_session_duration_value">%1$d dk %2$d sn</string>
+    <string name="aether_perf_session_ram_value">%1$d / %2$d MB</string>
+    <string name="aether_perf_session_unknown">Bildirilmedi</string>
 
     <!-- AetherRender modları -->
     <string name="aether_render_mode_title">AetherRender modu</string>

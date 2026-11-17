@@ -45,7 +45,7 @@
 | **Canlı Performans Merkezi** | **VAR (yeni)** | CPU/RAM/PSS/heap/GPU/ısı; 2 sn'de bir, yalnız görünürken |
 | **Ana ekran performans kartı** | **VAR (yeni)** | 5 sn'de bir özet; dokununca Performans Merkezi |
 | **Aether paletleri** | **VAR (yeni)** | Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED |
-| Oyun içi FPS/%1 low/frametime | **VAR (miras, oyun içi)** | Launcher panelinde üretilmez; overlay ölçer |
+| Oyun içi FPS/%1 low/frametime | **VAR 2.1 (yeni ölçüm)** | AetherMetrics takas zaman damgaları; oyun içi canlı overlay + oturum sonrası özet |
 | Düşük donanım arayüz modu | **VAR** | animasyon azaltma anahtarı |
 | Modpack dışa aktarma | **YOK** | planlı |
 | Oyun dosyası doğrulama | **KISMİ** | indirme bütünlüğü var; tam tarama yok |
@@ -64,6 +64,8 @@
 - **Aşama 5 — AetherRender v1:** ✅ EGL katmanı, GPU/termal paneli, birim testleri
 - **Aşama 5b — AetherLite 2.0 dilimi:** ✅ canlı Performans Merkezi, ana ekran
   performans kartı, altı Aether paleti, AetherRender 2.0 modları (80 birim testi)
+- **Aşama 5c — AetherMetrics + oturum raporu:** ✅ gerçek kare süresi halkası,
+  %1 low/P99/jank hesabı, son oturum kartı (yerel takas ölçümü)
 - **Aşama 6 — Cihaz doğrulaması:** ⏳ Mali-G57/G68/G76/G78 için
   [`DEVICE_TEST_PLAN.md`](DEVICE_TEST_PLAN.md) uygulanacak
 - **Aşama 7 — Dağıtım:** ⏳ imzalı release + sürüm notları
@@ -104,9 +106,9 @@ Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REP
 ## 7. Sonraki Adımlar (öncelik sırası)
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
-2. Oyun içi FPS/%1 low/frametime telemetrisini Performans Merkezi ile gerçekten
-   birleştir (oyun çalışırken ölçüm aktarımı; oyun kapalıyken asla sayı üretme).
-3. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
+2. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
+3. Oyun içi overlay'e `%1 low` ve P99 kare süresi satırlarını ekle (AetherMetrics
+   aynı örnekleri sağlar; canlı grafik zaten var).
 4. Modpack dışa aktarma ve oyun dosyası tam doğrulama.
 5. AetherTouch markalaması ve Bedrock benzeri düzen seçeneği.
 6. Modüler Gradle ayrımı (`launcher-core`, `launcher-performance`, `launcher-renderer`,

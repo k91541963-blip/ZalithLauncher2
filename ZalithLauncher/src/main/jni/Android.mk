@@ -28,6 +28,7 @@ LOCAL_SRC_FILES := \
     ctxbridges/swap_interval_no_egl.c \
     ctxbridges/virgl_bridge.c \
     aetherrender/aether_render.c \
+    aetherrender/aether_metrics.c \
     environ/environ.c \
     logger/logger.c \
     input_bridge_v3.c \

@@ -78,6 +78,7 @@ import com.movtery.zalithlauncher.bridge.ZLNativeInvoker
 import com.movtery.zalithlauncher.game.input.LWJGLCharSender
 import com.movtery.zalithlauncher.game.keycodes.mapToKeycode
 import com.movtery.zalithlauncher.game.launch.handler.GameHandler
+import com.movtery.zalithlauncher.game.performance.GameSessionRecorder
 import com.movtery.zalithlauncher.game.sdl.SdlBridge
 import com.movtery.zalithlauncher.game.sdl.SdlTextSender
 import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerInputModifier
@@ -592,6 +593,18 @@ fun GameScreen(
         eventViewModel = eventViewModel,
         getUserName = getAccountName
     )
+
+    // 本局真实帧时间与设备指标采集；退出游戏界面时写入最近一次会话摘要
+    DisposableEffect(version) {
+        GameSessionRecorder.start(
+            context = context.applicationContext,
+            versionName = version.getVersionName(),
+            rendererMode = AllSettings.aetherRenderMode.state.envValue
+        )
+        onDispose {
+            GameSessionRecorder.stop(context.applicationContext)
+        }
+    }
 
     LaunchedEffect(viewModel.isEditingLayout, viewModel.gameMenuState) {
         //向VMActivity同步状态，编辑控制布局或打开游戏菜单时，不会继续处理按键事件

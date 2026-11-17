@@ -123,6 +123,21 @@ Surface swap behaviour: EGL_BUFFER_DESTROYED (mode=balanced)
 GPU vendor=ARM renderer=Mali-G57 ... version=OpenGL ES 3.2 ... mode=balanced
 ```
 
+### 3.6 AetherMetrics (kare süresi ölçümü)
+
+AetherRender'ın EGL katmanıyla aynı pakette bulunan `aether_metrics.c` her kare
+takasında (`calculateFPS()` içinden) bir `CLOCK_MONOTONIC` zaman damgası alır ve iki
+kare arasındaki farkı 2048 girişlik halka tampona yazar.
+
+- `CallbackBridge.getFrameTimeSamples(int[])` en yeni örnekleri kronolojik sırayla
+  kopyalar; `resetFrameTimeSamples()` yeni oturum başında tamponu temizler.
+- 1 saniyeden uzun farklar (duraklatma, boyut yükleme, uygulamanın arka plana
+  gitmesi) kaydedilmez; aksi hâlde yapay bir "1 FPS" karesi tüm yüzdeleri bozardı.
+- Ölçüm yalnızca `GameSessionRecorder` oyun ekranı açıkken çalışır; launcher ana
+  ekranında veya oyun kapalıyken hiçbir örnek toplanmaz.
+- Bu katman render durumunu değiştirmez, ek GL çağrısı yapmaz ve başlatmayı
+  etkileyemez; yalnızca ölçer.
+
 ## 4. Geri Dönüş (Fallback)
 
 - `AETHER_RENDER` yoksa/0 ise tüm yeni kod eski davranışı birebir izler.
@@ -151,6 +166,7 @@ GPU vendor=ARM renderer=Mali-G57 ... version=OpenGL ES 3.2 ... mode=balanced
 |---|---|
 | `jni/aetherrender/aether_render.c` | Mod bazlı EGL seçimi, yüzey politikası, telemetri |
 | `jni/aetherrender/aether_render.h` | C arayüzü |
+| `jni/aetherrender/aether_metrics.c/h` | Takas zaman damgalarından gerçek kare süresi (AetherMetrics) |
 | `jni/ctxbridges/gl_bridge.c` | Entegrasyon noktaları |
 | `jni/ctxbridges/egl_loader.c/h` | `eglSurfaceAttrib` yüklemesi |
 | `game/renderer/renderers/AetherRenderer.kt` | Renderer kaydı, mod ortamı |

@@ -18,18 +18,24 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.performance
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +54,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.performance.CpuTimes
+import com.movtery.zalithlauncher.game.performance.GameSessionAccumulator
+import com.movtery.zalithlauncher.game.performance.GameSessionStore
+import com.movtery.zalithlauncher.game.performance.GameSessionSummary
 import com.movtery.zalithlauncher.game.performance.GpuInfoReader
 import com.movtery.zalithlauncher.game.performance.MaliTier
 import com.movtery.zalithlauncher.game.performance.PerformanceMonitor
@@ -68,6 +77,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /** How often the Performance Center refreshes while it is visible. */
 private const val POLL_INTERVAL_MS = 2000L
@@ -75,10 +87,10 @@ private const val POLL_INTERVAL_MS = 2000L
 /**
  * Live Performance Center.
  *
- * Everything shown here is measured on this device through Android APIs and `/proc`.
- * The launcher never invents FPS, frametime or chunk numbers: those only exist while
- * Minecraft is running and are owned by the in-game overlay. When a reading is not
- * available it is shown as unknown instead of being replaced with a placeholder.
+ * Everything shown here is measured on this device: CPU/RAM/temperature through Android
+ * APIs and `/proc`, and game frame times from AetherMetrics (native swap timestamps) for
+ * the last session. Readings that are not available are shown as unknown instead of
+ * being replaced with a placeholder; no number is estimated.
  *
  * Polling only runs while the screen is actually visible, so leaving the page stops the
  * work immediately.
@@ -93,6 +105,7 @@ fun PerformanceCenterScreen(
     var previousCpu by remember { mutableStateOf<CpuTimes?>(null) }
     var refreshing by remember { mutableStateOf(false) }
     var refreshKey by remember { mutableIntStateOf(0) }
+    var lastSession by remember { mutableStateOf<GameSessionSummary?>(null) }
 
     BaseScreen(
         screenKey = key,
@@ -104,6 +117,9 @@ fun PerformanceCenterScreen(
                 return@LaunchedEffect
             }
             refreshing = true
+            lastSession = withContext(Dispatchers.IO) {
+                GameSessionStore.readLast(context.applicationContext)
+            }
             // A single sample cannot produce a CPU percentage: it needs a delta between
             // two /proc/stat reads. The first refresh therefore only seeds the counters.
             while (isActive) {
@@ -229,6 +245,17 @@ fun PerformanceCenterScreen(
             AnimatedItem(scope) { yOffset ->
                 PerformancePresetCard(
                     modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) }
+                )
+            }
+
+            AnimatedItem(scope) { yOffset ->
+                SessionCard(
+                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
+                    session = lastSession,
+                    onClear = {
+                        GameSessionStore.clear(context.applicationContext)
+                        lastSession = null
+                    }
                 )
             }
 
@@ -396,6 +423,207 @@ private fun WarningCard(
         }
     }
 }
+
+/**
+ * Last measured game session.
+ *
+ * FPS, 1% low, P99 frame time and the per-window graph come from real swap timestamps
+ * captured by AetherMetrics while Minecraft was running; CPU/RAM/temperature come from
+ * the same monitors used above. When the game has never been launched this card says so
+ * instead of showing zeros.
+ */
+@Composable
+private fun SessionCard(
+    modifier: Modifier = Modifier,
+    session: GameSessionSummary?,
+    onClear: () -> Unit
+) {
+    SettingsCard(
+        modifier = modifier.fillMaxWidth(),
+        position = CardPosition.Single
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TitleAndSummary(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.aether_perf_session_title),
+                    summary = stringResource(R.string.aether_perf_session_summary)
+                )
+                if (session != null) {
+                    TextButton(onClick = onClear) {
+                        Text(text = stringResource(R.string.aether_perf_session_clear))
+                    }
+                }
+            }
+
+            if (session == null) {
+                Text(
+                    modifier = Modifier.alpha(0.7f),
+                    text = stringResource(R.string.aether_perf_session_empty),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            } else {
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_version),
+                    value = session.versionName
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_renderer),
+                    value = session.rendererMode
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_avg_fps),
+                    value = stringResource(
+                        R.string.aether_perf_session_fps_value,
+                        session.averageFps
+                    )
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_one_low),
+                    value = stringResource(
+                        R.string.aether_perf_session_fps_value,
+                        session.onePercentLowFps
+                    )
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_p99),
+                    value = stringResource(
+                        R.string.aether_perf_session_ms_value,
+                        session.p99FrameMs
+                    )
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_jank),
+                    value = stringResource(
+                        R.string.aether_perf_session_percent_value,
+                        session.jankPercent
+                    )
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_duration),
+                    value = stringResource(
+                        R.string.aether_perf_session_duration_value,
+                        session.durationSeconds / 60,
+                        session.durationSeconds % 60
+                    )
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_frames),
+                    value = session.framesCaptured.toString()
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_cpu),
+                    value = session.averageCpuPercent?.let {
+                        stringResource(R.string.aether_perf_session_percent_value, it)
+                    } ?: stringResource(R.string.aether_perf_session_unknown)
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_ram),
+                    value = if (session.totalRamMb > 0) {
+                        stringResource(
+                            R.string.aether_perf_session_ram_value,
+                            session.peakRamUsedMb,
+                            session.totalRamMb
+                        )
+                    } else {
+                        stringResource(R.string.aether_perf_session_unknown)
+                    }
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_temp),
+                    value = session.peakTemperatureCelsius?.let {
+                        stringResource(R.string.aether_device_info_temp_soc, it)
+                    } ?: stringResource(R.string.aether_perf_session_unknown)
+                )
+                SessionRow(
+                    label = stringResource(R.string.aether_perf_session_when),
+                    value = formatTimestamp(session.startedAtEpochMs)
+                )
+
+                if (session.fpsBuckets.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.alpha(0.7f),
+                        text = stringResource(R.string.aether_perf_session_graph),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    FpsBucketBars(buckets = session.fpsBuckets)
+                }
+
+                if (session.samplesTruncated) {
+                    Text(
+                        modifier = Modifier.alpha(0.7f),
+                        text = stringResource(
+                            R.string.aether_perf_session_truncated,
+                            GameSessionAccumulator.MAX_STORED_FRAMES
+                        ),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SessionRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            modifier = Modifier
+                .weight(0.45f)
+                .alpha(0.7f),
+            text = label,
+            style = MaterialTheme.typography.labelSmall
+        )
+        Text(
+            modifier = Modifier.weight(0.55f),
+            text = value,
+            style = MaterialTheme.typography.labelSmall,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+/**
+ * One bar per measured 10 second window. Bar height is relative to the fastest window,
+ * so the shape shows pacing changes instead of a normalised guess.
+ */
+@Composable
+private fun FpsBucketBars(buckets: List<Double>) {
+    val maximum = buckets.maxOrNull()?.takeIf { it > 0.0 } ?: 1.0
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        buckets.forEach { fps ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight((fps / maximum).toFloat().coerceIn(0.04f, 1f))
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                        shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
+                    )
+            )
+        }
+    }
+}
+
+private fun formatTimestamp(epochMs: Long): String =
+    SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(epochMs))
 
 private fun driverLabel(vendor: String?, version: String?): String = when {
     vendor != null && version != null -> "$vendor • $version"

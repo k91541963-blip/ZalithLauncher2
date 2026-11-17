@@ -3175,7 +3175,31 @@
     <string name="aether_perf_home_open">Open Performance Center</string>
     <string name="aether_perf_home_reading">Reading…</string>
     <string name="aether_perf_ingame_title">In-game FPS and frametime</string>
-    <string name="aether_perf_ingame_note" formatted="false">FPS, 1% low, frametime, chunk loading and render-thread state only exist while Minecraft is running. They are collected by the in-game overlay; this screen does not invent numbers when the game is closed.</string>
+    <string name="aether_perf_ingame_note" formatted="false">AetherMetrics measures real frame times on the swap path while Minecraft runs. The overlay shows live FPS; the session card below reads the same measured samples after you exit. Nothing is estimated while the game is closed.</string>
+    <string name="aether_perf_session_title">Last game session</string>
+    <string name="aether_perf_session_summary">Measured by AetherMetrics during the latest launch.</string>
+    <string name="aether_perf_session_empty">No session recorded yet. Launch a version: frame times, CPU, RAM and temperature are recorded while it runs and summarised here after you exit.</string>
+    <string name="aether_perf_session_avg_fps">Average FPS</string>
+    <string name="aether_perf_session_one_low" formatted="false">1% low</string>
+    <string name="aether_perf_session_p99">P99 frame time</string>
+    <string name="aether_perf_session_jank">Frames under 30 FPS</string>
+    <string name="aether_perf_session_duration">Duration</string>
+    <string name="aether_perf_session_frames">Frames measured</string>
+    <string name="aether_perf_session_cpu">Average CPU</string>
+    <string name="aether_perf_session_ram">Peak system RAM</string>
+    <string name="aether_perf_session_temp">Peak SoC temperature</string>
+    <string name="aether_perf_session_renderer">Renderer mode</string>
+    <string name="aether_perf_session_version">Version</string>
+    <string name="aether_perf_session_when">Recorded</string>
+    <string name="aether_perf_session_truncated">Frame buffer limit reached: only the first %1$d frames are included.</string>
+    <string name="aether_perf_session_clear">Delete record</string>
+    <string name="aether_perf_session_graph">FPS per 10 s window</string>
+    <string name="aether_perf_session_fps_value">%1$.1f FPS</string>
+    <string name="aether_perf_session_ms_value">%1$.1f ms</string>
+    <string name="aether_perf_session_percent_value">%1$.1f%%</string>
+    <string name="aether_perf_session_duration_value">%1$d min %2$d s</string>
+    <string name="aether_perf_session_ram_value">%1$d / %2$d MB</string>
+    <string name="aether_perf_session_unknown">Not reported</string>
 
     <!-- AetherRender modes -->
     <string name="aether_render_mode_title">AetherRender mode</string>
