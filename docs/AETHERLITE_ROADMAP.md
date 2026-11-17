@@ -67,7 +67,8 @@
 - **Aşama 5c — AetherMetrics + oturum raporu:** ✅ gerçek kare süresi halkası,
   %1 low/P99/jank hesabı, son oturum kartı (yerel takas ölçümü)
 - **Aşama 5d — AetherRender 2.1 (26.3 desteği):** ✅ NG-GL4ES çekirdeği, GLES 3
-  bağlamı/uyumluluk denetimi, `26.3-snapshot-3` sürüm aralığı
+  bağlamı/uyumluluk denetimi, `26.3-snapshot-3` sürüm aralığı (96 birim testi,
+  APK yayınlandı); cihazda 26.x başlatma doğrulaması hâlâ Aşama 6'da
 - **Aşama 6 — Cihaz doğrulaması:** ⏳ Mali-G57/G68/G76/G78 için
   [`DEVICE_TEST_PLAN.md`](DEVICE_TEST_PLAN.md) uygulanacak
 - **Aşama 7 — Dağıtım:** ⏳ imzalı release + sürüm notları
@@ -85,12 +86,18 @@
 | `61a49cf` | test beklentileri + `eglSurfaceAttrib_p` bağlayıcı düzeltmesi | ✅ CI, APK yayınlandı |
 | `48d7919` | Performans Merkezi + Aether paletleri + AetherRender 2.0 modları | ✅ CI, 80/80 test, APK yayınlandı |
 | `26c7bf3` | AetherMetrics kare süresi ölçümü + son oturum raporu | ✅ CI, 93/93 test, APK yayınlandı |
+| `be17262` | AetherRender 2.1: NG-GL4ES çekirdeği, GLES 3 bağlamı, 26.3 aralığı | ✅ CI (44047256866) |
+| `c17409f` | `LIBGL_ES` türetme düzeltmesi + belge doğrulaması | ✅ CI, 96/96 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
 ## 6. Bilinen Kısıtlar
 
 - Bu geliştirme ortamında Android SDK/NDK yok; derlemeler GitHub Actions'ta yapılır.
+- `26.3-snapshot-3` aralığı **beyan edilmiştir, cihazda doğrulanmamıştır**: bu ortamda
+  çalışan bir Mali cihaz/Minecraft kurulumu yok. NG-GL4ES çekirdeği ve GLES 3 bağlamı
+  derleme, birim testi ve APK sembol kontrolüyle doğrulandı; gerçek 26.2/26.3 başlatma
+  testi Aşama 6'ya bağlıdır.
 - **Henüz gerçek Mali cihazda oyun içi ölçüm yapılmadı.** AetherRender'ın EGL seçimi
   ve tampon politikası kod olarak doğrulanabilir, ancak FPS/frametime iddiası için
   cihaz testi zorunludur.

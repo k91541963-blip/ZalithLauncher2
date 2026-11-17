@@ -25,17 +25,17 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **93 test, 0 başarısız** (CI çalışması
-[44044868982](https://github.com/k91541963-blip/Zlc/actions/runs/44044868982),
-kaynak commit `26c7bf3`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL.
+Sonuç: **96 test, 0 başarısız** (CI çalışması
+[44048782523](https://github.com/k91541963-blip/Zlc/actions/runs/44048782523),
+kaynak commit `c17409f`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL.
 Sayı, CI ile aynı paketlerdeki `@Test` sayımıdır).
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 60 | ✅ geçti |
+| `game.performance` | 63 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **93** | ✅ **geçti** |
+| **Toplam** | **96** | ✅ **geçti** |
 
 İlk AetherLite CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
 `parseMaliModel("Mali-T860 MP4")` çekirdek sayısını koruyor ve `classifyMali`
@@ -49,9 +49,11 @@ Yeni eklenenler:
   ve tutarsız sayaç reddi (8 test)
 - `GpuInfoTest` — Mali model ayrıştırma/normalizasyon, sınıflandırma, negatif durumlar
 - `ThermalInfoTest` — millidegrees/ondalık ayrıştırma, aralık koruması
-- `AetherRendererTest` — `opengles` öneki (native GL4ES yolu), env,
-  `AETHER_RENDER_MODE` değerinin geçerliliği, kitaplık, kimlik çakışması
-- `RendererCompatibilityTest` — AetherRender Mali/Adreno davranışı
+- `AetherRendererTest` — `opengles` öneki (native GL4ES yolu), NG-GL4ES ortamı
+  (`LIBGL_GL=31`, `LIBGL_ES=3`, `LIBGL_USE_MC_COLOR`), `AETHER_RENDER_MODE`
+  değerinin geçerliliği, `libng_gl4es.so`, `26.3-snapshot-3` aralığı, kimlik çakışması
+- `RendererCompatibilityTest` — AetherRender Mali/Adreno davranışı, GLES 2 cihazda
+  red, `26.4` sürümünde aralık dışı
 - `FrameTimeStatsTest` — harmonik ortalama FPS, %1 low (en yavaş %1 kare), P99,
   jank oranı, geçersiz/1 sn üstü örnek reddi (7 test)
 - `GameSessionAccumulatorTest` — oturum toplama, eksik cihaz verisinin `null`
@@ -68,8 +70,8 @@ APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.404.552 bayt (≈206,4 MiB) |
-| SHA-256 | `5d12b52e4f22524dcb2901fe4f59ead350e2da80ac6f8c593fd6745661dbdae6` |
+| Boyut | 216.405.008 bayt (≈206,4 MiB) |
+| SHA-256 | `b3543a6ec1dcca5e07ee2794432082300aacf0258134922bfa873e5b2095a326` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -87,7 +89,12 @@ APK içeriği doğrulandı:
   `AetherRenderModeCard`, `AetherRenderMode`, `CpuUsage`, `FrameTimeMetrics`,
   `GameSessionAccumulator` ve `GameSessionRecorder` sınıfları paketli; oturum
   kaydı yolu (`aethermetrics`) ve yeni `aether_perf_session_*` dizeleri mevcut.
-- `lib/arm64-v8a/libgl4es_114.so` ve `lib/arm64-v8a/libng_gl4es.so` paketli.
+- `lib/arm64-v8a/libng_gl4es.so` paketli; içinde `LIBGL_GL` ve
+  `LIBGL_USE_MC_COLOR` değişken adları bulunuyor (2.1 çekirdeği).
+- `lib/arm64-v8a/libgl4es_114.so` yalnızca ayrı **GL4ES** renderer'ı için paketli
+  (regresyon değil).
+- DEX içinde `opengles3_aether` ve `26.3-snapshot-3` dizeleri var; eski
+  `opengles2_aether` kimliği hiç geçmiyor.
 - ZIP bütünlüğü bozuk giriş içermiyor (`unzip -t`: "No errors detected").
 - SHA-256, GitHub release `digest` alanıyla birebir eşleşiyor.
 - Manifest paket adı ve etiketi yukarıdakiyle aynı; APK v2/v3 imza bloğu mevcut
@@ -116,8 +123,14 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
 
 ## 5. Statik / Mantıksal Kontroller
 
-- `AetherRenderer.getRendererId()` `opengles` ile başlar → `pojavSetWindowHint`
-  GL4ES yolunu seçer (birim testi).
+- `AetherRenderer.getRendererId()` (`opengles3_aether`) `opengles` ile başlar →
+  `pojavSetWindowHint` GL4ES yolunu seçer (birim testi).
+- `aether_render_choose_config()` `EGL_RENDERABLE_TYPE` değerini `LIBGL_ES`'e göre
+  seçer: GLES 3 bağlamı istendiğinde `EGL_OPENGL_ES3_BIT_KHR`. Sabit ES2 biti
+  kalsaydı katı sürücülerde `eglCreateContext` `EGL_BAD_MATCH` verirdi (kod).
+- `GameLauncher` AetherRender'ı GL4ES ailesinde sayar → Mesa/Zink ortam değişkenleri
+  gönderilmez; `LIBGL_ES` AetherRender ortamından gelir, türetme yalnızca baştaki
+  rakamı alır (`opengles3_aether` → `3`) (kod + birim testi).
 - `AetherRenderer` ortamı `AETHER_RENDER_MODE` değerini her başlatmada yeniden
   üretir; mod değişikliği launcher'ı yeniden başlatmayı gerektirmez (kod + test).
 - `aether_render_choose_config()` `AETHER_RENDER` yokken ilk uygun config'i
@@ -154,7 +167,7 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   örnekleri mevcut, arayüz işi yol haritasında.
 - Oturum özeti tek dosyadır (`last_session.json`); geçmiş oturum listesi yok.
 
-> Rapor son güncelleme: 2026-11-17, kaynak commit `26c7bf3`, CI çalışması
-> [44044868982](https://github.com/k91541963-blip/Zlc/actions/runs/44044868982).
+> Rapor son güncelleme: 2026-11-17, kaynak commit `c17409f`, CI çalışması
+> [44048782523](https://github.com/k91541963-blip/Zlc/actions/runs/44048782523).
 > APK bu commit ile aynı ağaçtan üretildi ve SHA-256/ZIP/sembol olarak doğrulandı;
 > sonrasında yalnızca bu belge güncellendi.
