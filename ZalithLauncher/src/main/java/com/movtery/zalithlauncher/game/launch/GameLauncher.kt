@@ -504,7 +504,9 @@ private fun setRendererEnv(envMap: MutableMap<String, String>, version: Version)
             //fallback to 2 since it's the minimum for the entire app
             "2"
         } else if (rendererId.startsWith("opengles")) {
-            rendererId.replace("opengles", "").replace("_5", "")
+            // "opengles3" -> "3", "opengles2" -> "2", "opengles3_aether" -> "3".
+            // Takes the leading digit(s) only, so renderer suffixes cannot leak in.
+            rendererId.substringAfter("opengles").takeWhile { it.isDigit() }.ifEmpty { "3" }
         } else {
             // TODO if can: other backends such as Vulkan.
             // Sure, they should provide GLES 3 support.
