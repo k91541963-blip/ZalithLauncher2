@@ -1,4 +1,4 @@
-# AetherRender 2.0 — Tasarım, Entegrasyon ve Sınırlar
+# AetherRender 2.1 — Tasarım, Entegrasyon ve Sınırlar
 
 > Bu belge AetherRender'ın **ne yaptığını**, **ne yapmadığını** ve nasıl
 > doğrulanacağını anlatır. Pazarlama metni değildir.
@@ -36,7 +36,7 @@ kendi shader önbelleğidir. Mali'nin yerel GLES sürücüsünde eşdeğeri yokt
 Minecraft (LWJGL)
       │  OpenGL çağrıları
       ▼
-libgl4es_114.so  (GL → GLES çevirisi)
+libng_gl4es.so  (GL 3.1 → GLES 3 çevirisi)
       │
       ▼
 pojavexec / ctxbridges/gl_bridge.c
@@ -54,20 +54,25 @@ Vendor EGL/GLES sürücüsü (Mali, Adreno, …)
 
 `game/renderer/renderers/AetherRenderer.kt`
 
-- Kimlik: `opengles2_aether`
+- Kimlik: `opengles3_aether`
   - **Kritik:** `egl_bridge.c` içindeki `pojavSetWindowHint`, yalnızca `opengles`
     önekiyle başlayan kimlikleri `RENDERER_GL4ES` yoluna bağlar. Bu önek değişirse
     swap/make-current sessizce bozulur.
-- Kitaplık: paketli `libgl4es_114.so` (kanıtlanmış çekirdek)
-- Ortam: `AETHER_RENDER=1`, `AETHER_RENDER_MODE=<mod>`, `LIBGL_ES=2`, GL4ES güvenli ayarları
-- Sürüm aralığı: en fazla Minecraft 1.21.4 (GL4ES çekirdeğinin sınırı)
+- Kitaplık: paketli `libng_gl4es.so` (NG-GL4ES / "Krypton" çekirdeği)
+  - Eski `libgl4es_114.so` çekirdeği yalnızca GL 2.1 sunduğu ve 1.21.4'te durduğu için
+    AetherRender 2.1 modern çekirdeğe geçti. GLES 2 cihazlar ve eski sürümler için
+    ayrı **GL4ES** renderer'ı korunuyor.
+- Ortam: `AETHER_RENDER=1`, `AETHER_RENDER_MODE=<mod>`, `LIBGL_GL=31`, `LIBGL_ES=3`,
+  `LIBGL_USE_MC_COLOR=1`, GL4ES güvenli ayarları
+- Sürüm aralığı: en fazla `26.3-snapshot-3`; arayüzde `26.2` gösterilir
 
 ### 3.2 EGL config seçimi
 
 `aether_render_choose_config()`:
 
-1. `EGL_WINDOW_BIT | EGL_PBUFFER_BIT`, `EGL_OPENGL_ES2_BIT`, RGB888, alpha 8,
-   depth 24 ile adayları ister.
+1. `EGL_WINDOW_BIT | EGL_PBUFFER_BIT`, RGB888, alpha 8, depth 24 ile adayları
+   ister. `EGL_RENDERABLE_TYPE` artık `LIBGL_ES` değerine göre seçilir: GLES 3
+   bağlamı için `EGL_OPENGL_ES3_BIT_KHR`, GLES 2 için `EGL_OPENGL_ES2_BIT`.
 2. AetherRender kapalıysa eskisi gibi ilk adayı döndürür (davranış değişmez).
 3. Açıksa adayları puanlar:
    - `EGL_SAMPLES` / `EGL_SAMPLE_BUFFERS` → ağır ceza,
@@ -154,9 +159,11 @@ kare arasındaki farkı 2048 girişlik halka tampona yazar.
 `docs/DEVICE_TEST_PLAN.md` uygulanır. En az:
 
 1. AetherRender ile temiz dünya başlat, logcat'te yukarıdaki 4 satırı doğrula.
-2. Aynı sürüm/ayarlarla GL4ES'e dön; iki kez 10 dakikalık oturum karşılaştır.
-3. Frametime dağılımı (p50/p95), CPU zamanı, RSS, batarya sıcaklığı kaydet.
-4. Sonuç `TEST_REPORT.md`'ye cihaz/ROM/sürücü bilgisiyle yazılır.
+2. `26.2` (ve varsa `26.3-snapshot-3`) sürümünü NG-GL4ES çekirdeğiyle başlat;
+   `LIBGL_ES=3`/`LIBGL_GL=31` ortamını ve GLES 3 bağlamını logdan doğrula.
+3. Aynı sürüm/ayarlarla GL4ES'e dön; iki kez 10 dakikalık oturum karşılaştır.
+4. Frametime dağılımı (p50/p95), CPU zamanı, RSS, batarya sıcaklığı kaydet.
+5. Sonuç `TEST_REPORT.md`'ye cihaz/ROM/sürücü bilgisiyle yazılır.
 
 **Ölçüm olmadan FPS iddiası yayınlanmaz.**
 

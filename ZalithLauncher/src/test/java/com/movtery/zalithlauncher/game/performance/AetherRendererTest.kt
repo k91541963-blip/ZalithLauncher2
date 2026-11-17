@@ -39,7 +39,10 @@ class AetherRendererTest {
     fun `enables the native tuning layer`() {
         val env = AetherRenderer.getRendererEnv().value
         assertEquals("1", env["AETHER_RENDER"])
-        assertEquals("2", env["LIBGL_ES"])
+        // NG-GL4ES needs a GLES 3 context for Minecraft 1.17+ and the 26.x releases.
+        assertEquals("3", env["LIBGL_ES"])
+        assertEquals("31", env["LIBGL_GL"])
+        assertEquals("1", env["LIBGL_USE_MC_COLOR"])
         // The mode is always passed explicitly so the native layer never has to guess.
         assertTrue(
             env["AETHER_RENDER_MODE"] in
@@ -48,8 +51,17 @@ class AetherRendererTest {
     }
 
     @Test
-    fun `uses the bundled GL4ES core`() {
-        assertEquals("libgl4es_114.so", AetherRenderer.getRendererLibrary())
+    fun `uses the modern NG-GL4ES core`() {
+        // The 1.1.4 core only exposes GL 2.1 and stops at 1.21.4; 26.x needs NG-GL4ES.
+        assertEquals("libng_gl4es.so", AetherRenderer.getRendererLibrary())
+    }
+
+    @Test
+    fun `supports the 26_3 generation`() {
+        assertEquals("26.3-snapshot-3", AetherRenderer.getMaxMCVersion())
+        // A released version, not a snapshot tag, is what the UI should promise.
+        assertEquals("26.2", AetherRenderer.getDisplayMaxMCVersion())
+        assertTrue(AetherRenderer.getRendererId().startsWith("opengles3"))
     }
 
     @Test

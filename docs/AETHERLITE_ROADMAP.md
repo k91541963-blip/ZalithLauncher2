@@ -41,7 +41,7 @@
 | Sıcaklık | **KISMİ (yeni)** | batarya + okunabilen thermal zone; her cihazda yok |
 | Performans profilleri | **VAR** | Lite/Balanced/Quality, RAM/JVM/çözünürlük |
 | Renderer ön kontrolü | **VAR** | `RendererCompatibility` + rozet |
-| **AetherRender** | **VAR 2.0 (yeni)** | Beş seçilebilir EGL modu + `EGL_BUFFER_DESTROYED` + telemetri |
+| **AetherRender** | **VAR 2.1 (yeni)** | NG-GL4ES çekirdeği (26.3'e kadar), beş EGL modu, `EGL_BUFFER_DESTROYED`, telemetri |
 | **Canlı Performans Merkezi** | **VAR (yeni)** | CPU/RAM/PSS/heap/GPU/ısı; 2 sn'de bir, yalnız görünürken |
 | **Ana ekran performans kartı** | **VAR (yeni)** | 5 sn'de bir özet; dokununca Performans Merkezi |
 | **Aether paletleri** | **VAR (yeni)** | Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED |
@@ -66,6 +66,8 @@
   performans kartı, altı Aether paleti, AetherRender 2.0 modları (80 birim testi)
 - **Aşama 5c — AetherMetrics + oturum raporu:** ✅ gerçek kare süresi halkası,
   %1 low/P99/jank hesabı, son oturum kartı (yerel takas ölçümü)
+- **Aşama 5d — AetherRender 2.1 (26.3 desteği):** ✅ NG-GL4ES çekirdeği, GLES 3
+  bağlamı/uyumluluk denetimi, `26.3-snapshot-3` sürüm aralığı
 - **Aşama 6 — Cihaz doğrulaması:** ⏳ Mali-G57/G68/G76/G78 için
   [`DEVICE_TEST_PLAN.md`](DEVICE_TEST_PLAN.md) uygulanacak
 - **Aşama 7 — Dağıtım:** ⏳ imzalı release + sürüm notları
@@ -93,9 +95,11 @@ Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REP
   ve tampon politikası kod olarak doğrulanabilir, ancak FPS/frametime iddiası için
   cihaz testi zorunludur.
 - NG-GL4ES ("Krypton Wrapper") `libng_gl4es.so` `NG-GL4ES-release.aar` içinden
-  APK'ya paketleniyor ve ayrı bir renderer olarak seçilebilir. AetherRender 2.0 ise
-  bilinçli olarak kanıtlanmış `libgl4es_114.so` çekirdeğini kullanır; NG-GL4ES
-  arka ucu henüz AetherRender ile birleştirilmedi.
+  APK'ya paketleniyor. AetherRender 2.1 artık aynı NG-GL4ES çekirdeğini kullanır ve
+  `26.3-snapshot-3` sürümüne kadar destek beyan eder; eski `libgl4es_114.so` yolu
+  yalnızca ayrı **GL4ES** renderer'ında (en fazla 1.21.4) kalır.
+- AetherRender artık GLES 3 bağlamı ister; yalnızca GLES 2 destekleyen cihazlarda
+  uyumluluk denetimi renderer'ı "desteklenmiyor" olarak işaretler.
 - Chunk seviyesinde renderer değişikliği, asenkron chunk hazırlama ve draw call
   birleştirme yapılmadı; bunlar Minecraft/GL4ES içinde ve güvenli değil.
 - AetherTouch markalaması ve tam Bedrock benzeri düzen henüz uygulanmadı; mevcut

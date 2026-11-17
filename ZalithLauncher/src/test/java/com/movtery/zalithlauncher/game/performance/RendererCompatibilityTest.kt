@@ -128,9 +128,11 @@ class RendererCompatibilityTest {
 
     @Test
     fun `aetherrender is supported on mali without warnings`() {
-        val renderer = FakeRenderer("opengles2_aether", "AetherRender", maxVersion = "1.21.4")
+        val renderer = FakeRenderer(
+            "opengles3_aether", "AetherRender", maxVersion = "26.3-snapshot-3"
+        )
         val result = RendererCompatibility.assess(
-            profile(gpuFamily = GpuFamily.MALI), renderer, "1.21.1"
+            profile(gpuFamily = GpuFamily.MALI), renderer, "26.2"
         )
 
         assertEquals(RendererSupport.SUPPORTED, result.support)
@@ -140,12 +142,42 @@ class RendererCompatibilityTest {
 
     @Test
     fun `aetherrender warns on non mali gpus but stays usable`() {
-        val renderer = FakeRenderer("opengles2_aether", "AetherRender", maxVersion = "1.21.4")
+        val renderer = FakeRenderer(
+            "opengles3_aether", "AetherRender", maxVersion = "26.3-snapshot-3"
+        )
         val result = RendererCompatibility.assess(
-            profile(gpuFamily = GpuFamily.ADRENO), renderer, "1.21.1"
+            profile(gpuFamily = GpuFamily.ADRENO), renderer, "26.2"
         )
 
         assertEquals(RendererSupport.SUPPORTED, result.support)
         assertTrue(result.warnings.contains(RendererIssue.AETHER_TUNED_FOR_MALI))
+    }
+
+    @Test
+    fun `aetherrender needs a gles 3 device now that it runs a gles 3 context`() {
+        val renderer = FakeRenderer(
+            "opengles3_aether", "AetherRender", maxVersion = "26.3-snapshot-3"
+        )
+        val result = RendererCompatibility.assess(
+            profile(glEsMajor = 2, glEsMinor = 0, gpuFamily = GpuFamily.MALI),
+            renderer,
+            "26.2"
+        )
+
+        assertEquals(RendererSupport.UNSUPPORTED, result.support)
+        assertTrue(result.issues.contains(RendererIssue.GLES_TOO_LOW))
+    }
+
+    @Test
+    fun `aetherrender rejects versions newer than the 26_3 core`() {
+        val renderer = FakeRenderer(
+            "opengles3_aether", "AetherRender", maxVersion = "26.3-snapshot-3"
+        )
+        val result = RendererCompatibility.assess(
+            profile(gpuFamily = GpuFamily.MALI), renderer, "26.4"
+        )
+
+        assertEquals(RendererSupport.UNSUPPORTED, result.support)
+        assertTrue(result.issues.contains(RendererIssue.MC_VERSION_OUT_OF_RANGE))
     }
 }

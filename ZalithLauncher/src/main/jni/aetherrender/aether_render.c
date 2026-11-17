@@ -48,6 +48,9 @@
 #ifndef EGL_BUFFER_DESTROYED
 #define EGL_BUFFER_DESTROYED 0x3095
 #endif
+#ifndef EGL_OPENGL_ES3_BIT_KHR
+#define EGL_OPENGL_ES3_BIT_KHR 0x0040
+#endif
 
 #define GL_VENDOR 0x1F00
 #define GL_RENDERER 0x1F01
@@ -121,6 +124,19 @@ static bool mode_is_stock_egl(AetherMode mode) {
     return mode == MODE_NATIVE || mode == MODE_COMPATIBILITY;
 }
 
+/**
+ * Renderable bit must match the context version that gl_init_context() will request
+ * from LIBGL_ES. NG-GL4ES asks for GLES 3 (Minecraft 1.17+ / 26.x); asking for an ES2
+ * config there makes eglCreateContext() fail with EGL_BAD_MATCH on strict drivers.
+ */
+static EGLint required_renderable_bit(void) {
+    const char *value = getenv("LIBGL_ES");
+    if (value != NULL && atoi(value) >= 3) {
+        return EGL_OPENGL_ES3_BIT_KHR;
+    }
+    return EGL_OPENGL_ES2_BIT;
+}
+
 static EGLConfig choose_stock(EGLDisplay display, const EGLint *attributes,
                               EGLint *out_format) {
     EGLConfig configs[64];
@@ -165,7 +181,7 @@ static long score_config(EGLDisplay display, EGLConfig config, AetherMode mode) 
     eglGetConfigAttrib_p(display, config, EGL_CONFIG_CAVEAT, &caveat);
 
     if ((surface_type & EGL_WINDOW_BIT) == 0) return LONG_MIN;
-    if ((renderable_type & EGL_OPENGL_ES2_BIT) == 0) return LONG_MIN;
+    if ((renderable_type & required_renderable_bit()) == 0) return LONG_MIN;
     if (red < 5 || green < 5 || blue < 5) return LONG_MIN;
 
     long score = 0;
@@ -219,7 +235,7 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
                 EGL_ALPHA_SIZE, 8,
                 EGL_DEPTH_SIZE, 24,
                 EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL_RENDERABLE_TYPE, required_renderable_bit(),
                 EGL_NONE
         };
         EGLConfig config = choose_stock(display, stock_attributes, out_format);
@@ -249,7 +265,7 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
     attributes[index++] = EGL_SURFACE_TYPE;
     attributes[index++] = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
     attributes[index++] = EGL_RENDERABLE_TYPE;
-    attributes[index++] = EGL_OPENGL_ES2_BIT;
+    attributes[index++] = required_renderable_bit();
     attributes[index] = EGL_NONE;
 
     EGLConfig configs[64];
@@ -267,7 +283,7 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
                 EGL_ALPHA_SIZE, 8,
                 EGL_DEPTH_SIZE, 24,
                 EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL_RENDERABLE_TYPE, required_renderable_bit(),
                 EGL_NONE
         };
         return choose_stock(display, fallback, out_format);

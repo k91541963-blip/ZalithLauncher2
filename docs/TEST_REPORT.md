@@ -6,7 +6,8 @@
 ## 1. Kapsam
 
 - AetherLite kimliği ve paket adı
-- AetherRender 2.0 (mod bazlı EGL seçimi, yüzey politikası, telemetri)
+- AetherRender 2.1 (NG-GL4ES çekirdeği, GLES 3 bağlamı, 26.3 sürüm aralığı, mod bazlı
+  EGL seçimi, yüzey politikası, telemetri)
 - Canlı Performans Merkezi (CPU/RAM/GPU/ısı) ve ana ekran özet kartı
 - AetherMetrics gerçek kare süresi ölçümü ve son oturum raporu
 - Altı Aether paleti (Aether Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED)
@@ -61,7 +62,7 @@ Yeni eklenenler:
 | İş | Ortam | Sonuç |
 |---|---|---|
 | Debug ARM64 APK | GitHub Actions (JDK 21, NDK 27, Rust) | ✅ başarılı |
-| Native `pojavexec` (AetherRender 2.0 + AetherMetrics dahil) | NDK `ndkBuild` | ✅ başarılı |
+| Native `pojavexec` (AetherRender 2.1 + AetherMetrics dahil) | NDK `ndkBuild` | ✅ başarılı |
 
 APK: `AetherLite-arm64-debug.apk`
 
@@ -144,8 +145,9 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
 - Gerçek cihaz ölçümü yok (Mali-G57/G68/G76/G78 testleri bekliyor).
 - Otomatik çökme sonrası renderer geri dönüşü yok.
 - Modpack dışa aktarma ve tam dosya doğrulama yok.
-- NG-GL4ES APK'da paketli ve ayrı renderer olarak seçilebilir, ancak AetherRender
-  2.0 hâlâ `libgl4es_114.so` çekirdeğini kullanır; iki yol birleştirilmedi.
+- AetherRender 2.1 NG-GL4ES çekirdeğini kullanır ve `26.3-snapshot-3` aralığını beyan
+  eder; ancak bu aralık gerçek cihazda 26.3 ile denenmediği için "doğrulandı"
+  sayılmaz. Eski `libgl4es_114.so` yolu ayrı GL4ES renderer'ında kalır.
 - Chunk yükleme ve render thread süresi ölçülmez; bunlar Minecraft/GL4ES içinde
   kalır ve launcher tarafından güvenle okunamaz.
 - Oyun içi overlay henüz %1 low/P99 satırlarını göstermiyor; aynı AetherMetrics

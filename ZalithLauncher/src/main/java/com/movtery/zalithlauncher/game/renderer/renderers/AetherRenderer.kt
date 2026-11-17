@@ -23,26 +23,40 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
 
 /**
- * AetherRender 2.0.
+ * AetherRender 2.1 — modern (26.x) Minecraft support.
  *
- * The GL translation itself is the proven GL4ES 1.1.4 core. AetherRender adds a native
- * EGL layer (`jni/aetherrender/aether_render.c`) that:
+ * GL translation is the bundled NG-GL4ES core (`libng_gl4es.so`, the same engine the
+ * launcher ships as "Krypton Wrapper"): desktop GL 3.1 is translated to GLES 3, which is
+ * what Minecraft 1.17+ and the 26.x releases require. The older 1.1.4 core only offered
+ * GL 2.1 and therefore stopped at 1.21.4; that core is still available through the
+ * separate "GL4ES" renderer for legacy versions and GLES 2 devices.
+ *
+ * AetherRender adds a native EGL layer (`jni/aetherrender/aether_render.c`) that:
  *  - picks a tile-GPU friendly EGL config (no MSAA, 24-bit depth),
  *  - asks the driver to discard the back buffer after swap on tile-based GPUs,
  *  - applies one of five honest, selectable EGL policies (see [AetherRenderMode]),
+ *  - records real frame times for the session report (`aether_metrics.c`),
  *  - logs the real GL strings for support reports.
  *
  * It makes no claim about FPS and does not replace Minecraft's chunk renderer. If the
  * driver rejects the surface policy the launch continues on the stock path.
  */
 object AetherRenderer : RendererInterface {
-    override fun getRendererId(): String = "opengles2_aether"
+    /**
+     * The `opengles` prefix is what `egl_bridge.c` maps to the GL4ES/NG-GL4ES code path.
+     * The `3` reflects the GLES 3 context this renderer now requests.
+     */
+    override fun getRendererId(): String = "opengles3_aether"
 
     override fun getUniqueIdentifier(): String = "1f0a7e2c-9b4d-4c8e-a1e6-7ae71e4b9c01"
 
     override fun getRendererName(): String = "AetherRender"
 
-    override fun getMaxMCVersion(): String = "1.21.4"
+    /** Newest Minecraft generation this core is built for (snapshot builds included). */
+    override fun getMaxMCVersion(): String = "26.3-snapshot-3"
+
+    /** The last fully released version, shown in the UI instead of a snapshot tag. */
+    override fun getDisplayMaxMCVersion(): String = "26.2"
 
     /**
      * The environment is built lazily on the launch path, so a mode change applies to
@@ -53,16 +67,17 @@ object AetherRenderer : RendererInterface {
 
     override fun getDlopenLibrary(): Lazy<List<String>> = lazy { emptyList() }
 
-    override fun getRendererLibrary(): String = "libgl4es_114.so"
+    override fun getRendererLibrary(): String = "libng_gl4es.so"
 
     private fun buildEnv(): Map<String, String> = mapOf(
         "AETHER_RENDER" to "1",
         "AETHER_RENDER_MODE" to currentMode().envValue,
-        "LIBGL_ES" to "2",
-        "LIBGL_MIPMAP" to "3",
-        "LIBGL_NOERROR" to "1",
-        "LIBGL_NOINTOVLHACK" to "1",
-        "LIBGL_NORMALIZE" to "1"
+        // NG-GL4ES core: expose desktop GL 3.1 / GLES 3, keep Minecraft's colour path.
+        "LIBGL_GL" to "31",
+        "LIBGL_ES" to "3",
+        "LIBGL_USE_MC_COLOR" to "1",
+        "LIBGL_NORMALIZE" to "1",
+        "LIBGL_NOERROR" to "1"
     )
 
     private fun currentMode(): AetherRenderMode =

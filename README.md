@@ -8,9 +8,10 @@
 
 ## AetherLite farkları
 
-- **AetherRender v1** — GL4ES çekirdeği üzerinde Mali/tile GPU odaklı EGL katmanı:
-  çok örneklemeli (MSAA) config seçmez, 24-bit derinlik ister, pencere yüzeyinde
-  `EGL_BUFFER_DESTROYED` ister ve gerçek GL sürücü dizelerini loglar.
+- **AetherRender 2.1** — NG-GL4ES çekirdeği (GL 3.1 → GLES 3) üzerinde Mali/tile GPU
+  odaklı EGL katmanı: Minecraft `26.3-snapshot-3` sürümüne kadar destek, MSAA'sız
+  config, 24-bit derinlik, `EGL_BUFFER_DESTROYED`, beş seçilebilir mod ve gerçek GL
+  sürücü dizeleri. Eski GLES 2 cihazlar için ayrı GL4ES renderer'ı korunur.
   Minecraft'ın chunk renderer'ını değiştirmez; FPS garantisi vermez.
 - **Cihaz ve GPU paneli** — gerçek EGL sorgusu, Mali modeli, OpenGL ES sürümü,
   SoC, RAM ve okunabiliyorsa batarya/SoC sıcaklığı.
@@ -18,6 +19,8 @@
   önerileri, Lite/Balanced/Performance profilleri, renderer uyumluluk rozetleri.
 - **Teşhis** — log analizi, çökme nedeni, Fabric/Quilt/Forge/NeoForge bağımlılık denetimi.
 - **AetherLite kimliği** — yeni uygulama kimliği (`com.aetherlite.launcher`), ikon ve Türkçe arayüz.
+- **Performans Merkezi + AetherMetrics** — canlı CPU/RAM/GPU/ısı paneli ve oyun
+  sırasında gerçek kare sürelerinden ölçülen %1 low / P99 / jank oturum raporu.
 
 > Durum ve yol haritası: [`docs/AETHERLITE_ROADMAP.md`](docs/AETHERLITE_ROADMAP.md)
 > AetherRender tasarımı ve sınırları: [`docs/AETHERRENDER.md`](docs/AETHERRENDER.md)

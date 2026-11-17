@@ -99,8 +99,9 @@ object RendererCompatibility {
 
         when (renderer.getRendererId()) {
             "opengles2" -> requireGles(profile, GLES_2, issues, warnings)
-            "opengles2_aether" -> {
-                requireGles(profile, GLES_2, issues, warnings)
+            "opengles3_aether" -> {
+                // AetherRender now runs NG-GL4ES with a GLES 3 context (Minecraft 26.x).
+                requireGles(profile, GLES_3, issues, warnings)
                 if (profile.gpuFamily != GpuFamily.MALI &&
                     profile.gpuFamily != GpuFamily.UNKNOWN
                 ) {
