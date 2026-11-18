@@ -1441,8 +1441,6 @@
     <string name="aether_render_mode_lite_desc">Piksel başına durumu ve belleği azaltmak için opak, şablonsuz yüzeyleri tercih eder.</string>
     <string name="aether_render_mode_performance_desc">İsteğe bağlı 16-bit RGB565 pencere formatı; bant genişliği kazandırır ama renk bantlanması yapabilir.</string>
     <string name="aether_render_mode_compatibility_desc">Stok EGL seçimi ve yüzey ipucu yok; destek raporları için tutulur.</string>
-    <string name="aether_render_mode_compatibility_desc">Stok EGL seçimi ve yüzey ipucu yok; destek raporları için tutulur.</string>
-
     <!-- AetherRender 3: çekirdek ayarı + VSync + Mali profilleri -->
     <string name="aether_tuning_title">AetherRender çekirdek ayarı</string>
     <string name="aether_tuning_summary">Paketli NG-GL4ES çekirdeği için ön ayarlar. Bir sonraki oyun başlatmasında uygulanır.</string>

@@ -3219,8 +3219,6 @@
     <string name="aether_render_mode_lite_desc">Also prefers opaque, stencil-free surfaces to reduce per-pixel state and memory.</string>
     <string name="aether_render_mode_performance_desc">Opt-in 16-bit RGB565 window format; saves bandwidth but may band colours.</string>
     <string name="aether_render_mode_compatibility_desc">Stock EGL selection plus no surface hints, kept for support reports.</string>
-    <string name="aether_render_mode_compatibility_desc">Stock EGL selection plus no surface hints, kept for support reports.</string>
-
     <!-- AetherRender 3: core tuning + VSync + Mali profiles -->
     <string name="aether_tuning_title">AetherRender core tuning</string>
     <string name="aether_tuning_summary">Presets for the bundled NG-GL4ES core. Applies on the next game launch.</string>
