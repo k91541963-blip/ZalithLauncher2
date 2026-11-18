@@ -91,11 +91,12 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
             MMKV.initialize(this)
             loadAllSettings(this)
 
+            Logger.initialize(this)
+
             // AetherRender 3 — crash recovery: if the previous launch never reported an
             // exit code, switch to a safe renderer before the UI can start another one.
+            // Runs after the logger so the decision is written into the launcher log.
             RendererRecoveryStartup.apply(this)
-
-            Logger.initialize(this)
 
             initializeData()
             PathManager.DIR_FILES_PRIVATE = getDir("files", MODE_PRIVATE)
