@@ -163,7 +163,8 @@ class RendererRecoveryTest {
             rendererUniqueId = RendererRecovery.uniqueIdentifierOf(
                 RendererRecovery.AETHER_RENDER_ID
             )!!,
-            versionName = "1.21.4"
+            // A different version, so the failing one below cannot clear this entry.
+            versionName = "1.20.1"
         )
         recordAether(store)
         store.handleFailure(store.pending()!!, 3)
