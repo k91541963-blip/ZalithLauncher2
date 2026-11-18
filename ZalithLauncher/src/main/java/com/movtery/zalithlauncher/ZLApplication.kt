@@ -39,6 +39,7 @@ import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.path.GamePathManager
 import com.movtery.zalithlauncher.keepalive.TaskKeepAlive
 import com.movtery.zalithlauncher.path.PathManager
+import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStartup
 import com.movtery.zalithlauncher.setting.loadAllSettings
 import com.movtery.zalithlauncher.ui.activities.showFatalError
 import com.movtery.zalithlauncher.ui.activities.showLauncherCrash
@@ -89,6 +90,10 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
 
             MMKV.initialize(this)
             loadAllSettings(this)
+
+            // AetherRender 3 — crash recovery: if the previous launch never reported an
+            // exit code, switch to a safe renderer before the UI can start another one.
+            RendererRecoveryStartup.apply(this)
 
             Logger.initialize(this)
 

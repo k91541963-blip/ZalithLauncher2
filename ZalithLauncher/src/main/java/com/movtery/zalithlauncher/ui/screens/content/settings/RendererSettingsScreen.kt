@@ -206,6 +206,12 @@ fun RendererSettingsScreen(
                         position = CardPosition.Middle
                     )
 
+                    //AetherRender 3 — 崩溃恢复 / 最后可用渲染器
+                    RendererRecoveryCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle
+                    )
+
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,

@@ -44,6 +44,9 @@ import com.movtery.zalithlauncher.game.plugin.renderer.RendererPluginManager
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.RendererV2Data
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.VersionEnvStorage
 import com.movtery.zalithlauncher.game.renderer.Renderers
+import com.movtery.zalithlauncher.game.renderer.recovery.PendingLaunch
+import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStartup
+import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStore
 import com.movtery.zalithlauncher.game.renderer.renderers.AetherRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.GL4ESRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.NGGL4ESRenderer
@@ -105,6 +108,17 @@ class GameLauncher(
             Renderers.setCurrentRenderer(version.getRenderer())
         }
 
+        // Crash recovery: the attempt is written before the JVM starts, so a native
+        // crash or process kill still leaves evidence for the next app start.
+        val recovery = RendererRecoveryStore.forContext(activity)
+        val activeRenderer = Renderers.getCurrentRenderer()
+        recovery.recordAttempt(
+            rendererId = activeRenderer.getRendererId(),
+            rendererName = activeRenderer.getRendererName(),
+            rendererUniqueId = activeRenderer.getUniqueIdentifier(),
+            versionName = version.getVersionName()
+        )
+
         val manifest = GSON.fromJson(File(version.getVersionPath(), "${version.getVersionName()}.json").readText(), GameManifest::class.java)
         val clientJar = manifest.inheritsFrom?.let { inheritsFrom ->
             //FIXME: 依赖的是一个原版ID的版本，但这个版本可能是用户自行安装的，只是版本名称与ID一致，不保证客户端真的是对应版本
@@ -143,12 +157,47 @@ class GameLauncher(
 
         initLwjglComponent(activity, detectLwjglVersion(gameManifest))
 
-        return launchGame(
+        val exitCode = launchGame(
             screenSize = screenSize,
             clientJar = clientJar,
             javaRuntime = javaRuntime,
             customArgs = customArgs,
         )
+
+        // Exit code 0 means the JVM finished normally; anything else is treated as a
+        // failed launch and triggers the safe-renderer switch right away.
+        if (exitCode == 0) {
+            recovery.markSuccess(
+                rendererId = activeRenderer.getRendererId(),
+                rendererName = activeRenderer.getRendererName(),
+                rendererUniqueId = activeRenderer.getUniqueIdentifier(),
+                versionName = version.getVersionName()
+            )
+        } else {
+            // The attempt written before the JVM started is the single source of truth;
+            // the in-memory copy is only a fallback if the file was removed meanwhile.
+            val attempt = recovery.pending() ?: PendingLaunch(
+                rendererId = activeRenderer.getRendererId(),
+                rendererName = activeRenderer.getRendererName(),
+                rendererUniqueId = activeRenderer.getUniqueIdentifier(),
+                versionName = version.getVersionName(),
+                startedAt = System.currentTimeMillis()
+            )
+            // Same GLES probe as the startup path, so both halves of the flow decide alike.
+            val event = recovery.handleFailure(
+                attempt = attempt,
+                glEsMajor = RendererRecoveryStartup.detectGlEsMajor(activity)
+            )
+            event?.toId?.let { uniqueId ->
+                AllSettings.renderer.save(uniqueId)
+                Logger.warning(
+                    TAG,
+                    "Launch with ${activeRenderer.getRendererName()} failed (exit $exitCode); " +
+                        "switched to ${event.toName} and notified the user"
+                )
+            }
+        }
+        return exitCode
     }
 
     override fun MutableMap<String, String>.putJavaArgs() {

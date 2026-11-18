@@ -1463,4 +1463,14 @@
     <string name="aether_gpu_note_mid">Orta seviye Mali: toplu çizim ve VBO yeniden kullanımı mevcut belleğe uyar.</string>
     <string name="aether_gpu_note_high">Üst seviye Mali: toplu çizim ve VBO yeniden kullanımı güvenli başlangıç noktasıdır.</string>
     <string name="aether_gpu_note_unknown">Bilinmeyen GPU: çekirdek varsayılanları korunur; hiçbir optimizasyon tahmin edilmez.</string>
+
+    <!-- AetherRender 3: crash recovery -->
+    <string name="renderer_recovery_title">Başlatma kurtarma</string>
+    <string name="renderer_recovery_summary">Gerçek başlatma sonuçlarından yazılır: başarısız başlatma daha güvenli bir renderer'a geçer, başarılı olan sürüm bazında hatırlanır.</string>
+    <string name="renderer_recovery_switched">%1$s tamamlanmadı; launcher %2$s renderer'ına geçti.</string>
+    <string name="renderer_recovery_no_fallback">%1$s tamamlanmadı ve daha güvenli renderer kalmadı. Tekrar başlatmadan önce logu kontrol edin.</string>
+    <string name="renderer_recovery_version">Sürüm: %1$s</string>
+    <string name="renderer_recovery_dismiss">Anladım</string>
+    <string name="renderer_recovery_restore_aether">AetherRender'a geri dön</string>
+    <string name="renderer_recovery_last_good">Son başarılı başlatma: %1$s, %2$s ile</string>
 </resources>

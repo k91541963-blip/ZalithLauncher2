@@ -3241,4 +3241,14 @@
     <string name="aether_gpu_note_mid">Mid-range Mali: batching and VBO reuse fit the available memory.</string>
     <string name="aether_gpu_note_high">High-end Mali: batching and VBO reuse are the safe starting point.</string>
     <string name="aether_gpu_note_unknown">Unknown GPU: keep the core defaults; no optimisation is guessed.</string>
+
+    <!-- AetherRender 3: crash recovery -->
+    <string name="renderer_recovery_title">Launch recovery</string>
+    <string name="renderer_recovery_summary">Written by real launch results: a failed launch switches to a safer renderer, a successful one is remembered per version.</string>
+    <string name="renderer_recovery_switched">%1$s did not finish; the launcher switched to %2$s.</string>
+    <string name="renderer_recovery_no_fallback">%1$s did not finish and no safer renderer is left. Check the log before launching again.</string>
+    <string name="renderer_recovery_version">Version: %1$s</string>
+    <string name="renderer_recovery_dismiss">Understood</string>
+    <string name="renderer_recovery_restore_aether">Switch back to AetherRender</string>
+    <string name="renderer_recovery_last_good">Last successful launch: %1$s with %2$s</string>
 </resources>
