@@ -57,6 +57,7 @@ import com.movtery.zalithlauncher.game.performance.CpuTimes
 import com.movtery.zalithlauncher.game.performance.GameSessionAccumulator
 import com.movtery.zalithlauncher.game.performance.GameSessionStore
 import com.movtery.zalithlauncher.game.performance.GameSessionSummary
+import com.movtery.zalithlauncher.game.performance.SessionHistoryEntry
 import com.movtery.zalithlauncher.game.performance.GpuInfoReader
 import com.movtery.zalithlauncher.game.performance.MaliTier
 import com.movtery.zalithlauncher.game.performance.PerformanceMonitor
@@ -256,6 +257,20 @@ fun PerformanceCenterScreen(
                         GameSessionStore.clear(context.applicationContext)
                         lastSession = null
                     }
+                )
+            }
+
+            AnimatedItem(scope) { yOffset ->
+                PerformanceAdvisorCard(
+                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
+                    session = lastSession?.let { SessionHistoryEntry.from(it) }
+                )
+            }
+
+            AnimatedItem(scope) { yOffset ->
+                SessionHistoryCard(
+                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
+                    refreshKey = refreshKey
                 )
             }
 

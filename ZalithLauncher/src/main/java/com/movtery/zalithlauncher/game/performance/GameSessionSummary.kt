@@ -210,6 +210,11 @@ object GameSessionStore {
             target.parentFile?.mkdirs()
             target.writeText(gson.toJson(summary))
         }
+        // 3D: keep a bounded history next to the single "last session" file.
+        runCatching {
+            SessionHistoryStore.forContext(context)
+                .append(SessionHistoryEntry.from(summary))
+        }
     }
 
     fun readLast(context: Context): GameSessionSummary? = runCatching {

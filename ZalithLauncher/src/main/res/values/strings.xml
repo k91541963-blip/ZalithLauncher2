@@ -3271,4 +3271,43 @@
     <string name="home_widget_add_action">Add</string>
     <string name="home_widget_already_added">That widget is already on the home screen</string>
     <string name="home_widget_invalid_ip">Enter a valid address, for example play.example.com:25565</string>
+
+    <!-- AetherLite 3.0: measured-session advisor + session history -->
+    <string name="aether_advisor_title">Performance advisor</string>
+    <string name="aether_advisor_summary">Every finding comes from the last measured session. Nothing is applied automatically.</string>
+    <string name="aether_advisor_no_session">Record a game session first; the advisor has no data to read.</string>
+    <string name="aether_advisor_no_frames">The session captured %1$d frames in %2$d s, so there is nothing to analyse.</string>
+    <string name="aether_advisor_smooth">Measured %1$s FPS average with %2$s%% jank — already smooth, no change needed.</string>
+    <string name="aether_advisor_stutter">Average %1$s FPS, 1%% low %2$s FPS, jank %3$s%%.</string>
+    <string name="aether_advisor_reason_low">The slowest 1%% of frames is far below the average.</string>
+    <string name="aether_advisor_reason_jank">Jank is above the 10%% threshold.</string>
+    <string name="aether_advisor_memory">Peak memory %1$d MB of %2$d MB.</string>
+    <string name="aether_advisor_vsync">VSync is on and the average is %1$s FPS, which matches a refresh-rate cap.</string>
+    <string name="aether_advisor_temperature">Peak temperature %1$s °C. Temperature alone does not select a setting.</string>
+    <string name="aether_advisor_cpu">High CPU usage (%1$s%%) with %2$s FPS. This is not a renderer-setting problem.</string>
+    <string name="aether_advisor_action_throughput">Use throughput tuning</string>
+    <string name="aether_advisor_action_memory">Use memory saver</string>
+    <string name="aether_advisor_action_vsync">Disable VSync</string>
+    <string name="aether_advisor_applied">Applied: %1$s</string>
+    <string name="aether_advisor_settings_note">Changing a setting never restarts the game; the next launch uses it.</string>
+    <string name="aether_advisor_no_findings">No finding for these measurements.</string>
+    <string name="aether_history_title">Session history</string>
+    <string name="aether_history_summary">Up to %1$d measured sessions. Select two to compare.</string>
+    <string name="aether_history_empty">No session recorded yet.</string>
+    <string name="aether_history_row">%1$s FPS · 1%% low %2$s · jank %3$s%%</string>
+    <string name="aether_history_duration">%1$d min</string>
+    <string name="aether_history_selection_hint">Tap a session to select it; two selected sessions are compared.</string>
+    <string name="aether_history_clear_selection">Clear selection</string>
+    <string name="aether_history_clear">Clear history</string>
+    <string name="aether_history_clear_confirm">Delete all %1$d sessions?</string>
+    <string name="aether_history_delete">Delete</string>
+    <string name="aether_history_compare_title">Comparison (older → newer)</string>
+    <string name="aether_history_compare_fps">Average FPS: %1$s → %2$s (%3$s)</string>
+    <string name="aether_history_compare_low">1%% low: %1$s → %2$s (%3$s)</string>
+    <string name="aether_history_compare_jank">Jank: %1$s%% → %2$s%% (%3$s)</string>
+    <string name="aether_history_compare_duration">Duration: %1$s min</string>
+    <string name="aether_history_verdict_better">The newer session is better on both metrics.</string>
+    <string name="aether_history_verdict_worse">The newer session is worse on both metrics.</string>
+    <string name="aether_history_verdict_mixed">Mixed: one metric improved while the other got worse.</string>
+    <string name="aether_history_verdict_same">Both sessions are within measurement tolerance (1 FPS / 0.5%% jank).</string>
 </resources>
