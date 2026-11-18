@@ -1473,4 +1473,24 @@
     <string name="renderer_recovery_dismiss">Anladım</string>
     <string name="renderer_recovery_restore_aether">AetherRender\'a geri dön</string>
     <string name="renderer_recovery_last_good">Son başarılı başlatma: %1$s, %2$s ile</string>
+
+    <!-- AetherUI 3.0: ana ekran kahraman kartı + widget galerisi -->
+    <string name="home_hero_add_account">Hesap ekle</string>
+    <string name="home_hero_pick_version">Sürüm seç</string>
+    <string name="home_hero_play">Başlat</string>
+    <string name="home_hero_need_account">Oyunu başlatmak için hesap ekleyin</string>
+    <string name="home_hero_need_version">Oyunu başlatmak için sürüm seçin</string>
+    <string name="home_hero_need_account_version">Başlatmak için hesap ve sürüm gerekli</string>
+    <string name="home_hero_last_world">Son dünya: %1$s</string>
+    <string name="home_hero_last_session_fps">Son oturum: %1$s · %2$s FPS · %3$d dk</string>
+    <string name="home_hero_last_session">Son oturum: %1$s · %2$d dk</string>
+    <string name="home_widget_add_title">Widget ekle</string>
+    <string name="home_widget_version_card">Sürüm kartı</string>
+    <string name="home_widget_server_card">Sunucu kartı</string>
+    <string name="home_widget_no_versions">Başlatılabilir yüklü sürüm yok</string>
+    <string name="home_widget_server_name">Sunucu adı (isteğe bağlı)</string>
+    <string name="home_widget_server_ip">Sunucu adresi</string>
+    <string name="home_widget_add_action">Ekle</string>
+    <string name="home_widget_already_added">Bu widget zaten ana ekranda</string>
+    <string name="home_widget_invalid_ip">Geçerli bir adres girin, örneğin play.example.com:25565</string>
 </resources>

@@ -216,7 +216,9 @@ fun LauncherScreen(
                     onOpenVersionSettings = navigateToVersions,
                     onOpenPerformanceCenter = {
                         backStackViewModel.mainScreen.navigateTo(NormalNavKey.PerformanceCenter)
-                    }
+                    },
+                    onOpenAccountManager = toAccountManageScreen,
+                    onOpenVersionManager = toVersionManageScreen
                 )
                 }
 
@@ -266,6 +268,8 @@ private fun ContentMenu(
     onQuickPlayServer: (Version?, String) -> Unit,
     onOpenVersionSettings: (Version) -> Unit,
     onOpenPerformanceCenter: () -> Unit,
+    onOpenAccountManager: () -> Unit,
+    onOpenVersionManager: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val yOffset by swapAnimateDpAsState(
@@ -283,6 +287,8 @@ private fun ContentMenu(
             state = gridState,
             isVisible = isVisible,
             onOpenPerformanceCenter = onOpenPerformanceCenter,
+            onOpenAccountManager = onOpenAccountManager,
+            onOpenVersionManager = onOpenVersionManager,
             modifier = modifier
                 .fillMaxSize()
                 .offset { IntOffset(x = 0, y = yOffset.roundToPx()) }

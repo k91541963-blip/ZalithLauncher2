@@ -3251,4 +3251,24 @@
     <string name="renderer_recovery_dismiss">Understood</string>
     <string name="renderer_recovery_restore_aether">Switch back to AetherRender</string>
     <string name="renderer_recovery_last_good">Last successful launch: %1$s with %2$s</string>
+
+    <!-- AetherUI 3.0: home hero card + widget gallery -->
+    <string name="home_hero_add_account">Add an account</string>
+    <string name="home_hero_pick_version">Choose a version</string>
+    <string name="home_hero_play">Launch</string>
+    <string name="home_hero_need_account">Add an account to launch the game</string>
+    <string name="home_hero_need_version">Choose a version to launch the game</string>
+    <string name="home_hero_need_account_version">An account and a version are required to launch</string>
+    <string name="home_hero_last_world">Last world: %1$s</string>
+    <string name="home_hero_last_session_fps">Last session: %1$s · %2$s FPS · %3$d min</string>
+    <string name="home_hero_last_session">Last session: %1$s · %2$d min</string>
+    <string name="home_widget_add_title">Add widget</string>
+    <string name="home_widget_version_card">Version card</string>
+    <string name="home_widget_server_card">Server card</string>
+    <string name="home_widget_no_versions">No launchable version installed</string>
+    <string name="home_widget_server_name">Server name (optional)</string>
+    <string name="home_widget_server_ip">Server address</string>
+    <string name="home_widget_add_action">Add</string>
+    <string name="home_widget_already_added">That widget is already on the home screen</string>
+    <string name="home_widget_invalid_ip">Enter a valid address, for example play.example.com:25565</string>
 </resources>

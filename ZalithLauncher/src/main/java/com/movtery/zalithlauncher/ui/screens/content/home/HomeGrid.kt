@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -95,11 +96,15 @@ fun HomeGrid(
     state: CardGridState,
     isVisible: Boolean,
     onOpenPerformanceCenter: () -> Unit,
+    onOpenAccountManager: () -> Unit,
+    onOpenVersionManager: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
     //长按调整工具栏触发的卡片操作
     var operation by remember { mutableStateOf<HomeCardOperation>(HomeCardOperation.None) }
+    //小组件画廊（3.0）
+    var showWidgetGallery by remember { mutableStateOf(false) }
 
     // 播种持久化的用户卡片布局
     LaunchedEffect(Unit) {
@@ -212,7 +217,9 @@ fun HomeGrid(
         ) {
             val systemCards = HomeCards.systemCards(
                 isVisible = isVisible,
-                onOpenPerformanceCenter = onOpenPerformanceCenter
+                onOpenPerformanceCenter = onOpenPerformanceCenter,
+                onOpenAccountManager = onOpenAccountManager,
+                onOpenVersionManager = onOpenVersionManager
             )
             if (!systemCards.isEmpty()) {
                 Column(
@@ -243,6 +250,11 @@ fun HomeGrid(
                     )
                 },
             )
+
+            // Keeps the add button from covering the last card row.
+            if (!state.isAdjusting) {
+                Spacer(Modifier.height(64.dp))
+            }
         }
         CardGridAutoScroll(
             state = state,
@@ -263,15 +275,55 @@ fun HomeGrid(
                 state = state,
                 onShowSettings = {
                     operation = HomeCardOperation.ServerCardSettings(it)
-                }
+                },
+                onAddWidget = { showWidgetGallery = true }
             )
         }
+
+        // Always reachable entry point for the widget gallery while the home screen
+        // is not in adjust mode (adjust mode has its own "+" button).
+        AnimatedVisibility(
+            visible = !state.isAdjusting,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 12.dp, bottom = 12.dp)
+        ) {
+            AddWidgetButton(onClick = { showWidgetGallery = true })
+        }
+    }
+
+    if (showWidgetGallery) {
+        HomeWidgetGallery(onDismiss = { showWidgetGallery = false })
     }
 
     HomeCardOperation(
         operation = operation,
         onChange = { operation = it }
     )
+}
+
+@Composable
+private fun AddWidgetButton(onClick: () -> Unit) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shadowElevation = 3.dp
+    ) {
+        IconButton(
+            modifier = Modifier.size(44.dp),
+            onClick = onClick
+        ) {
+            Icon(
+                modifier = Modifier.size(22.dp),
+                painter = painterResource(R.drawable.ic_add),
+                contentDescription = stringResource(R.string.home_widget_add_title)
+            )
+        }
+    }
 }
 
 @Composable
@@ -296,7 +348,8 @@ private fun HomeCardOperation(
 @Composable
 private fun AdjustingBar(
     state: CardGridState,
-    onShowSettings: (String) -> Unit
+    onShowSettings: (String) -> Unit,
+    onAddWidget: () -> Unit
 ) {
     val adjustingId = state.adjustingCardId
     val isServerCard = remember(state.cards, adjustingId) {
@@ -328,6 +381,18 @@ private fun AdjustingBar(
                 }
                 Spacer(Modifier.width(2.dp))
             }
+
+            IconButton(
+                modifier = Modifier.size(34.dp),
+                onClick = onAddWidget
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = stringResource(R.string.home_widget_add_title)
+                )
+            }
+
+            Spacer(Modifier.width(2.dp))
 
             IconButton(
                 modifier = Modifier.size(34.dp),

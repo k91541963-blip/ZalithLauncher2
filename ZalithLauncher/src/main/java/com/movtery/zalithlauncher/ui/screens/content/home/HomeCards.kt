@@ -98,8 +98,20 @@ object HomeCards {
     /** 系统卡片（不可变更） */
     fun systemCards(
         isVisible: Boolean,
-        onOpenPerformanceCenter: () -> Unit
+        onOpenPerformanceCenter: () -> Unit,
+        onOpenAccountManager: () -> Unit,
+        onOpenVersionManager: () -> Unit
     ): List<SystemCard> = buildList {
+        // AetherUI 3.0 — hero card: account + selected version + last world/session + Play.
+        add(
+            SystemCard(id = "system_hero") {
+                HomeHeroCard(
+                    isVisible = isVisible,
+                    onOpenAccountManager = onOpenAccountManager,
+                    onOpenVersionManager = onOpenVersionManager
+                )
+            }
+        )
         add(
             SystemCard(id = "system_performance") {
                 PerformanceSummaryCard(
