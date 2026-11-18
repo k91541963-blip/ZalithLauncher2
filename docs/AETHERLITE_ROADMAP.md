@@ -91,6 +91,7 @@
 | `0dd1a45` | AetherRender 3 çekirdek ön ayarları + VSync + Mali profilleri + Titan temaları | ✅ CI (44261608248 kaynak hatası: yinelenen dize) |
 | `de55df2` | Yinelenen dize düzeltmesi | ✅ CI 44262769558, 109/109 test, APK yayınlandı |
 | `a96dfc1` | Aşama 3C: çökme kurtarma + sürüm başına son çalışan renderer | ✅ CI 44268954010, 120/120 test, APK yayınlandı |
+| `92f7b60` | Aşama 3B: ana ekran kahraman kartı + son dünya/oturum + widget galerisi | ✅ CI 44271299158, 133/133 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
@@ -127,7 +128,7 @@ APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
 | Aşama | İçerik | Durum |
 |---|---|---|
 | **3A** | AetherRender 3 çekirdek ön ayarları (batching/VBO/16-bit doku), gerçek VSync, Mali modeline göre öneri kartı; AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal) | ✅ CI 44262769558, 109/109 test |
-| **3B** | Ana ekran 3.0: büyük karakter kartı, seçili sürüm/modpack/son dünya, Play, son oturumlar; widget ekle/kaldır/taşı/boyutlandır + düzen kaydı | ⏳ |
+| **3B** | Ana ekran 3.0: büyük karakter kartı, seçili sürüm/modpack/son dünya, Play, son oturumlar; widget ekle/kaldır/taşı/boyutlandır + düzen kaydı | ✅ CI 44271299158, 133/133 test |
 | **3C** | AetherRender 3 derinlik: çökme sonrası otomatik geri dönüş, sürüm başına son çalışan renderer, seçilen EGL config dökümü | ✅ CI 44268954010, 120/120 test |
 | **3D** | Performans AI: ölçüme dayalı bulgular (CPU/GPU darboğazı, bellek artışı, shader takılması) + kullanıcı onaylı uygulama; oturum geçmişi ve karşılaştırma | ⏳ |
 | **3E** | Mod Hub: güncelleme denetimi, uyumsuz mod uyarısı, `.mrpack` dışa aktarma; World Manager: toplu yedek/geri yükleme, içe/dışa aktarma | ⏳ |
@@ -139,6 +140,29 @@ APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
 3A'da bilinçli olarak yapılmayanlar: chunk renderer'a dokunulmadı, draw call
 birleştirme/chunk mesh cache iddiası yok (bunlar NG-GL4ES içinde ve cihazda
 doğrulanmadan beyan edilemez), 16-bit renk zorlanmadı.
+
+3B'de eklenenler:
+
+- **Kahraman kartı** (sistem kartı, ana ekranın en üstü): gerçek hesap adı + yüzü,
+  seçili sürüm ve yükleyici özeti (`VersionInfo.getInfoString()`), o sürümün
+  `saves/` klasöründeki **son dünya** (`level.dat` olan en yeni klasör) ve
+  AetherMetrics'in yazdığı **son oturum** (sürüm, ölçülmüş FPS, süre).
+- Play düğmesi yalnızca **hesap ve sürüm birlikte** varken etkin. Eksik olan şey
+  yazıyla söylenir ("Hesap ekle" / "Sürüm seç") ve yazıya dokunmak ilgili ekranı
+  açar. Sahte "hazır" durumu veya uydurma FPS yok; kare örneği yoksa FPS satırı
+  hiç gösterilmez.
+- Telefon ve tablet: kart 520 dp altında alt alta, üstünde yan yana düzen kullanır.
+- **Widget galerisi**: sürüm kartı (yüklü ve geçerli sürümlerden) ve sunucu kartı
+  (ad + adres) ekler. `VersionCardManager`/`ServerCardManager`'ın gerçek sonucu
+  gösterilir; çift kayıt reddedilir, geçersiz adres kabul edilmez.
+- Ekleme girişi her zaman görünen "+" düğmesi; düzenleme modundaki araç çubuğunda
+  da ayrıca var. Taşıma/boyutlandırma/kaldırma ve düzen kaydı mevcut
+  `cardgrid` + `HomeGridStore` yolunu kullanır (3B bunu değiştirmedi, doğruladı).
+
+3B'de bilinçli olarak yapılmayanlar: modpack adı ayrı bir alan olarak gösterilmez
+(sürüm özeti yükleyiciyi ve MC sürümünü içerir; modpack meta verisi güvenilir
+biçimde okunamıyor), oturum **geçmişi** yoktur (tek `last_session.json` var,
+geçmiş 3D'de), dünya adı NBT'den değil klasör adından gelir.
 
 3C'de eklenenler:
 
@@ -162,10 +186,12 @@ doğrular; bu, cihaz kanıtı yerine geçmez.
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
 2. Çökme kurtarma zincirini cihazda gerçek bir başlatma hatasıyla doğrula (3C kodu hazır).
-3. Oyun içi overlay'e `%1 low` ve P99 kare süresi satırlarını ekle (AetherMetrics
+3. Oturum geçmişi + karşılaştırma (3D) ve kahraman kartındaki son oturum satırını
+   geçmişle besle.
+4. Oyun içi overlay'e `%1 low` ve P99 kare süresi satırlarını ekle (AetherMetrics
    aynı örnekleri sağlar; canlı grafik zaten var).
-4. Modpack dışa aktarma ve oyun dosyası tam doğrulama.
-5. AetherTouch markalaması ve Bedrock benzeri düzen seçeneği.
-6. Modüler Gradle ayrımı (`launcher-core`, `launcher-performance`, `launcher-renderer`,
+5. Modpack dışa aktarma ve oyun dosyası tam doğrulama.
+6. AetherTouch markalaması ve Bedrock benzeri düzen seçeneği.
+7. Modüler Gradle ayrımı (`launcher-core`, `launcher-performance`, `launcher-renderer`,
    …) — çalışan davranışı bozmadan kademeli.
-7. İmzalı release hattı ve sürüm notları.
+8. İmzalı release hattı ve sürüm notları.

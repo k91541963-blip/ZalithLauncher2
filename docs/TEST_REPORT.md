@@ -12,6 +12,8 @@
 - AetherRender 3 çökme kurtarma: başlatma öncesi deneme kaydı, çıkış kodu 0 = başarı,
   başarısızlıkta güvenli renderer zinciri (AetherRender → Krypton Wrapper → GL4ES →
   dur) ve sürüm başına "son çalışan renderer" kaydı
+- AetherUI 3.0 ana ekran: kahraman kartı (hesap + seçili sürüm + son dünya + son
+  oturum + gerçek Play koşulu), widget galerisi (sürüm/sunucu kartı ekleme)
 - AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal + mevcut
   Aether paletleri, Midnight AMOLED)
 - Canlı Performans Merkezi (CPU/RAM/GPU/ısı) ve ana ekran özet kartı
@@ -31,19 +33,17 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **120 test, 0 başarısız** (CI çalışması
-[44268954010](https://github.com/k91541963-blip/Zlc/actions/runs/44268954010),
-kaynak commit `a96dfc1`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
-Çalıştırılan test kümesinin boyutu bir önceki çalışmada Gradle tarafından
-`120 tests completed, 1 failed` olarak raporlandı; aynı küme bu çalışmada tamamen
-geçti. Sayı, CI ile aynı paketlerdeki `@Test` sayımıdır.
+Sonuç: **133 test, 0 başarısız** (CI çalışması
+[44271299158](https://github.com/k91541963-blip/Zlc/actions/runs/44271299158),
+kaynak commit `92f7b60`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
+Test dosyalarındaki `@Test` sayımı 133'tür ve CI aynı filtrelerle yeşildir.
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 87 | ✅ geçti |
+| `game.performance` | 100 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **120** | ✅ **geçti** |
+| **Toplam** | **133** | ✅ **geçti** |
 
 Aşama 3C'de CI iki gerçek hata yakaladı ve ikisi de düzeltildi:
 `44266581823` — TR dizelerinde kaçırılmamış kesme işareti (`aapt2`
@@ -79,6 +79,12 @@ Yeni eklenenler:
   çekirdek varsayılanı, EGL modunun asla 16-bit'e zorlanmaması (5 test)
 - `AetherThemeSeedTest` — her Aether paletinin benzersiz tohumu, Aether olmayan
   türlerde `null`, Titan tohumlarının opak olması (3 test)
+- `HomeHeroTest` — Play koşulu (hesap/sürüm/ikisi), eksik olanın doğru sebep
+  olarak dönmesi, kare örneği olmayan oturumda FPS'in gizlenmesi, negatif sürenin
+  sıfıra çekilmesi, `level.dat` olan en yeni dünyanın seçilmesi, `level.dat`
+  olmayan klasörün yok sayılması, sıralama/limit, eksik `saves` klasörü, sunucu
+  adresi doğrulama (host/port kabul; boşluk, şema, baştaki/sondaki iki nokta ve
+  aşırı uzunluk reddi), ad boşken adresin kullanılması (13 test)
 - `RendererRecoveryTest` — GLES 3'te AetherRender→Krypton Wrapper, GLES 2'de
   AetherRender→GL4ES, zincirin GL4ES'te bitmesi, kimlik eşlemesi, denemenin
   çözülene kadar okunması, çıkış kodu 0'da denemenin silinmesi ve son çalışanın
@@ -97,8 +103,8 @@ APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.457.612 bayt (≈206,4 MiB) |
-| SHA-256 | `ec3baf98206197ff8117b5447263737f16b026c9fad047e7659b5b8751cbde13` |
+| Boyut | 216.519.752 bayt (≈206,5 MiB) |
+| SHA-256 | `787763e6c754f6c9e544ce028341e009d0339516b23eaeaff00d0a6d7026d779` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -129,6 +135,8 @@ APK içeriği doğrulandı:
 - Native `libpojavexec.so` içinde `AETHER_SWAP_INTERVAL` ve
   `Swap interval: %d` günlük dizesi var → VSync yolu gerçekten derlenmiş.
 - DEX içinde `TITAN_DARK`, `CYBER_PURPLE`, `ARCTIC_BLUE` tema kimlikleri var.
+- DEX içinde `HomeHeroCard`, `HomeWidgetGallery`, `HomeWorlds`, `HomeWidgetInput`,
+  `home_hero_last_session_fps` ve `home_widget_add_title` var → 3B kodu paketlenmiş.
 - DEX içinde `RendererRecovery`, `RendererRecoveryStore`, `RendererRecoveryStartup`,
   `renderer_recovery` ve kurtarma dosya adları (`pending.properties`,
   `last_good.properties`) var → kurtarma kodu gerçekten paketlenmiş.
@@ -193,6 +201,11 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
 ## 6. Bilinen Açıklar
 
 - Gerçek cihaz ölçümü yok (Mali-G57/G68/G76/G78 testleri bekliyor).
+- Ana ekran "son oturumlar" **geçmişi** yok; yalnızca son ölçülen oturum gösterilir
+  (`last_session.json`). Geçmiş ve karşılaştırma 3D'de.
+- Widget galerisi sunucu kartı için adres doğrular, ancak erişilebilirliği burada
+  ölçmez; kart kendi ping sonucunu gösterir.
+- Dünya adı `level.dat` NBT'sinden değil klasör adından okunur.
 - Otomatik çökme sonrası renderer geri dönüşü **kod olarak var** (3C) ve birim
   testleriyle doğrulandı, ancak gerçek bir native çökme/LMK senaryosunda cihazda
   denenmedi. Zincir AetherRender → Krypton Wrapper → GL4ES → dur; bilinmeyen
@@ -216,7 +229,7 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   ölçülmedi; yalnızca çekirdeğin bu değişkenleri okuduğu ve ortama yazıldığı
   doğrulandı. FPS/frametime iddiası yoktur.
 
-> Rapor son güncelleme: 2026-11-18, kaynak commit `a96dfc1`, CI çalışması
-> [44268954010](https://github.com/k91541963-blip/Zlc/actions/runs/44268954010).
+> Rapor son güncelleme: 2026-11-18, kaynak commit `92f7b60`, CI çalışması
+> [44271299158](https://github.com/k91541963-blip/Zlc/actions/runs/44271299158).
 > APK bu commit ile aynı ağaçtan üretildi ve SHA-256/ZIP/sembol olarak doğrulandı;
 > sonrasında yalnızca bu belge güncellendi.
