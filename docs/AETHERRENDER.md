@@ -1,4 +1,4 @@
-# AetherRender 2.1 — Tasarım, Entegrasyon ve Sınırlar
+# AetherRender 3 — Tasarım, Entegrasyon ve Sınırlar
 
 > Bu belge AetherRender'ın **ne yaptığını**, **ne yapmadığını** ve nasıl
 > doğrulanacağını anlatır. Pazarlama metni değildir.
@@ -81,7 +81,7 @@ Vendor EGL/GLES sürücüsü (Mali, Adreno, …)
    - pencere desteği ve ES2 renderable zorunlu.
 4. Seçilen config'in renk/alpha/depth/samples/visual değerlerini loglar.
 
-### 3.3 Renderer modları (2.0)
+### 3.3 Renderer modları
 
 Mod, `AllSettings.aetherRenderMode` üzerinden seçilir ve **bir sonraki oyun
 başlatmasında** `AETHER_RENDER_MODE` ortam değişkeniyle yerel katmana iletilir.
@@ -142,6 +142,40 @@ kare arasındaki farkı 2048 girişlik halka tampona yazar.
   ekranında veya oyun kapalıyken hiçbir örnek toplanmaz.
 - Bu katman render durumunu değiştirmez, ek GL çağrısı yapmaz ve başlatmayı
   etkileyemez; yalnızca ölçer.
+
+### 3.7 Çekirdek ayar ön ayarları (3.0)
+
+`game/renderer/aether/AetherTuning.kt` + `AetherGpuProfiles.kt`
+
+AetherRender 3, NG-GL4ES çekirdeğinin **gerçekten okuduğu** değişkenlerle üç ön
+ayar sunar (değişken adları paketli `libng_gl4es.so` taranarak doğrulandı):
+
+| Ön ayar | Yazdığı değişkenler | Ne yapar |
+|---|---|---|
+| Core default | — | Hiçbir şey yazmaz; 2.x davranışı birebir korunur |
+| Throughput | `LIBGL_BATCH=1`, `LIBGL_USEVBO=1`, `LIBGL_RECYCLEFBO=1` | Toplu çizim + VBO kullanımı + FBO adı geri dönüşümü |
+| Memory saver | `LIBGL_FORCE16BITS=1`, `LIBGL_NOVAOCACHE=1` | 16-bit doku (bellek yarıya iner, renk bantlanabilir) + VAO önbelleği kapalı |
+
+- Varsayılan **Core default**'tur: 2.x'ten yükselen kullanıcıda davranış değişmez.
+- Ön ayarlar birbirleriyle çakışmaz (birim testi) ve yalnızca `LIBGL_*` anahtarları
+  kullanır (birim testi).
+- Mali modeli `sysfs` üzerinden okunabilirse öneri kartı çıkar:
+  G57/G68 → bellek tasarrufu, G76/G78/G710/G715 → verim; **bilinmeyen GPU'ya
+  optimizasyon uydurulmaz**. Öneri ancak kullanıcı düğmeye basınca yazılır ve EGL
+  modu asla 16-bit'e zorlanmaz.
+- Bu değişkenler çeviricinin sürücüye verdiği biçimi değiştirir; Minecraft'ın chunk
+  renderer'ını değiştirmez ve FPS garantisi yoktur.
+
+### 3.8 VSync (3.0)
+
+`aether_render.c` → `apply_swap_interval()`
+
+- Launcher `AETHER_SWAP_INTERVAL=0|1` yazar (ayar: "VSync", varsayılan açık).
+- Yüzey oluşturulduğunda ve bağlam current olduğunda `eglSwapInterval` çağrılır;
+  katı sürücüler ikinci çağrıyı gerekli kılabilir.
+- Değişken **yoksa** sürücü varsayılanına dokunulmaz (2.x ile aynı).
+- Başarısızlık yalnızca loglanır (`eglSwapInterval(%d) rejected`), başlatma durmaz.
+- VSync EGL modundan bağımsızdır: `native`/`compatibility` seçiliyken de uygulanır.
 
 ## 4. Geri Dönüş (Fallback)
 

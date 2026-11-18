@@ -6,8 +6,11 @@
 ## 1. Kapsam
 
 - AetherLite kimliği ve paket adı
-- AetherRender 2.1 (NG-GL4ES çekirdeği, GLES 3 bağlamı, 26.3 sürüm aralığı, mod bazlı
-  EGL seçimi, yüzey politikası, telemetri)
+- AetherRender 3 (NG-GL4ES çekirdeği, GLES 3 bağlamı, 26.3 sürüm aralığı, mod bazlı
+  EGL seçimi, yüzey politikası, gerçek çekirdek ayar ön ayarları, `eglSwapInterval`
+  ile VSync, Mali modeline göre öneri, telemetri)
+- AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal + mevcut
+  Aether paletleri, Midnight AMOLED)
 - Canlı Performans Merkezi (CPU/RAM/GPU/ısı) ve ana ekran özet kartı
 - AetherMetrics gerçek kare süresi ölçümü ve son oturum raporu
 - Altı Aether paleti (Aether Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED)
@@ -25,17 +28,17 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **96 test, 0 başarısız** (CI çalışması
-[44048782523](https://github.com/k91541963-blip/Zlc/actions/runs/44048782523),
-kaynak commit `c17409f`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL.
+Sonuç: **109 test, 0 başarısız** (CI çalışması
+[44262769558](https://github.com/k91541963-blip/Zlc/actions/runs/44262769558),
+kaynak commit `de55df2`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL.
 Sayı, CI ile aynı paketlerdeki `@Test` sayımıdır).
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 63 | ✅ geçti |
+| `game.performance` | 76 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **96** | ✅ **geçti** |
+| **Toplam** | **109** | ✅ **geçti** |
 
 İlk AetherLite CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
 `parseMaliModel("Mali-T860 MP4")` çekirdek sayısını koruyor ve `classifyMali`
@@ -58,6 +61,13 @@ Yeni eklenenler:
   jank oranı, geçersiz/1 sn üstü örnek reddi (7 test)
 - `GameSessionAccumulatorTest` — oturum toplama, eksik cihaz verisinin `null`
   kalması, kare tamponu sınırı ve işaretleme, 10 sn FPS kovaları (6 test)
+- `AetherTuningTest` — çekirdek varsayılanının hiç değişken yazmaması, ön ayarların
+  yalnızca `LIBGL_*` anahtarları ve 0/1 değerleri kullanması, ön ayarların aynı
+  değişkeni paylaşmaması (5 test)
+- `AetherGpuProfilesTest` — G57/G68 bellek, G76/G78/G710/G715 verim, bilinmeyen GPU
+  çekirdek varsayılanı, EGL modunun asla 16-bit'e zorlanmaması (5 test)
+- `AetherThemeSeedTest` — her Aether paletinin benzersiz tohumu, Aether olmayan
+  türlerde `null`, Titan tohumlarının opak olması (3 test)
 
 ## 3. Derleme
 
@@ -70,8 +80,8 @@ APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.405.008 bayt (≈206,4 MiB) |
-| SHA-256 | `b3543a6ec1dcca5e07ee2794432082300aacf0258134922bfa873e5b2095a326` |
+| Boyut | 216.435.392 bayt (≈206,4 MiB) |
+| SHA-256 | `2874950bc79285e4fb29829b44adffdd65b2b06f6faabb520e006cadd359cf30` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -95,6 +105,13 @@ APK içeriği doğrulandı:
   (regresyon değil).
 - DEX içinde `opengles3_aether` ve `26.3-snapshot-3` dizeleri var; eski
   `opengles2_aether` kimliği hiç geçmiyor.
+- DEX içinde `AETHER_SWAP_INTERVAL`, `aetherRenderTuning`, `aetherRenderVsync`,
+  `AetherGpuProfiles` ve ön ayarların gerçekten yazdığı `LIBGL_BATCH`,
+  `LIBGL_USEVBO`, `LIBGL_RECYCLEFBO`, `LIBGL_FORCE16BITS`, `LIBGL_NOVAOCACHE`
+  dizeleri var.
+- Native `libpojavexec.so` içinde `AETHER_SWAP_INTERVAL` ve
+  `Swap interval: %d` günlük dizesi var → VSync yolu gerçekten derlenmiş.
+- DEX içinde `TITAN_DARK`, `CYBER_PURPLE`, `ARCTIC_BLUE` tema kimlikleri var.
 - ZIP bütünlüğü bozuk giriş içermiyor (`unzip -t`: "No errors detected").
 - SHA-256, GitHub release `digest` alanıyla birebir eşleşiyor.
 - Manifest paket adı ve etiketi yukarıdakiyle aynı; APK v2/v3 imza bloğu mevcut
@@ -166,8 +183,17 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
 - Oyun içi overlay henüz %1 low/P99 satırlarını göstermiyor; aynı AetherMetrics
   örnekleri mevcut, arayüz işi yol haritasında.
 - Oturum özeti tek dosyadır (`last_session.json`); geçmiş oturum listesi yok.
+- **AetherLite 3.0 spec'inin bu dilimde olmayan bölümleri:** Ana ekran 3.0 yeniden
+  tasarımı ve widget sistemi, oyun içi Overlay 3.0, Mod Hub güncelleme denetimi,
+  World Manager eklemeleri, Skin Studio, Java Manager yenilemesi, Download Center
+  kuyruğu, Notification Center, Plugin API ve modüler Gradle ayrımı. Bunlar
+  `AETHERLITE_ROADMAP.md` içinde aşamalara bağlanmıştır; bu raporda "yapıldı"
+  sayılmazlar.
+- AetherRender 3 ön ayarlarının (batching/VBO/16-bit doku) gerçek etkisi cihazda
+  ölçülmedi; yalnızca çekirdeğin bu değişkenleri okuduğu ve ortama yazıldığı
+  doğrulandı. FPS/frametime iddiası yoktur.
 
-> Rapor son güncelleme: 2026-11-17, kaynak commit `c17409f`, CI çalışması
-> [44048782523](https://github.com/k91541963-blip/Zlc/actions/runs/44048782523).
+> Rapor son güncelleme: 2026-11-18, kaynak commit `de55df2`, CI çalışması
+> [44262769558](https://github.com/k91541963-blip/Zlc/actions/runs/44262769558).
 > APK bu commit ile aynı ağaçtan üretildi ve SHA-256/ZIP/sembol olarak doğrulandı;
 > sonrasında yalnızca bu belge güncellendi.

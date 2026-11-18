@@ -8,17 +8,21 @@
 
 ## AetherLite farkları
 
-- **AetherRender 2.1** — NG-GL4ES çekirdeği (GL 3.1 → GLES 3) üzerinde Mali/tile GPU
+- **AetherRender 3** — NG-GL4ES çekirdeği (GL 3.1 → GLES 3) üzerinde Mali/tile GPU
   odaklı EGL katmanı: Minecraft `26.3-snapshot-3` sürümüne kadar destek, MSAA'sız
-  config, 24-bit derinlik, `EGL_BUFFER_DESTROYED`, beş seçilebilir mod ve gerçek GL
-  sürücü dizeleri. Eski GLES 2 cihazlar için ayrı GL4ES renderer'ı korunur.
-  Minecraft'ın chunk renderer'ını değiştirmez; FPS garantisi vermez.
+  config, 24-bit derinlik, `EGL_BUFFER_DESTROYED`, beş seçilebilir mod, gerçek
+  çekirdek ön ayarları (batching / VBO / 16-bit doku), `eglSwapInterval` ile VSync,
+  Mali modeline göre öneri ve gerçek GL sürücü dizeleri. Eski GLES 2 cihazlar için
+  ayrı GL4ES renderer'ı korunur. Minecraft'ın chunk renderer'ını değiştirmez; FPS
+  garantisi vermez.
 - **Cihaz ve GPU paneli** — gerçek EGL sorgusu, Mali modeli, OpenGL ES sürümü,
   SoC, RAM ve okunabiliyorsa batarya/SoC sıcaklığı.
 - **Düşük donanım odaklı performans** — donanım profiline göre RAM/JVM/çözünürlük
   önerileri, Lite/Balanced/Performance profilleri, renderer uyumluluk rozetleri.
 - **Teşhis** — log analizi, çökme nedeni, Fabric/Quilt/Forge/NeoForge bağımlılık denetimi.
 - **AetherLite kimliği** — yeni uygulama kimliği (`com.aetherlite.launcher`), ikon ve Türkçe arayüz.
+- **AetherUI 3.0** — Titan Dark, Cyber Purple, Arctic Blue, Minimal ve Midnight AMOLED
+  dahil kişiselleştirilebilir paletler; AMOLED'de gerçek siyah yüzeyler.
 - **Performans Merkezi + AetherMetrics** — canlı CPU/RAM/GPU/ısı paneli ve oyun
   sırasında gerçek kare sürelerinden ölçülen %1 low / P99 / jank oturum raporu.
 

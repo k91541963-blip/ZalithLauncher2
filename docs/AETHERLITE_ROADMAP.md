@@ -41,10 +41,10 @@
 | Sıcaklık | **KISMİ (yeni)** | batarya + okunabilen thermal zone; her cihazda yok |
 | Performans profilleri | **VAR** | Lite/Balanced/Quality, RAM/JVM/çözünürlük |
 | Renderer ön kontrolü | **VAR** | `RendererCompatibility` + rozet |
-| **AetherRender** | **VAR 2.1 (yeni)** | NG-GL4ES çekirdeği (26.3'e kadar), beş EGL modu, `EGL_BUFFER_DESTROYED`, telemetri |
+| **AetherRender** | **VAR 3.0 (yeni)** | NG-GL4ES çekirdeği (26.3'e kadar), beş EGL modu, gerçek çekirdek ön ayarları (batching/VBO/16-bit doku), `eglSwapInterval` VSync, Mali modeline göre öneri, telemetri |
 | **Canlı Performans Merkezi** | **VAR (yeni)** | CPU/RAM/PSS/heap/GPU/ısı; 2 sn'de bir, yalnız görünürken |
 | **Ana ekran performans kartı** | **VAR (yeni)** | 5 sn'de bir özet; dokununca Performans Merkezi |
-| **Aether paletleri** | **VAR (yeni)** | Blue, Purple Nebula, Emerald, Crimson, Midnight, AMOLED |
+| **Aether paletleri** | **VAR 3.0 (yeni)** | Aether Blue, Purple Nebula, Emerald, Crimson, Midnight, Midnight AMOLED + Titan Dark, Cyber Purple, Arctic Blue, Minimal |
 | Oyun içi FPS/%1 low/frametime | **VAR 2.1 (yeni ölçüm)** | AetherMetrics takas zaman damgaları; oyun içi canlı overlay + oturum sonrası özet |
 | Düşük donanım arayüz modu | **VAR** | animasyon azaltma anahtarı |
 | Modpack dışa aktarma | **YOK** | planlı |
@@ -88,6 +88,8 @@
 | `26c7bf3` | AetherMetrics kare süresi ölçümü + son oturum raporu | ✅ CI, 93/93 test, APK yayınlandı |
 | `be17262` | AetherRender 2.1: NG-GL4ES çekirdeği, GLES 3 bağlamı, 26.3 aralığı | ✅ CI (44047256866) |
 | `c17409f` | `LIBGL_ES` türetme düzeltmesi + belge doğrulaması | ✅ CI, 96/96 test, APK yayınlandı |
+| `0dd1a45` | AetherRender 3 çekirdek ön ayarları + VSync + Mali profilleri + Titan temaları | ✅ CI (44261608248 kaynak hatası: yinelenen dize) |
+| `de55df2` | Yinelenen dize düzeltmesi | ✅ CI 44262769558, 109/109 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
@@ -115,7 +117,29 @@ Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REP
   mevcut çalışan modül yapısı korunuyor.
 - Vulkan/Zink yolu yalnızca gerçek Mesa sürücüsü olan cihazlarda anlamlıdır.
 
-## 7. Sonraki Adımlar (öncelik sırası)
+## 7. AetherLite 3.0 — TITAN Programı
+
+3.0 spec'i tek seferde "yapıldı" ilan edilemeyecek kadar büyük (14 modül, yeni
+ana ekran, overlay, plugin API). Program aşamalara bölündü; her aşama CI'da derlenip
+APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
+
+| Aşama | İçerik | Durum |
+|---|---|---|
+| **3A** | AetherRender 3 çekirdek ön ayarları (batching/VBO/16-bit doku), gerçek VSync, Mali modeline göre öneri kartı; AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal) | ✅ CI 44262769558, 109/109 test |
+| **3B** | Ana ekran 3.0: büyük karakter kartı, seçili sürüm/modpack/son dünya, Play, son oturumlar; widget ekle/kaldır/taşı/boyutlandır + düzen kaydı | ⏳ |
+| **3C** | AetherRender 3 derinlik: çökme sonrası otomatik geri dönüş, sürüm başına son çalışan renderer, seçilen EGL config dökümü | ⏳ |
+| **3D** | Performans AI: ölçüme dayalı bulgular (CPU/GPU darboğazı, bellek artışı, shader takılması) + kullanıcı onaylı uygulama; oturum geçmişi ve karşılaştırma | ⏳ |
+| **3E** | Mod Hub: güncelleme denetimi, uyumsuz mod uyarısı, `.mrpack` dışa aktarma; World Manager: toplu yedek/geri yükleme, içe/dışa aktarma | ⏳ |
+| **3F** | Overlay 3.0 (taşı/boyutlandır/şeffaflık, panel seçimi) ve AetherTouch 3.0 (profil içe/dışa aktarma, tek elle düzen) | ⏳ |
+| **3G** | Skin Studio, Java Manager yenilemesi, Download Center kuyruğu, Notification Center | ⏳ |
+| **3H** | Plugin API (izin modeli, bilinmeyen eklenti güvenilmez) + modüler Gradle ayrımı | ⏳ |
+| **3I** | Cihaz testi ve 2.0 ↔ 3.0 karşılaştırma raporu (aynı cihaz/dünya/ayarlar) | ⏳ |
+
+3A'da bilinçli olarak yapılmayanlar: chunk renderer'a dokunulmadı, draw call
+birleştirme/chunk mesh cache iddiası yok (bunlar NG-GL4ES içinde ve cihazda
+doğrulanmadan beyan edilemez), 16-bit renk zorlanmadı.
+
+## 8. Sonraki Adımlar (öncelik sırası)
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
 2. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
