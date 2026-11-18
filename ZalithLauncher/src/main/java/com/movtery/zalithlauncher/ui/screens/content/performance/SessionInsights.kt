@@ -286,6 +286,7 @@ private fun applyAction(action: AdvisorAction) {
 fun SessionHistoryCard(
     modifier: Modifier = Modifier,
     refreshKey: Int = 0,
+    visible: Boolean = true,
     position: CardPosition = CardPosition.Single
 ) {
     val context = LocalContext.current
@@ -294,7 +295,8 @@ fun SessionHistoryCard(
     var confirmClear by remember { mutableStateOf(false) }
     var revision by remember { mutableStateOf(0) }
 
-    LaunchedEffect(refreshKey, revision) {
+    LaunchedEffect(refreshKey, revision, visible) {
+        if (!visible) return@LaunchedEffect
         entries = withContext(Dispatchers.IO) {
             SessionHistoryStore.forContext(context).all()
         }

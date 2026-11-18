@@ -270,7 +270,8 @@ fun PerformanceCenterScreen(
             AnimatedItem(scope) { yOffset ->
                 SessionHistoryCard(
                     modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
-                    refreshKey = refreshKey
+                    refreshKey = refreshKey,
+                    visible = isVisible
                 )
             }
 
