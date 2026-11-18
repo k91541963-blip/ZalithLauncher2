@@ -90,6 +90,7 @@
 | `c17409f` | `LIBGL_ES` türetme düzeltmesi + belge doğrulaması | ✅ CI, 96/96 test, APK yayınlandı |
 | `0dd1a45` | AetherRender 3 çekirdek ön ayarları + VSync + Mali profilleri + Titan temaları | ✅ CI (44261608248 kaynak hatası: yinelenen dize) |
 | `de55df2` | Yinelenen dize düzeltmesi | ✅ CI 44262769558, 109/109 test, APK yayınlandı |
+| `a96dfc1` | Aşama 3C: çökme kurtarma + sürüm başına son çalışan renderer | ✅ CI 44268954010, 120/120 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
@@ -127,7 +128,7 @@ APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
 |---|---|---|
 | **3A** | AetherRender 3 çekirdek ön ayarları (batching/VBO/16-bit doku), gerçek VSync, Mali modeline göre öneri kartı; AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal) | ✅ CI 44262769558, 109/109 test |
 | **3B** | Ana ekran 3.0: büyük karakter kartı, seçili sürüm/modpack/son dünya, Play, son oturumlar; widget ekle/kaldır/taşı/boyutlandır + düzen kaydı | ⏳ |
-| **3C** | AetherRender 3 derinlik: çökme sonrası otomatik geri dönüş, sürüm başına son çalışan renderer, seçilen EGL config dökümü | ⏳ |
+| **3C** | AetherRender 3 derinlik: çökme sonrası otomatik geri dönüş, sürüm başına son çalışan renderer, seçilen EGL config dökümü | ✅ CI 44268954010, 120/120 test |
 | **3D** | Performans AI: ölçüme dayalı bulgular (CPU/GPU darboğazı, bellek artışı, shader takılması) + kullanıcı onaylı uygulama; oturum geçmişi ve karşılaştırma | ⏳ |
 | **3E** | Mod Hub: güncelleme denetimi, uyumsuz mod uyarısı, `.mrpack` dışa aktarma; World Manager: toplu yedek/geri yükleme, içe/dışa aktarma | ⏳ |
 | **3F** | Overlay 3.0 (taşı/boyutlandır/şeffaflık, panel seçimi) ve AetherTouch 3.0 (profil içe/dışa aktarma, tek elle düzen) | ⏳ |
@@ -139,10 +140,28 @@ APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
 birleştirme/chunk mesh cache iddiası yok (bunlar NG-GL4ES içinde ve cihazda
 doğrulanmadan beyan edilemez), 16-bit renk zorlanmadı.
 
+3C'de eklenenler:
+
+- Başlatma öncesi `filesDir/renderer_recovery/pending.properties` yazılır; JVM
+  çıkış kodu 0 ise deneme silinir ve sürüm için "son çalışan renderer" kaydedilir.
+- Sıfırdan farklı çıkış kodu ya da hiç raporlanmayan çıkış (native çökme/LMK) bir
+  sonraki açılışta işlenir: zincir **AetherRender → Krypton Wrapper (NG-GL4ES) →
+  GL4ES → dur**. GLES 2 cihazda AetherRender doğrudan GL4ES'e düşer.
+- Zincir sonunda hiçbir şey zorlanmaz; kullanıcıya "daha güvenli renderer kalmadı"
+  bilgisi gösterilir ve aynı çökme iki kez işlenmez.
+- Renderer ayarlarında kurtarma kartı yalnızca gerçek dosyalar varsa görünür; olay
+  kapatılabilir ve kullanıcı tek dokunuşla AetherRender'a dönebilir.
+- Seçilen EGL config'in tüm alanları (rgb/alpha/depth/samples/visual) zaten
+  `EGL config: ...` satırıyla loglanıyor; 3C bunu değiştirmedi, yalnızca belgeledi.
+
+Cihaz doğrulaması yapılmadı: gerçek bir native çökme üretilip zincirin cihazda
+çalıştığı gösterilmedi. Birim testleri karar tablosunu ve dosya yaşam döngüsünü
+doğrular; bu, cihaz kanıtı yerine geçmez.
+
 ## 8. Sonraki Adımlar (öncelik sırası)
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
-2. AetherRender için otomatik güvenli geri dönüş: başlatma çökmesi sonrası GL4ES'e dön.
+2. Çökme kurtarma zincirini cihazda gerçek bir başlatma hatasıyla doğrula (3C kodu hazır).
 3. Oyun içi overlay'e `%1 low` ve P99 kare süresi satırlarını ekle (AetherMetrics
    aynı örnekleri sağlar; canlı grafik zaten var).
 4. Modpack dışa aktarma ve oyun dosyası tam doğrulama.

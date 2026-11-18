@@ -9,6 +9,9 @@
 - AetherRender 3 (NG-GL4ES çekirdeği, GLES 3 bağlamı, 26.3 sürüm aralığı, mod bazlı
   EGL seçimi, yüzey politikası, gerçek çekirdek ayar ön ayarları, `eglSwapInterval`
   ile VSync, Mali modeline göre öneri, telemetri)
+- AetherRender 3 çökme kurtarma: başlatma öncesi deneme kaydı, çıkış kodu 0 = başarı,
+  başarısızlıkta güvenli renderer zinciri (AetherRender → Krypton Wrapper → GL4ES →
+  dur) ve sürüm başına "son çalışan renderer" kaydı
 - AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal + mevcut
   Aether paletleri, Midnight AMOLED)
 - Canlı Performans Merkezi (CPU/RAM/GPU/ısı) ve ana ekran özet kartı
@@ -28,17 +31,25 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **109 test, 0 başarısız** (CI çalışması
-[44262769558](https://github.com/k91541963-blip/Zlc/actions/runs/44262769558),
-kaynak commit `de55df2`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL.
-Sayı, CI ile aynı paketlerdeki `@Test` sayımıdır).
+Sonuç: **120 test, 0 başarısız** (CI çalışması
+[44268954010](https://github.com/k91541963-blip/Zlc/actions/runs/44268954010),
+kaynak commit `a96dfc1`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
+Çalıştırılan test kümesinin boyutu bir önceki çalışmada Gradle tarafından
+`120 tests completed, 1 failed` olarak raporlandı; aynı küme bu çalışmada tamamen
+geçti. Sayı, CI ile aynı paketlerdeki `@Test` sayımıdır.
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 76 | ✅ geçti |
+| `game.performance` | 87 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **109** | ✅ **geçti** |
+| **Toplam** | **120** | ✅ **geçti** |
+
+Aşama 3C'de CI iki gerçek hata yakaladı ve ikisi de düzeltildi:
+`44266581823` — TR dizelerinde kaçırılmamış kesme işareti (`aapt2`
+`mergeDebugResources` hatası), `44267725095` — kurtarma testinde kalan
+`storeFileRoot` referansı ve "son çalışan" kaydını yanlış sürümde tutan beklenti.
+Düzeltmeler `f7ced04`, `b727757`, `a96dfc1`.
 
 İlk AetherLite CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
 `parseMaliModel("Mali-T860 MP4")` çekirdek sayısını koruyor ve `classifyMali`
@@ -68,6 +79,12 @@ Yeni eklenenler:
   çekirdek varsayılanı, EGL modunun asla 16-bit'e zorlanmaması (5 test)
 - `AetherThemeSeedTest` — her Aether paletinin benzersiz tohumu, Aether olmayan
   türlerde `null`, Titan tohumlarının opak olması (3 test)
+- `RendererRecoveryTest` — GLES 3'te AetherRender→Krypton Wrapper, GLES 2'de
+  AetherRender→GL4ES, zincirin GL4ES'te bitmesi, kimlik eşlemesi, denemenin
+  çözülene kadar okunması, çıkış kodu 0'da denemenin silinmesi ve son çalışanın
+  yazılması, başarısızlıkta olay + güvenli geri dönüş, sayaç artışı/sıfırlanması,
+  olayın kapatılması, başarısız sürümün "son çalışan" kaydını kaybetmesi,
+  kayıt yokken hiçbir şey üretilmemesi (11 test)
 
 ## 3. Derleme
 
@@ -80,8 +97,8 @@ APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.435.392 bayt (≈206,4 MiB) |
-| SHA-256 | `2874950bc79285e4fb29829b44adffdd65b2b06f6faabb520e006cadd359cf30` |
+| Boyut | 216.457.612 bayt (≈206,4 MiB) |
+| SHA-256 | `ec3baf98206197ff8117b5447263737f16b026c9fad047e7659b5b8751cbde13` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -112,6 +129,9 @@ APK içeriği doğrulandı:
 - Native `libpojavexec.so` içinde `AETHER_SWAP_INTERVAL` ve
   `Swap interval: %d` günlük dizesi var → VSync yolu gerçekten derlenmiş.
 - DEX içinde `TITAN_DARK`, `CYBER_PURPLE`, `ARCTIC_BLUE` tema kimlikleri var.
+- DEX içinde `RendererRecovery`, `RendererRecoveryStore`, `RendererRecoveryStartup`,
+  `renderer_recovery` ve kurtarma dosya adları (`pending.properties`,
+  `last_good.properties`) var → kurtarma kodu gerçekten paketlenmiş.
 - ZIP bütünlüğü bozuk giriş içermiyor (`unzip -t`: "No errors detected").
 - SHA-256, GitHub release `digest` alanıyla birebir eşleşiyor.
 - Manifest paket adı ve etiketi yukarıdakiyle aynı; APK v2/v3 imza bloğu mevcut
@@ -173,7 +193,10 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
 ## 6. Bilinen Açıklar
 
 - Gerçek cihaz ölçümü yok (Mali-G57/G68/G76/G78 testleri bekliyor).
-- Otomatik çökme sonrası renderer geri dönüşü yok.
+- Otomatik çökme sonrası renderer geri dönüşü **kod olarak var** (3C) ve birim
+  testleriyle doğrulandı, ancak gerçek bir native çökme/LMK senaryosunda cihazda
+  denenmedi. Zincir AetherRender → Krypton Wrapper → GL4ES → dur; bilinmeyen
+  renderer'lar da güvenli çekirdeğe düşer.
 - Modpack dışa aktarma ve tam dosya doğrulama yok.
 - AetherRender 2.1 NG-GL4ES çekirdeğini kullanır ve `26.3-snapshot-3` aralığını beyan
   eder; ancak bu aralık gerçek cihazda 26.3 ile denenmediği için "doğrulandı"
@@ -193,7 +216,7 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   ölçülmedi; yalnızca çekirdeğin bu değişkenleri okuduğu ve ortama yazıldığı
   doğrulandı. FPS/frametime iddiası yoktur.
 
-> Rapor son güncelleme: 2026-11-18, kaynak commit `de55df2`, CI çalışması
-> [44262769558](https://github.com/k91541963-blip/Zlc/actions/runs/44262769558).
+> Rapor son güncelleme: 2026-11-18, kaynak commit `a96dfc1`, CI çalışması
+> [44268954010](https://github.com/k91541963-blip/Zlc/actions/runs/44268954010).
 > APK bu commit ile aynı ağaçtan üretildi ve SHA-256/ZIP/sembol olarak doğrulandı;
 > sonrasında yalnızca bu belge güncellendi.

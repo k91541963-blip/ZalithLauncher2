@@ -177,6 +177,28 @@ ayar sunar (değişken adları paketli `libng_gl4es.so` taranarak doğrulandı):
 - Başarısızlık yalnızca loglanır (`eglSwapInterval(%d) rejected`), başlatma durmaz.
 - VSync EGL modundan bağımsızdır: `native`/`compatibility` seçiliyken de uygulanır.
 
+### 3.9 Çökme kurtarma (3C)
+
+`game/renderer/recovery/RendererRecovery.kt`
+
+- JVM başlamadan önce `filesDir/renderer_recovery/pending.properties` yazılır
+  (renderer kimliği, adı, sürüm adı, zaman). Dosya `java.util.Properties`'tir;
+  JVM testlerinde Android/JSON olmadan doğrulanabilir.
+- Çıkış kodu **0** → deneme silinir, `last_good.properties` içine sürüm başına
+  renderer yazılır, o renderer'ın hata sayacı sıfırlanır.
+- Çıkış kodu **≠ 0** → hemen; kod hiç raporlanmadıysa (native çökme/LMK) bir
+  sonraki açılışta `ZLApplication` içinde `RendererRecoveryStartup` devreye girer.
+- Zincir: **AetherRender → Krypton Wrapper (`opengles3`) → GL4ES (`opengles2`) →
+  dur**. GLES ana sürümü `ActivityManager.deviceConfigurationInfo`'dan okunur;
+  GLES 2 cihazda AetherRender doğrudan GL4ES'e düşer.
+- Zincirin sonundaki renderer değiştirilmez; aynı çökme iki kez işlenmez. Bilinmeyen
+  (plugin/Zink) renderer'lar da güvenli çekirdeğe düşer.
+- Başarısız sürümün eski "son çalışan" kaydı silinir; böylece kart yanlış bir
+  başarıyı göstermez.
+- Renderer ayarlarındaki kurtarma kartı yalnızca dosya varsa görünür; olay
+  kapatılabilir ve kullanıcı tek dokunuşla AetherRender'a dönebilir. Otomatik
+  yükseltme yoktur: kullanıcıya her zaman geri dönme yolu bırakılır.
+
 ## 4. Geri Dönüş (Fallback)
 
 - `AETHER_RENDER` yoksa/0 ise tüm yeni kod eski davranışı birebir izler.
@@ -186,7 +208,9 @@ ayar sunar (değişken adları paketli `libng_gl4es.so` taranarak doğrulandı):
 - Renderer seçimi kullanıcı ayarıdır; AetherRender seçili değilken hiçbir yeni
   ortam değişkeni gönderilmez.
 
-> Otomatik "çökme sonrası GL4ES'e dön" henüz yok; yol haritasında.
+> Otomatik çökme sonrası geri dönüş 3C ile geldi (bkz. 3.9). Cihazda gerçek bir
+> native çökme üretilerek doğrulanmadı; birim testleri karar tablosunu ve dosya
+> yaşam döngüsünü doğrular.
 
 ## 5. Cihaz Doğrulama
 
@@ -219,4 +243,6 @@ ayar sunar (değişken adları paketli `libng_gl4es.so` taranarak doğrulandı):
 | `ui/.../performance/PerformanceCenterScreen.kt` | Canlı Performans Merkezi |
 | `ui/.../home/PerformanceSummaryCard.kt` | Ana ekran performans kartı |
 | `ui/.../DeviceInfoCard.kt` | Cihaz ve GPU paneli |
-| `test/.../CpuUsageTest.kt`, `GpuInfoTest.kt`, `ThermalInfoTest.kt`, `AetherRendererTest.kt` | Birim testleri |
+| `game/renderer/recovery/RendererRecovery.kt` | Çökme kurtarma, güvenli renderer zinciri, sürüm başına son çalışan |
+| `ui/.../settings/RendererRecoveryCard.kt` | Kurtarma olayı + son çalışan renderer kartı |
+| `test/.../CpuUsageTest.kt`, `GpuInfoTest.kt`, `ThermalInfoTest.kt`, `AetherRendererTest.kt`, `RendererRecoveryTest.kt` | Birim testleri |
