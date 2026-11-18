@@ -113,21 +113,23 @@ class RendererRecoveryTest {
 
     @Test
     fun `failed launch produces an event and a safe fallback`() {
-        val store = store()
+        val dir = newDir()
+        val store = store(dir)
         recordAether(store)
         val attempt = store.pending()!!
         val event = store.handleFailure(attempt, glEsMajor = 3, now = 1234L)
 
         assertNotNull(event)
         assertTrue(event!!.switched)
-        assertEquals(RendererRecovery.NG_GL4ES_ID, event.toId?.let {
-            RendererRecovery.uniqueIdentifierOf(RendererRecovery.NG_GL4ES_ID)
-        })
+        assertEquals(
+            RendererRecovery.uniqueIdentifierOf(RendererRecovery.NG_GL4ES_ID),
+            event.toId
+        )
         assertEquals("1.21.4", event.versionName)
         assertNull(store.pending())
 
         // The event survives a new store instance, i.e. it is on disk for the next start.
-        val reopened = RendererRecoveryStore(store.let { _ -> storeFileRoot(store) })
+        val reopened = store(dir)
         assertEquals(event.fromName, reopened.event()?.fromName)
     }
 
