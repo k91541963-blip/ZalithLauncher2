@@ -667,6 +667,12 @@ fun ZalithLauncherTheme(
                 ColorThemeType.CRIMSON -> aetherDark(AetherThemeColors.CRIMSON)
                 ColorThemeType.MIDNIGHT -> aetherDark(AetherThemeColors.MIDNIGHT)
                 ColorThemeType.AMOLED_BLACK -> amoledDark(AetherThemeColors.AMOLED_BLACK)
+                ColorThemeType.TITAN_DARK -> aetherDark(AetherThemeColors.TITAN_DARK)
+                ColorThemeType.CYBER_PURPLE ->
+                    aetherDark(AetherThemeColors.CYBER_PURPLE, PaletteStyle.Vibrant)
+                ColorThemeType.ARCTIC_BLUE -> aetherDark(AetherThemeColors.ARCTIC_BLUE)
+                ColorThemeType.MINIMAL ->
+                    aetherDark(AetherThemeColors.MINIMAL, PaletteStyle.Neutral)
                 ColorThemeType.CUSTOM -> customDark(
                     color = customColor,
                     style = customPaletteStyle
@@ -688,6 +694,12 @@ fun ZalithLauncherTheme(
                 ColorThemeType.CRIMSON -> aetherLight(AetherThemeColors.CRIMSON)
                 ColorThemeType.MIDNIGHT -> aetherLight(AetherThemeColors.MIDNIGHT)
                 ColorThemeType.AMOLED_BLACK -> aetherLight(AetherThemeColors.AMOLED_BLACK)
+                ColorThemeType.TITAN_DARK -> aetherLight(AetherThemeColors.TITAN_DARK)
+                ColorThemeType.CYBER_PURPLE ->
+                    aetherLight(AetherThemeColors.CYBER_PURPLE, PaletteStyle.Vibrant)
+                ColorThemeType.ARCTIC_BLUE -> aetherLight(AetherThemeColors.ARCTIC_BLUE)
+                ColorThemeType.MINIMAL ->
+                    aetherLight(AetherThemeColors.MINIMAL, PaletteStyle.Neutral)
                 ColorThemeType.CUSTOM -> customLight(
                     color = customColor,
                     style = customPaletteStyle

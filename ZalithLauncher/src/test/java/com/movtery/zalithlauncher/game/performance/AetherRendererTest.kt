@@ -43,6 +43,8 @@ class AetherRendererTest {
         assertEquals("3", env["LIBGL_ES"])
         assertEquals("31", env["LIBGL_GL"])
         assertEquals("1", env["LIBGL_USE_MC_COLOR"])
+        // AetherRender 3: VSync is a real native setting, always passed explicitly.
+        assertEquals("1", env["AETHER_SWAP_INTERVAL"])
         // The mode is always passed explicitly so the native layer never has to guess.
         assertTrue(
             env["AETHER_RENDER_MODE"] in

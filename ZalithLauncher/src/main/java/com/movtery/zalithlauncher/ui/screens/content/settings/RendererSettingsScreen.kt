@@ -185,6 +185,27 @@ fun RendererSettingsScreen(
                         position = CardPosition.Middle
                     )
 
+                    //AetherRender 3 — NG-GL4ES 核心调优预设
+                    AetherRenderTuningCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle
+                    )
+
+                    //AetherRender 3 — VSync（真实 eglSwapInterval）
+                    SwitchSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.aetherRenderVsync,
+                        title = stringResource(R.string.aether_vsync_title),
+                        summary = stringResource(R.string.aether_vsync_summary)
+                    )
+
+                    //AetherRender 3 — Mali 型号推荐
+                    AetherGpuRecommendationCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle
+                    )
+
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,

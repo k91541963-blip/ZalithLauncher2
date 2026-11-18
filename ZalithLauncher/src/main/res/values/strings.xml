@@ -3143,7 +3143,11 @@
     <string name="theme_color_crimson">Crimson</string>
     <string name="theme_color_midnight">Midnight</string>
     <!-- AMOLED surfaces are true black when the launcher uses the dark theme -->
-    <string name="theme_color_amoled_black">AMOLED Black</string>
+    <string name="theme_color_amoled_black">Midnight AMOLED</string>
+    <string name="theme_color_titan_dark">Titan Dark</string>
+    <string name="theme_color_cyber_purple">Cyber Purple</string>
+    <string name="theme_color_arctic_blue">Arctic Blue</string>
+    <string name="theme_color_minimal">Minimal</string>
 
     <!-- Performance Center -->
     <string name="aether_perf_center_title">Performance Center</string>
@@ -3215,4 +3219,28 @@
     <string name="aether_render_mode_lite_desc">Also prefers opaque, stencil-free surfaces to reduce per-pixel state and memory.</string>
     <string name="aether_render_mode_performance_desc">Opt-in 16-bit RGB565 window format; saves bandwidth but may band colours.</string>
     <string name="aether_render_mode_compatibility_desc">Stock EGL selection plus no surface hints, kept for support reports.</string>
+    <string name="aether_render_mode_compatibility_desc">Stock EGL selection plus no surface hints, kept for support reports.</string>
+
+    <!-- AetherRender 3: core tuning + VSync + Mali profiles -->
+    <string name="aether_tuning_title">AetherRender core tuning</string>
+    <string name="aether_tuning_summary">Presets for the bundled NG-GL4ES core. Applies on the next game launch.</string>
+    <string name="aether_tuning_core">Core default</string>
+    <string name="aether_tuning_core_summary">Sets nothing; the core decides, exactly like AetherRender 2.x.</string>
+    <string name="aether_tuning_throughput">Throughput (batching + VBO)</string>
+    <string name="aether_tuning_throughput_summary">Sets LIBGL_BATCH, LIBGL_USEVBO and LIBGL_RECYCLEFBO. Uses a little more GPU memory.</string>
+    <string name="aether_tuning_memory">Memory saver (16-bit textures)</string>
+    <string name="aether_tuning_memory_summary">Sets LIBGL_FORCE16BITS and LIBGL_NOVAOCACHE. Colours may band; recommended on 3–4 GB phones.</string>
+    <string name="aether_tuning_note">These are variables the bundled core actually reads. They change how the translator feeds the driver, not Minecraft\'s chunk renderer, and no FPS is promised.</string>
+    <string name="aether_vsync_title">VSync</string>
+    <string name="aether_vsync_summary">AetherRender only: passed as AETHER_SWAP_INTERVAL and applied with eglSwapInterval. Turning it off may tear.</string>
+    <string name="aether_gpu_title">Recommended for this GPU</string>
+    <string name="aether_gpu_summary">Name-based starting point from the detected Mali model. Nothing is applied until you confirm.</string>
+    <string name="aether_gpu_detected">Detected: %1$s</string>
+    <string name="aether_gpu_unknown">Mali model could not be read</string>
+    <string name="aether_gpu_apply">Use recommendation</string>
+    <string name="aether_gpu_applied">Applied: %1$s + %2$s</string>
+    <string name="aether_gpu_note_entry">Entry-level Mali: the memory preset is offered first because GPU memory, not GPU speed, usually limits these phones.</string>
+    <string name="aether_gpu_note_mid">Mid-range Mali: batching and VBO reuse fit the available memory.</string>
+    <string name="aether_gpu_note_high">High-end Mali: batching and VBO reuse are the safe starting point.</string>
+    <string name="aether_gpu_note_unknown">Unknown GPU: keep the core defaults; no optimisation is guessed.</string>
 </resources>

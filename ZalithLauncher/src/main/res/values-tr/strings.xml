@@ -1365,7 +1365,11 @@
     <string name="theme_color_crimson">Kızıl</string>
     <string name="theme_color_midnight">Gece Yarısı</string>
     <!-- AMOLED yüzeyleri koyu temada gerçek siyah olur -->
-    <string name="theme_color_amoled_black">AMOLED Siyah</string>
+    <string name="theme_color_amoled_black">Gece AMOLED</string>
+    <string name="theme_color_titan_dark">Titan Karanlık</string>
+    <string name="theme_color_cyber_purple">Cyber Mor</string>
+    <string name="theme_color_arctic_blue">Arktik Mavi</string>
+    <string name="theme_color_minimal">Minimal</string>
 
     <!-- Performans Merkezi -->
     <string name="aether_perf_center_title">Performans Merkezi</string>
@@ -1437,4 +1441,28 @@
     <string name="aether_render_mode_lite_desc">Piksel başına durumu ve belleği azaltmak için opak, şablonsuz yüzeyleri tercih eder.</string>
     <string name="aether_render_mode_performance_desc">İsteğe bağlı 16-bit RGB565 pencere formatı; bant genişliği kazandırır ama renk bantlanması yapabilir.</string>
     <string name="aether_render_mode_compatibility_desc">Stok EGL seçimi ve yüzey ipucu yok; destek raporları için tutulur.</string>
+    <string name="aether_render_mode_compatibility_desc">Stok EGL seçimi ve yüzey ipucu yok; destek raporları için tutulur.</string>
+
+    <!-- AetherRender 3: çekirdek ayarı + VSync + Mali profilleri -->
+    <string name="aether_tuning_title">AetherRender çekirdek ayarı</string>
+    <string name="aether_tuning_summary">Paketli NG-GL4ES çekirdeği için ön ayarlar. Bir sonraki oyun başlatmasında uygulanır.</string>
+    <string name="aether_tuning_core">Çekirdek varsayılanı</string>
+    <string name="aether_tuning_core_summary">Hiçbir değişken ayarlamaz; kararı çekirdek verir, AetherRender 2.x ile aynı.</string>
+    <string name="aether_tuning_throughput">Verim (toplu çizim + VBO)</string>
+    <string name="aether_tuning_throughput_summary">LIBGL_BATCH, LIBGL_USEVBO ve LIBGL_RECYCLEFBO ayarlanır. Biraz daha GPU belleği kullanır.</string>
+    <string name="aether_tuning_memory">Bellek tasarrufu (16-bit doku)</string>
+    <string name="aether_tuning_memory_summary">LIBGL_FORCE16BITS ve LIBGL_NOVAOCACHE ayarlanır. Renkler bantlanabilir; 3–4 GB telefonlarda önerilir.</string>
+    <string name="aether_tuning_note">Bunlar paketli çekirdeğin gerçekten okuduğu değişkenlerdir. Çeviricinin sürücüye verdiği biçimi değiştirir, Minecraft\'ın chunk renderer\'ını değil; FPS garantisi verilmez.</string>
+    <string name="aether_vsync_title">VSync</string>
+    <string name="aether_vsync_summary">Yalnızca AetherRender: AETHER_SWAP_INTERVAL olarak geçer ve eglSwapInterval ile uygulanır. Kapatmak yırtılmaya yol açabilir.</string>
+    <string name="aether_gpu_title">Bu GPU için öneri</string>
+    <string name="aether_gpu_summary">Algılanan Mali modeline göre isim tabanlı başlangıç noktası. Siz onaylamadan hiçbir şey uygulanmaz.</string>
+    <string name="aether_gpu_detected">Algılanan: %1$s</string>
+    <string name="aether_gpu_unknown">Mali modeli okunamadı</string>
+    <string name="aether_gpu_apply">Öneriyi kullan</string>
+    <string name="aether_gpu_applied">Uygulandı: %1$s + %2$s</string>
+    <string name="aether_gpu_note_entry">Giriş seviyesi Mali: önce bellek ön ayarı önerilir çünkü bu telefonlarda genelde sınır GPU hızı değil GPU belleğidir.</string>
+    <string name="aether_gpu_note_mid">Orta seviye Mali: toplu çizim ve VBO yeniden kullanımı mevcut belleğe uyar.</string>
+    <string name="aether_gpu_note_high">Üst seviye Mali: toplu çizim ve VBO yeniden kullanımı güvenli başlangıç noktasıdır.</string>
+    <string name="aether_gpu_note_unknown">Bilinmeyen GPU: çekirdek varsayılanları korunur; hiçbir optimizasyon tahmin edilmez.</string>
 </resources>

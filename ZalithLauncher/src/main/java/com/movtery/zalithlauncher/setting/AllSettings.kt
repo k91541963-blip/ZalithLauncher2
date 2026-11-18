@@ -38,6 +38,7 @@ import com.movtery.zalithlauncher.setting.enums.GestureActionType
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
 import com.movtery.zalithlauncher.setting.enums.MouseControlMode
 import com.movtery.zalithlauncher.setting.enums.MouseTouchBlockMode
+import com.movtery.zalithlauncher.game.renderer.aether.AetherTuning
 import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
 import com.movtery.zalithlauncher.setting.enums.ResolutionRule
 import com.movtery.zalithlauncher.ui.control.HotbarRule
@@ -60,6 +61,19 @@ object AllSettings : SettingsRegistry() {
      * the value is passed to the native layer on the next game launch.
      */
     val aetherRenderMode = enumSetting("aetherRenderMode", AetherRenderMode.BALANCED)
+
+    /**
+     * AetherRender 3 — NG-GL4ES core tuning preset. Only real, binary-verified core
+     * variables are set; [AetherTuning.CORE_DEFAULT] sets none of them, so it restores
+     * the 2.x behaviour exactly.
+     */
+    val aetherRenderTuning = enumSetting("aetherRenderTuning", AetherTuning.CORE_DEFAULT)
+
+    /**
+     * AetherRender 3 — VSync. Passed to the native layer as `AETHER_SWAP_INTERVAL`
+     * and applied with `eglSwapInterval`, i.e. a real device refinement.
+     */
+    val aetherRenderVsync = boolSetting("aetherRenderVsync", true)
 
     /**
      * Vulkan 驱动器

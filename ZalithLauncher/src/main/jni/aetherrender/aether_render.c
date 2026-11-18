@@ -17,13 +17,14 @@
  */
 
 /*
- * AetherRender 2.0 — EGL/tile-GPU tuning layer.
+ * AetherRender 3 — EGL/tile-GPU tuning layer.
  *
  * This file is intentionally small and only touches things the launcher can prove:
  *  - it chooses an EGL config without multisampling and with a 24-bit depth buffer,
  *  - it asks the driver to discard the back buffer after swap on tile-based GPUs,
  *  - it applies one of five selectable policies (native, balanced, lite, performance,
  *    compatibility) and logs every decision,
+ *  - it applies the user's real VSync choice with eglSwapInterval,
  *  - it logs the real GL strings for support reports.
  *
  * It does not translate desktop GL (GL4ES does that), does not rewrite Minecraft's
@@ -71,6 +72,7 @@ static AetherMode g_mode = MODE_BALANCED;
 static int g_gpu_logged = 0;
 static int g_surface_logged = 0;
 static int g_config_logged = 0;
+static int g_swap_logged = 0;
 
 static int env_is_enabled(const char *value) {
     if (value == NULL) return 0;
@@ -117,6 +119,49 @@ bool aether_render_enabled(void) {
                             mode_name(aether_mode()));
     }
     return g_enabled == 1;
+}
+
+/**
+ * Requested swap interval: 0 = VSync off, 1 = VSync on, -1 = launcher said nothing.
+ * AetherRender 3 exposes this as a real user setting (`AETHER_SWAP_INTERVAL`); when the
+ * variable is absent the driver default is left untouched, exactly like 2.x.
+ */
+static int requested_swap_interval(void) {
+    const char *value = getenv("AETHER_SWAP_INTERVAL");
+    if (value == NULL || value[0] == '\0') return -1;
+    if (strcmp(value, "0") == 0) return 0;
+    if (strcmp(value, "1") == 0) return 1;
+    return -1;
+}
+
+/**
+ * Applies the requested swap interval with `eglSwapInterval`. On strict drivers the
+ * call only sticks once the surface is current, so it is attempted on surface creation
+ * and again on context creation. Failures are logged and never abort the launch.
+ */
+static void apply_swap_interval(EGLDisplay display, EGLSurface surface) {
+    if (!aether_render_enabled() || eglSwapInterval_p == NULL) return;
+    const int interval = requested_swap_interval();
+    if (interval < 0) return;
+
+    if (surface == EGL_NO_SURFACE && eglGetCurrentSurface_p != NULL) {
+        surface = eglGetCurrentSurface_p(EGL_DRAW);
+    }
+    if (surface == EGL_NO_SURFACE) return;
+
+    const EGLBoolean ok = eglSwapInterval_p(display, interval);
+    if (!g_swap_logged) {
+        if (ok) {
+            __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
+                                "Swap interval: %d (VSync %s)", interval,
+                                interval == 0 ? "off" : "on");
+        } else {
+            __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
+                                "eglSwapInterval(%d) rejected: %04x", interval,
+                                eglGetError_p != NULL ? eglGetError_p() : 0);
+        }
+        g_swap_logged = 1;
+    }
 }
 
 /** True when the mode only logs and leaves EGL selection to the stock path. */
@@ -328,6 +373,9 @@ void aether_render_on_surface_created(EGLDisplay display, EGLSurface surface) {
         return;
     }
 
+    // AetherRender 3: VSync is an independent axis, applied in every EGL mode.
+    apply_swap_interval(display, surface);
+
     const AetherMode mode = aether_mode();
     if (mode_is_stock_egl(mode)) {
         if (!g_surface_logged) {
@@ -357,9 +405,11 @@ void aether_render_on_surface_created(EGLDisplay display, EGLSurface surface) {
 }
 
 void aether_render_on_context_created(EGLDisplay display, EGLContext context) {
-    (void) display;
     (void) context;
-    if (!aether_render_enabled() || g_gpu_logged) return;
+    if (!aether_render_enabled()) return;
+    // The surface is bound now, so a strict driver can accept eglSwapInterval here.
+    apply_swap_interval(display, EGL_NO_SURFACE);
+    if (g_gpu_logged) return;
     if (eglGetProcAddress_p == NULL) return;
 
     typedef const unsigned char *(*PFN_GL_GET_STRING)(unsigned int name);

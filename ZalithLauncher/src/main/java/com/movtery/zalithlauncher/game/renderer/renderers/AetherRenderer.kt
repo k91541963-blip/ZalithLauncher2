@@ -19,6 +19,7 @@
 package com.movtery.zalithlauncher.game.renderer.renderers
 
 import com.movtery.zalithlauncher.game.renderer.RendererInterface
+import com.movtery.zalithlauncher.game.renderer.aether.AetherTuning
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
 
@@ -69,18 +70,32 @@ object AetherRenderer : RendererInterface {
 
     override fun getRendererLibrary(): String = "libng_gl4es.so"
 
-    private fun buildEnv(): Map<String, String> = mapOf(
-        "AETHER_RENDER" to "1",
-        "AETHER_RENDER_MODE" to currentMode().envValue,
-        // NG-GL4ES core: expose desktop GL 3.1 / GLES 3, keep Minecraft's colour path.
-        "LIBGL_GL" to "31",
-        "LIBGL_ES" to "3",
-        "LIBGL_USE_MC_COLOR" to "1",
-        "LIBGL_NORMALIZE" to "1",
-        "LIBGL_NOERROR" to "1"
-    )
+    private fun buildEnv(): Map<String, String> {
+        val env = linkedMapOf(
+            "AETHER_RENDER" to "1",
+            "AETHER_RENDER_MODE" to currentMode().envValue,
+            "AETHER_SWAP_INTERVAL" to if (currentVsync()) "1" else "0",
+            // NG-GL4ES core: expose desktop GL 3.1 / GLES 3, keep Minecraft's colour path.
+            "LIBGL_GL" to "31",
+            "LIBGL_ES" to "3",
+            "LIBGL_USE_MC_COLOR" to "1",
+            "LIBGL_NORMALIZE" to "1",
+            "LIBGL_NOERROR" to "1"
+        )
+        // AetherRender 3: only variables the bundled core actually reads (see AetherTuning).
+        env.putAll(currentTuning().env)
+        return env
+    }
 
     private fun currentMode(): AetherRenderMode =
         runCatching { AllSettings.aetherRenderMode.state }
             .getOrDefault(AetherRenderMode.BALANCED)
+
+    private fun currentTuning(): AetherTuning =
+        runCatching { AllSettings.aetherRenderTuning.state }
+            .getOrDefault(AetherTuning.CORE_DEFAULT)
+
+    private fun currentVsync(): Boolean =
+        runCatching { AllSettings.aetherRenderVsync.state }
+            .getOrDefault(true)
 }

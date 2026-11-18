@@ -192,6 +192,10 @@ fun LauncherSettingsScreen(
                                 ColorThemeType.CRIMSON -> stringResource(R.string.theme_color_crimson)
                                 ColorThemeType.MIDNIGHT -> stringResource(R.string.theme_color_midnight)
                                 ColorThemeType.AMOLED_BLACK -> stringResource(R.string.theme_color_amoled_black)
+                                ColorThemeType.TITAN_DARK -> stringResource(R.string.theme_color_titan_dark)
+                                ColorThemeType.CYBER_PURPLE -> stringResource(R.string.theme_color_cyber_purple)
+                                ColorThemeType.ARCTIC_BLUE -> stringResource(R.string.theme_color_arctic_blue)
+                                ColorThemeType.MINIMAL -> stringResource(R.string.theme_color_minimal)
                                 ColorThemeType.CUSTOM -> stringResource(R.string.generic_custom)
                             }
                         },

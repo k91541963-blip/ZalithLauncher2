@@ -52,7 +52,11 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format);
  * Applies per-surface policies after eglCreateWindowSurface/eglCreatePbufferSurface.
  * Balanced, lite and performance ask the driver to use EGL_BUFFER_DESTROYED so the
  * back buffer does not need to be preserved across swaps. Native and compatibility
- * leave the driver default untouched. Failures are logged and ignored.
+ * leave the driver default untouched.
+ *
+ * AetherRender 3 also applies `AETHER_SWAP_INTERVAL` (0 = VSync off, 1 = on) here with
+ * `eglSwapInterval`; the call is repeated when the context becomes current because some
+ * drivers only accept it then. Failures are logged and ignored.
  */
 void aether_render_on_surface_created(EGLDisplay display, EGLSurface surface);
 
