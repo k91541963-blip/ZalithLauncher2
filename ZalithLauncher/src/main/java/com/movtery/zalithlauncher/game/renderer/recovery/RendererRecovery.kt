@@ -23,7 +23,6 @@ import android.content.Context
 import com.movtery.zalithlauncher.game.renderer.renderers.AetherRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.GL4ESRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.NGGL4ESRenderer
-import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.logging.Logger
 import java.io.File
 import java.util.Properties
@@ -37,6 +36,13 @@ data class PendingLaunch(
     val startedAt: Long
 )
 
+/** Why the previous launch was reported. Only [RENDERER] suggests another renderer. */
+enum class RecoveryReason {
+    RENDERER,
+    MEMORY,
+    UNKNOWN
+}
+
 /** What the user should see after a failed launch. */
 data class RecoveryEvent(
     val fromName: String,
@@ -44,10 +50,16 @@ data class RecoveryEvent(
     val toName: String?,
     val toId: String?,
     val versionName: String,
-    val at: Long
+    val at: Long,
+    val reason: RecoveryReason = RecoveryReason.RENDERER,
+    val allocatedMb: Int? = null,
+    val recommendedMb: Int? = null
 ) {
-    /** True when the launcher actually switched renderers. */
-    val switched: Boolean get() = toId != null
+    /**
+     * True when a safer renderer is *suggested*. The renderer setting is never changed
+     * by the recovery flow itself; the user has to accept the suggestion.
+     */
+    val hasSuggestion: Boolean get() = toId != null
 }
 
 /** The renderer that last finished a launch successfully, per Minecraft version. */
@@ -179,38 +191,53 @@ class RendererRecoveryStore(private val root: File) {
     // --- failure -----------------------------------------------------------
 
     /**
-     * Handles a failed launch: counts the failure, decides the safe renderer and clears
-     * the attempt so the same crash cannot be processed twice.
+     * Handles an abnormal launch end: counts a renderer failure, decides which renderer
+     * would be safer and stores the event.
      *
+     * The renderer setting is **not** written here. A non-zero exit code or an OOM is not
+     * proof that the renderer is broken; silently changing it would also hide memory
+     * problems behind a renderer downgrade. The UI offers the switch as a user action.
+     *
+     * @param reason [RecoveryReason.MEMORY] never counts against the renderer and never
+     *   suggests another one.
      * @return the event to show, or `null` when there was nothing to recover
      */
     fun handleFailure(
         attempt: PendingLaunch,
         glEsMajor: Int,
+        reason: RecoveryReason = RecoveryReason.RENDERER,
+        allocatedMb: Int? = null,
+        recommendedMb: Int? = null,
         now: Long = System.currentTimeMillis()
     ): RecoveryEvent? {
         delete(FILE_PENDING)
 
-        val failures = load(FILE_FAILURES) ?: Properties()
-        val key = attempt.rendererUniqueId
-        val count = (failures.getProperty(key)?.toIntOrNull() ?: 0) + 1
-        failures.setProperty(key, count.toString())
-        save(FILE_FAILURES, failures)
+        if (reason == RecoveryReason.RENDERER) {
+            val failures = load(FILE_FAILURES) ?: Properties()
+            val key = attempt.rendererUniqueId
+            val count = (failures.getProperty(key)?.toIntOrNull() ?: 0) + 1
+            failures.setProperty(key, count.toString())
+            save(FILE_FAILURES, failures)
 
-        if (attempt.versionName.isNotBlank()) {
-            // A failed run must not leave an older success pointing at the same version.
-            val good = load(FILE_LAST_GOOD) ?: Properties()
-            val prefix = "${attempt.versionName}."
-            if (good.keys.any { it.toString().startsWith(prefix) }) {
-                val filtered = Properties()
-                for ((k, v) in good) {
-                    if (!k.toString().startsWith(prefix)) filtered[k] = v
+            if (attempt.versionName.isNotBlank()) {
+                // A failed run must not leave an older success pointing at the same version.
+                val good = load(FILE_LAST_GOOD) ?: Properties()
+                val prefix = "${attempt.versionName}."
+                if (good.keys.any { it.toString().startsWith(prefix) }) {
+                    val filtered = Properties()
+                    for ((k, v) in good) {
+                        if (!k.toString().startsWith(prefix)) filtered[k] = v
+                    }
+                    if (filtered.isEmpty) delete(FILE_LAST_GOOD) else save(FILE_LAST_GOOD, filtered)
                 }
-                if (filtered.isEmpty) delete(FILE_LAST_GOOD) else save(FILE_LAST_GOOD, filtered)
             }
         }
 
-        val fallbackId = RendererRecovery.fallbackRendererId(attempt.rendererId, glEsMajor)
+        val fallbackId = if (reason == RecoveryReason.RENDERER) {
+            RendererRecovery.fallbackRendererId(attempt.rendererId, glEsMajor)
+        } else {
+            null
+        }
         val fallbackUniqueId = fallbackId?.let { RendererRecovery.uniqueIdentifierOf(it) }
         val fallbackName = fallbackId?.let { nameOf(it) }
 
@@ -220,7 +247,10 @@ class RendererRecoveryStore(private val root: File) {
             toName = fallbackName.takeIf { fallbackUniqueId != null },
             toId = fallbackUniqueId,
             versionName = attempt.versionName,
-            at = now
+            at = now,
+            reason = reason,
+            allocatedMb = allocatedMb,
+            recommendedMb = recommendedMb
         )
         save(
             FILE_EVENT,
@@ -231,6 +261,9 @@ class RendererRecoveryStore(private val root: File) {
                 event.toId?.let { setProperty("toId", it) }
                 setProperty("versionName", event.versionName)
                 setProperty("at", event.at.toString())
+                setProperty("reason", event.reason.name)
+                event.allocatedMb?.let { setProperty("allocatedMb", it.toString()) }
+                event.recommendedMb?.let { setProperty("recommendedMb", it.toString()) }
             }
         )
         return event
@@ -246,7 +279,12 @@ class RendererRecoveryStore(private val root: File) {
             toName = props.getProperty("toName"),
             toId = props.getProperty("toId"),
             versionName = props.getProperty("versionName").orEmpty(),
-            at = props.getProperty("at")?.toLongOrNull() ?: 0L
+            at = props.getProperty("at")?.toLongOrNull() ?: 0L,
+            reason = runCatching {
+                RecoveryReason.valueOf(props.getProperty("reason") ?: RecoveryReason.RENDERER.name)
+            }.getOrDefault(RecoveryReason.RENDERER),
+            allocatedMb = props.getProperty("allocatedMb")?.toIntOrNull(),
+            recommendedMb = props.getProperty("recommendedMb")?.toIntOrNull()
         )
     }
 
@@ -322,16 +360,20 @@ object RendererRecoveryStartup {
     fun apply(context: Context): RecoveryEvent? = runCatching {
         val store = RendererRecoveryStore.forContext(context)
         val attempt = store.pending() ?: return@runCatching null
-        val event = store.handleFailure(attempt, detectGlEsMajor(context)) ?: return@runCatching null
+        // A leftover attempt only proves that the process died before it could report an
+        // exit code: a native crash, but also an LMK kill of a perfectly healthy game.
+        // So no renderer is suggested and, above all, nothing is changed automatically.
+        val event = store.handleFailure(
+            attempt = attempt,
+            glEsMajor = detectGlEsMajor(context),
+            reason = RecoveryReason.UNKNOWN
+        ) ?: return@runCatching null
 
-        event.toId?.let { uniqueId ->
-            AllSettings.renderer.save(uniqueId)
-            Logger.warning(
-                TAG,
-                "Previous launch with ${attempt.rendererName} did not finish; " +
-                    "switched to ${event.toName ?: "no fallback"}"
-            )
-        }
+        Logger.warning(
+            TAG,
+            "Previous launch with ${attempt.rendererName} did not report an exit code; " +
+                "no renderer change was applied automatically"
+        )
         event
     }.onFailure {
         Logger.warning(TAG, "Renderer recovery check failed", it)

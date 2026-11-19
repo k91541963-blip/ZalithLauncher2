@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.performance
 
+import com.movtery.zalithlauncher.game.renderer.recovery.RecoveryReason
 import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecovery
 import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStore
 import java.nio.file.Files
@@ -120,7 +121,7 @@ class RendererRecoveryTest {
         val event = store.handleFailure(attempt, glEsMajor = 3, now = 1234L)
 
         assertNotNull(event)
-        assertTrue(event!!.switched)
+        assertTrue(event!!.hasSuggestion)
         assertEquals(
             RendererRecovery.uniqueIdentifierOf(RendererRecovery.NG_GL4ES_ID),
             event.toId
@@ -197,5 +198,85 @@ class RendererRecoveryTest {
         assertNull(store.pending())
         assertNull(store.event())
         assertNull(store.latestLastGood())
+    }
+
+    @Test
+    fun `memory failure suggests no renderer and does not count against it`() {
+        val dir = newDir()
+        val store = store(dir)
+        val uniqueId = RendererRecovery.uniqueIdentifierOf(RendererRecovery.AETHER_RENDER_ID)!!
+        recordAether(store)
+
+        val event = store.handleFailure(
+            attempt = store.pending()!!,
+            glEsMajor = 3,
+            reason = RecoveryReason.MEMORY,
+            allocatedMb = 2048,
+            recommendedMb = 3072,
+            now = 99L
+        )
+
+        assertNotNull(event)
+        assertEquals(RecoveryReason.MEMORY, event!!.reason)
+        assertFalse(event.hasSuggestion)
+        assertNull(event.toId)
+        assertEquals(2048, event.allocatedMb)
+        assertEquals(3072, event.recommendedMb)
+        assertEquals(0, store.failureCount(uniqueId))
+
+        // The recommendation must survive a restart so the card can still offer it.
+        val reopened = store(dir).event()
+        assertEquals(RecoveryReason.MEMORY, reopened?.reason)
+        assertEquals(3072, reopened?.recommendedMb)
+    }
+
+    @Test
+    fun `memory failure keeps the last good entry of that version`() {
+        val store = store()
+        val uniqueId = RendererRecovery.uniqueIdentifierOf(RendererRecovery.AETHER_RENDER_ID)!!
+        store.markSuccess(
+            rendererId = RendererRecovery.AETHER_RENDER_ID,
+            rendererName = "AetherRender",
+            rendererUniqueId = uniqueId,
+            versionName = "1.21.4"
+        )
+        recordAether(store)
+        store.handleFailure(
+            attempt = store.pending()!!,
+            glEsMajor = 3,
+            reason = RecoveryReason.MEMORY,
+            allocatedMb = 2048
+        )
+
+        // A heap problem says nothing about the renderer, so the success stays valid.
+        assertTrue(store.lastGoodAll().containsKey("1.21.4"))
+    }
+
+    @Test
+    fun `leftover attempt is reported without a renderer suggestion`() {
+        val store = store()
+        recordAether(store)
+
+        val event = store.handleFailure(
+            attempt = store.pending()!!,
+            glEsMajor = 3,
+            reason = RecoveryReason.UNKNOWN
+        )
+
+        assertNotNull(event)
+        assertEquals(RecoveryReason.UNKNOWN, event!!.reason)
+        assertFalse(event.hasSuggestion)
+        assertNull(event.toId)
+    }
+
+    @Test
+    fun `default reason still describes a renderer failure`() {
+        val store = store()
+        recordAether(store)
+
+        val event = store.handleFailure(store.pending()!!, glEsMajor = 3)
+
+        assertEquals(RecoveryReason.RENDERER, event!!.reason)
+        assertTrue(event.hasSuggestion)
     }
 }

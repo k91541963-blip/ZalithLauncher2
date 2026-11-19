@@ -34,14 +34,14 @@ bool aether_render_enabled(void);
 
 /**
  * Picks an EGL config according to `AETHER_RENDER_MODE`:
- *  - `native` / `compatibility`: stock first-matching config, no scoring;
- *  - `balanced` (default): no MSAA, 8-bit colour, 24-bit depth;
- *  - `lite`: also prefers no alpha and no stencil;
- *  - `performance`: prefers a 16-bit RGB565 window format (opt-in, may band).
+ *  - `native`: stock first-matching config, no scoring;
+ *  - `balanced` (default): RGB888 + alpha 8 + depth 24 + stencil 8, no MSAA;
+ *  - `compatibility`: RGB888 with 16-bit depth and optional alpha/stencil.
  *
- * With AetherRender disabled this reproduces the previous "first matching config"
- * behaviour. If the mode-specific request finds no config, it falls back to the
- * balanced attribute set instead of failing the launch.
+ * Every AetherRender mode rejects 16-bit colour: an RGB565 window buffer rendered the
+ * world white on several drivers. With AetherRender disabled this reproduces the
+ * previous "first matching config" behaviour. If the mode-specific request finds no
+ * config, it falls back to the stock attribute set instead of failing the launch.
  *
  * @param out_format receives EGL_NATIVE_VISUAL_ID for the chosen config
  * @return the chosen config or NULL when no config matches
@@ -50,9 +50,9 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format);
 
 /**
  * Applies per-surface policies after eglCreateWindowSurface/eglCreatePbufferSurface.
- * Balanced, lite and performance ask the driver to use EGL_BUFFER_DESTROYED so the
- * back buffer does not need to be preserved across swaps. Native and compatibility
- * leave the driver default untouched.
+ * Balanced asks the driver to use EGL_BUFFER_DESTROYED so the back buffer does not need
+ * to be preserved across swaps. Native and compatibility leave the driver default
+ * untouched.
  *
  * AetherRender 3 also applies `AETHER_SWAP_INTERVAL` (0 = VSync off, 1 = on) here with
  * `eglSwapInterval`; the call is repeated when the context becomes current because some

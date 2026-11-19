@@ -46,6 +46,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -101,8 +102,10 @@ fun SimpleAlertDialog(
     text: String,
     confirmText: String = stringResource(R.string.generic_confirm),
     dismissText: String = stringResource(R.string.generic_cancel),
+    neutralText: String? = null,
     dismissByDialog: Boolean = true,
     onConfirm: () -> Unit,
+    onNeutral: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -131,8 +134,19 @@ fun SimpleAlertDialog(
             }
         },
         dismissButton = {
-            FilledTonalButton(onClick = onDismiss) {
-                MarqueeText(text = dismissText)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (neutralText != null) {
+                    TextButton(onClick = onNeutral) {
+                        MarqueeText(text = neutralText)
+                    }
+                    FilledTonalButton(onClick = onDismiss) {
+                        MarqueeText(text = dismissText)
+                    }
+                } else {
+                    FilledTonalButton(onClick = onDismiss) {
+                        MarqueeText(text = dismissText)
+                    }
+                }
             }
         }
     )

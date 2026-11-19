@@ -27,6 +27,11 @@ import com.movtery.zalithlauncher.R
  * and surface hints). It never claims an FPS increase and does not touch Minecraft's
  * chunk renderer.
  *
+ * AetherLite 3.0.1 removed the former `lite` and `performance` modes: their only real
+ * effect was a stencil-less or 16-bit (RGB565) window surface, which made the world render
+ * white on several Android compositors. Saved settings that still name them fall back to
+ * [BALANCED], and the native layer maps the old `AETHER_RENDER_MODE` values the same way.
+ *
  * @param nameRes label shown in the renderer settings
  * @param envValue value passed to the native layer as `AETHER_RENDER_MODE`
  */
@@ -34,15 +39,15 @@ enum class AetherRenderMode(val nameRes: Int, val envValue: String) {
     /** Stock EGL selection and no surface hints; useful to isolate driver issues. */
     NATIVE(R.string.aether_render_mode_native, "native"),
 
-    /** Default: no MSAA, 24-bit depth, `EGL_BUFFER_DESTROYED`. */
+    /**
+     * Default: 8-bit RGBA, 24-bit depth, 8-bit stencil (needed by "Fabulous"), no
+     * multisampling and `EGL_BUFFER_DESTROYED`.
+     */
     BALANCED(R.string.aether_render_mode_balanced, "balanced"),
 
-    /** Balanced policy, preferring configs without stencil and without alpha. */
-    LITE(R.string.aether_render_mode_lite, "lite"),
-
-    /** Prefers 16-bit RGB565 window configs to save memory bandwidth (opt-in). */
-    PERFORMANCE(R.string.aether_render_mode_performance, "performance"),
-
-    /** Stock EGL selection and no surface hints; same as native, kept for support reports. */
+    /**
+     * Relaxed selection for drivers with no 24-bit depth or stencil config: still
+     * 8-bit RGB, but 16-bit depth and optional alpha/stencil. No surface hints.
+     */
     COMPATIBILITY(R.string.aether_render_mode_compatibility, "compatibility")
 }

@@ -21,6 +21,7 @@ package com.movtery.zalithlauncher.game.performance
 import com.movtery.zalithlauncher.game.renderer.renderers.AetherRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.GL4ESRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.KopperZinkRenderer
+import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -48,7 +49,13 @@ class AetherRendererTest {
         // The mode is always passed explicitly so the native layer never has to guess.
         assertTrue(
             env["AETHER_RENDER_MODE"] in
-                listOf("native", "balanced", "lite", "performance", "compatibility")
+                AetherRenderMode.entries.map { it.envValue }
+        )
+        // 3.0.1 removed "lite" and "performance": their only real effect was the
+        // stencil-less / 16-bit surface that rendered the world white.
+        assertEquals(
+            listOf("native", "balanced", "compatibility"),
+            AetherRenderMode.entries.map { it.envValue }
         )
     }
 

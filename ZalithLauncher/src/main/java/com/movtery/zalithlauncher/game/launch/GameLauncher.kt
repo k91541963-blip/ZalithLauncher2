@@ -38,6 +38,10 @@ import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.download.game.parseLibraryComponents
 import com.movtery.zalithlauncher.game.multirt.Runtime
 import com.movtery.zalithlauncher.game.multirt.RuntimesManager
+import com.movtery.zalithlauncher.game.performance.HardwareProfile
+import com.movtery.zalithlauncher.game.performance.LaunchLogClassifier
+import com.movtery.zalithlauncher.game.performance.MemoryAdvisor
+import com.movtery.zalithlauncher.game.performance.MemoryRecommendation
 import com.movtery.zalithlauncher.game.plugin.Plugin
 import com.movtery.zalithlauncher.game.plugin.driver.DriverPluginManager
 import com.movtery.zalithlauncher.game.plugin.renderer.RendererPluginManager
@@ -45,6 +49,7 @@ import com.movtery.zalithlauncher.game.plugin.renderer_v2.RendererV2Data
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.VersionEnvStorage
 import com.movtery.zalithlauncher.game.renderer.Renderers
 import com.movtery.zalithlauncher.game.renderer.recovery.PendingLaunch
+import com.movtery.zalithlauncher.game.renderer.recovery.RecoveryReason
 import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStartup
 import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStore
 import com.movtery.zalithlauncher.game.renderer.renderers.AetherRenderer
@@ -63,6 +68,8 @@ import com.movtery.zalithlauncher.utils.file.child
 import com.movtery.zalithlauncher.utils.file.ensureDirectorySilently
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.string.isEqualTo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.lwjgl.glfw.CallbackBridge
 import java.io.File
@@ -164,9 +171,48 @@ class GameLauncher(
             customArgs = customArgs,
         )
 
-        // Exit code 0 means the JVM finished normally; anything else is treated as a
-        // failed launch and triggers the safe-renderer switch right away.
-        if (exitCode == 0) {
+        // Exit code 0 means the JVM finished normally; anything else is an abnormal end.
+        // Neither case may change the renderer on its own: a memory exhaustion or an LMK
+        // kill is not a renderer fault, and a silent downgrade hides the real problem.
+        val outOfMemory = withContext(Dispatchers.IO) {
+            LaunchLogClassifier.logShowsOutOfMemory(version.getLatestLog())
+        }
+
+        if (outOfMemory) {
+            if (exitCode == 0) {
+                recovery.markSuccess(
+                    rendererId = activeRenderer.getRendererId(),
+                    rendererName = activeRenderer.getRendererName(),
+                    rendererUniqueId = activeRenderer.getUniqueIdentifier(),
+                    versionName = version.getVersionName()
+                )
+            }
+            val attempt = recovery.pending() ?: PendingLaunch(
+                rendererId = activeRenderer.getRendererId(),
+                rendererName = activeRenderer.getRendererName(),
+                rendererUniqueId = activeRenderer.getUniqueIdentifier(),
+                versionName = version.getVersionName(),
+                startedAt = System.currentTimeMillis()
+            )
+            val memory = withContext(Dispatchers.IO) {
+                val allocated = version.getRamAllocation(activity)
+                val modCount = MemoryRecommendation.countMods(version.getGameDir())
+                val maxMb = MemoryAdvisor.advise(HardwareProfile.detect(activity)).maxMb
+                allocated to MemoryRecommendation.recommendedMb(allocated, modCount, maxMb)
+            }
+            recovery.handleFailure(
+                attempt = attempt,
+                glEsMajor = RendererRecoveryStartup.detectGlEsMajor(activity),
+                reason = RecoveryReason.MEMORY,
+                allocatedMb = memory.first,
+                recommendedMb = memory.second
+            )
+            Logger.warning(
+                TAG,
+                "Launch ended with an out-of-memory marker (exit $exitCode); " +
+                    "renderer was not changed"
+            )
+        } else if (exitCode == 0) {
             recovery.markSuccess(
                 rendererId = activeRenderer.getRendererId(),
                 rendererName = activeRenderer.getRendererName(),
@@ -186,16 +232,14 @@ class GameLauncher(
             // Same GLES probe as the startup path, so both halves of the flow decide alike.
             val event = recovery.handleFailure(
                 attempt = attempt,
-                glEsMajor = RendererRecoveryStartup.detectGlEsMajor(activity)
+                glEsMajor = RendererRecoveryStartup.detectGlEsMajor(activity),
+                reason = RecoveryReason.RENDERER
             )
-            event?.toId?.let { uniqueId ->
-                AllSettings.renderer.save(uniqueId)
-                Logger.warning(
-                    TAG,
-                    "Launch with ${activeRenderer.getRendererName()} failed (exit $exitCode); " +
-                        "switched to ${event.toName} and notified the user"
-                )
-            }
+            Logger.warning(
+                TAG,
+                "Launch with ${activeRenderer.getRendererName()} failed (exit $exitCode); " +
+                    "suggested ${event?.toName ?: "no fallback"}, user confirmation required"
+            )
         }
         return exitCode
     }

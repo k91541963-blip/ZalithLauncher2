@@ -292,6 +292,7 @@ fun LaunchGameOperation(
             val version = operation.version
             val quickPlay = operation.quickPlay
             val health = operation.health
+            val recommendedMb = health.recommendedMb
             val message = buildString {
                 append(
                     activity.getString(
@@ -310,6 +311,13 @@ fun LaunchGameOperation(
                                 activity.getString(R.string.aether_launch_health_low_storage, health.freeStorageMb)
                             LaunchWarning.THERMAL ->
                                 activity.getString(R.string.aether_launch_health_thermal)
+                            LaunchWarning.LOW_ALLOCATION ->
+                                activity.getString(
+                                    R.string.aether_launch_health_low_allocation,
+                                    health.modCount,
+                                    health.allocatedMb,
+                                    recommendedMb ?: health.allocatedMb
+                                )
                         }
                     )
                 }
@@ -317,8 +325,21 @@ fun LaunchGameOperation(
             SimpleAlertDialog(
                 title = stringResource(R.string.aether_launch_health_title),
                 text = message,
-                confirmText = stringResource(R.string.generic_anyway),
+                confirmText = if (recommendedMb != null) {
+                    stringResource(R.string.aether_launch_health_increase_and_launch, recommendedMb)
+                } else {
+                    stringResource(R.string.generic_anyway)
+                },
+                neutralText = if (recommendedMb != null) {
+                    stringResource(R.string.generic_anyway)
+                } else {
+                    null
+                },
                 onConfirm = {
+                    recommendedMb?.let { applyRamAllocation(version, it) }
+                    launchGameViewModel.updateOperation(LaunchGameOperation.RealLaunch(version, quickPlay))
+                },
+                onNeutral = {
                     launchGameViewModel.updateOperation(LaunchGameOperation.RealLaunch(version, quickPlay))
                 },
                 onDismiss = {
@@ -383,9 +404,13 @@ fun LaunchGameOperation(
                     return@LaunchedEffect
                 }
 
-                // 启动前检查设备状态（内存、存储、温度）。这只是提示，绝不阻止启动。
+                // 启动前检查设备状态（内存、存储、温度、模组堆大小）。这只是提示，绝不阻止启动。
                 val health = withContext(Dispatchers.IO) {
-                    LaunchHealthCheck.check(activity.applicationContext, version.getGameDir())
+                    LaunchHealthCheck.check(
+                        context = activity.applicationContext,
+                        gameDir = version.getGameDir(),
+                        allocatedMb = version.getRamAllocation(activity)
+                    )
                 }
                 if (health.warnings.isNotEmpty()) {
                     launchGameViewModel.updateOperation(
@@ -716,4 +741,18 @@ private fun BackgroundImage(
         contentDescription = null,
         contentScale = ContentScale.Crop
     )
+}
+
+/**
+ * Applies a heap size the user just confirmed. A per-version override stays per-version;
+ * otherwise the global setting is updated, exactly like the memory slider.
+ */
+private fun applyRamAllocation(version: Version, mb: Int) {
+    val config = version.getVersionConfig()
+    if (config.ramAllocation >= 256) {
+        config.ramAllocation = mb
+        config.save()
+    } else {
+        AllSettings.ramAllocation.save(mb)
+    }
 }

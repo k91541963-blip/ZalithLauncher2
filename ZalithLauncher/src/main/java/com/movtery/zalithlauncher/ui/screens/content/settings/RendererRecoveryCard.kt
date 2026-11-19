@@ -39,8 +39,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
-import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecovery
+import com.movtery.zalithlauncher.game.renderer.recovery.RecoveryReason
 import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStore
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.components.TitleAndSummary
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.CardPosition
@@ -86,12 +87,20 @@ fun RendererRecoveryCard(
 
             event?.let { failed ->
                 Text(
-                    text = if (failed.toName != null) {
-                        stringResource(
-                            R.string.renderer_recovery_switched, failed.fromName, failed.toName
-                        )
-                    } else {
-                        stringResource(R.string.renderer_recovery_no_fallback, failed.fromName)
+                    text = when {
+                        failed.reason == RecoveryReason.MEMORY ->
+                            stringResource(
+                                R.string.renderer_recovery_memory,
+                                failed.allocatedMb ?: 0
+                            )
+                        failed.toName != null ->
+                            stringResource(
+                                R.string.renderer_recovery_suggested, failed.fromName, failed.toName
+                            )
+                        failed.reason == RecoveryReason.UNKNOWN ->
+                            stringResource(R.string.renderer_recovery_unknown)
+                        else ->
+                            stringResource(R.string.renderer_recovery_no_fallback, failed.fromName)
                     },
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -99,6 +108,18 @@ fun RendererRecoveryCard(
                     Text(
                         modifier = Modifier.alpha(0.7f),
                         text = stringResource(R.string.renderer_recovery_version, failed.versionName),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                if (failed.reason == RecoveryReason.MEMORY) {
+                    val recommended = failed.recommendedMb
+                    Text(
+                        modifier = Modifier.alpha(0.8f),
+                        text = if (recommended != null) {
+                            stringResource(R.string.renderer_recovery_memory_recommend, recommended)
+                        } else {
+                            stringResource(R.string.renderer_recovery_memory_no_room)
+                        },
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -111,19 +132,42 @@ fun RendererRecoveryCard(
                     ) {
                         Text(text = stringResource(R.string.renderer_recovery_dismiss))
                     }
-                    if (failed.switched) {
-                        TextButton(
-                            onClick = {
-                                AllSettings.renderer.save(
-                                    RendererRecovery.uniqueIdentifierOf(
-                                        RendererRecovery.AETHER_RENDER_ID
-                                    ).orEmpty()
+                    if (failed.reason == RecoveryReason.MEMORY) {
+                        failed.recommendedMb?.let { recommended ->
+                            TextButton(
+                                onClick = {
+                                    applyRecommendedRam(failed.versionName, recommended)
+                                    store.dismissEvent()
+                                    revision++
+                                }
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.renderer_recovery_apply_memory,
+                                        recommended
+                                    )
                                 )
-                                store.dismissEvent()
-                                revision++
                             }
-                        ) {
-                            Text(text = stringResource(R.string.renderer_recovery_restore_aether))
+                        }
+                    }
+                    if (failed.reason == RecoveryReason.RENDERER && failed.hasSuggestion) {
+                        val toId = failed.toId
+                        val toName = failed.toName.orEmpty()
+                        if (toId != null) {
+                            TextButton(
+                                onClick = {
+                                    AllSettings.renderer.save(toId)
+                                    store.dismissEvent()
+                                    revision++
+                                }
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.renderer_recovery_suggest_switch,
+                                        toName
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -150,5 +194,23 @@ fun RendererRecoveryCard(
                 }
             }
         }
+    }
+}
+
+/**
+ * Applies the recommended heap to the version that ran out of memory. A per-version
+ * override stays per-version; otherwise the global value is updated.
+ */
+private fun applyRecommendedRam(versionName: String, mb: Int) {
+    val version = VersionsManager.currentVersion.value
+        ?.takeIf { it.getVersionName() == versionName }
+        ?: VersionsManager.versions.value.find { it.getVersionName() == versionName }
+
+    val config = version?.getVersionConfig()
+    if (config != null && config.ramAllocation >= 256) {
+        config.ramAllocation = mb
+        config.save()
+    } else {
+        AllSettings.ramAllocation.save(mb)
     }
 }

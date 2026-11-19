@@ -94,7 +94,8 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
             Logger.initialize(this)
 
             // AetherRender 3 — crash recovery: if the previous launch never reported an
-            // exit code, switch to a safe renderer before the UI can start another one.
+            // exit code, record why it is unknown. The renderer is never switched here:
+            // a process kill or a heap exhaustion is not proof of a renderer fault.
             // Runs after the logger so the decision is written into the launcher log.
             RendererRecoveryStartup.apply(this)
 

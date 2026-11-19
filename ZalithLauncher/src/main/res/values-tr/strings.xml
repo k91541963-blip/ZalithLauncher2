@@ -1432,15 +1432,11 @@
     <string name="aether_render_mode_summary">AetherRender renderer\'ı için EGL ilkesi. Bir sonraki oyun başlatmasında uygulanır.</string>
     <string name="aether_render_mode_native">Aether Native (stok EGL)</string>
     <string name="aether_render_mode_balanced">Aether Balanced</string>
-    <string name="aether_render_mode_lite">Aether Lite (alfa/şablon yok)</string>
-    <string name="aether_render_mode_performance">Aether Performance (16-bit renk)</string>
-    <string name="aether_render_mode_compatibility">Aether Compatibility (stok EGL)</string>
-    <string name="aether_render_mode_note">Lite ve Performance yalnızca EGL yüzeyini değiştirir; Minecraft\'ın chunk renderer\'ını değiştirmez. Performance renk bantlanmasına yol açabilir. FPS garantisi verilmez.</string>
+    <string name="aether_render_mode_compatibility">Aether Compatibility (gevşek EGL)</string>
+    <string name="aether_render_mode_note">AetherRender asla 16-bit veya şablonsuz pencere tamponu istemez; ikisi de etkilenen cihazlarda dünyayı beyaz çizdi. Yalnızca EGL yüzeyini değiştirir, Minecraft\'ın chunk renderer\'ını değil. FPS garantisi verilmez.</string>
     <string name="aether_render_mode_native_desc">AetherRender EGL değişikliği yok; sürücü güncellemesi ayarlı yolu bozduğunda kullanışlıdır.</string>
-    <string name="aether_render_mode_balanced_desc">Varsayılan: çoklu örnekleme yok, 8-bit renk, 24-bit derinlik ve takas sonrası atma ipucu.</string>
-    <string name="aether_render_mode_lite_desc">Piksel başına durumu ve belleği azaltmak için opak, şablonsuz yüzeyleri tercih eder.</string>
-    <string name="aether_render_mode_performance_desc">İsteğe bağlı 16-bit RGB565 pencere formatı; bant genişliği kazandırır ama renk bantlanması yapabilir.</string>
-    <string name="aether_render_mode_compatibility_desc">Stok EGL seçimi ve yüzey ipucu yok; destek raporları için tutulur.</string>
+    <string name="aether_render_mode_balanced_desc">Varsayılan: 8-bit RGBA, 24-bit derinlik, 8-bit şablon tamponu (Fabulous için gerekli), çoklu örnekleme yok ve takas sonrası atma ipucu.</string>
+    <string name="aether_render_mode_compatibility_desc">24-bit derinlik veya şablon yapılandırması sunmayan sürücüler için gevşek seçim: yine 8-bit RGB, 16-bit derinliğe izin verilir. Yüzey ipucu yok.</string>
     <!-- AetherRender 3: çekirdek ayarı + VSync + Mali profilleri -->
     <string name="aether_tuning_title">AetherRender çekirdek ayarı</string>
     <string name="aether_tuning_summary">Paketli NG-GL4ES çekirdeği için ön ayarlar. Bir sonraki oyun başlatmasında uygulanır.</string>
@@ -1466,12 +1462,11 @@
 
     <!-- AetherRender 3: crash recovery -->
     <string name="renderer_recovery_title">Başlatma kurtarma</string>
-    <string name="renderer_recovery_summary">Gerçek başlatma sonuçlarından yazılır: başarısız başlatma daha güvenli bir renderer\'a geçer, başarılı olan sürüm bazında hatırlanır.</string>
-    <string name="renderer_recovery_switched">%1$s tamamlanmadı; launcher %2$s renderer\'ına geçti.</string>
+    <string name="renderer_recovery_summary">Gerçek başlatma sonuçlarından yazılır. Başarısız başlatma yalnızca daha güvenli bir renderer önerir; hiçbir şey otomatik değişmez. Başarılı başlatma sürüm bazında hatırlanır.</string>
+    <string name="renderer_recovery_suggested">%1$s tamamlanmadı. Önerilen daha güvenli renderer: %2$s.</string>
     <string name="renderer_recovery_no_fallback">%1$s tamamlanmadı ve daha güvenli renderer kalmadı. Tekrar başlatmadan önce logu kontrol edin.</string>
     <string name="renderer_recovery_version">Sürüm: %1$s</string>
     <string name="renderer_recovery_dismiss">Anladım</string>
-    <string name="renderer_recovery_restore_aether">AetherRender\'a geri dön</string>
     <string name="renderer_recovery_last_good">Son başarılı başlatma: %1$s, %2$s ile</string>
 
     <!-- AetherUI 3.0: ana ekran kahraman kartı + widget galerisi -->
@@ -1532,4 +1527,13 @@
     <string name="aether_history_verdict_worse">Yeni oturum iki ölçümde de daha kötü.</string>
     <string name="aether_history_verdict_mixed">Karışık: bir ölçüm iyileşti, diğeri kötüleşti.</string>
     <string name="aether_history_verdict_same">İki oturum da ölçüm toleransı içinde (1 FPS / %%0.5 jank).</string>
+    <!-- AetherLite 3.0.1: kurtarma yalnızca önerir; bellek hataları ayrı raporlanır -->
+    <string name="renderer_recovery_unknown">Önceki oturum düzgün kapanmadı. Renderer değiştirilmedi; oyun sürekli çöküyorsa elle değiştirin.</string>
+    <string name="renderer_recovery_memory">Son oturum bellek yetersizliğiyle sona erdi; oyun belleği %1$d MB idi.</string>
+    <string name="renderer_recovery_memory_recommend">Bu kurulum için önerilen bellek: %1$d MB.</string>
+    <string name="renderer_recovery_memory_no_room">Bu cihaz oyuna güvenli şekilde daha fazla bellek veremiyor. Arka plan uygulamalarını kapatın veya görüş mesafesini düşürün.</string>
+    <string name="renderer_recovery_apply_memory">%1$d MB yap</string>
+    <string name="renderer_recovery_suggest_switch">%1$s renderer\'ına geç</string>
+    <string name="aether_launch_health_low_allocation">%1$d mod kurulu ancak oyun belleği yalnızca %2$d MB. Bu boyuttaki mod paketleri sık sık bellek tüketir; %3$d MB önerilir.</string>
+    <string name="aether_launch_health_increase_and_launch">%1$d MB yap ve başlat</string>
 </resources>

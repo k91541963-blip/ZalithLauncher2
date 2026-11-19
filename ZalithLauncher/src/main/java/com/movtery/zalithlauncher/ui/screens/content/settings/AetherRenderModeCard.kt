@@ -154,7 +154,5 @@ fun AetherRenderModeCard(
 private fun modeDescriptionRes(mode: AetherRenderMode) = when (mode) {
     AetherRenderMode.NATIVE -> R.string.aether_render_mode_native_desc
     AetherRenderMode.BALANCED -> R.string.aether_render_mode_balanced_desc
-    AetherRenderMode.LITE -> R.string.aether_render_mode_lite_desc
-    AetherRenderMode.PERFORMANCE -> R.string.aether_render_mode_performance_desc
     AetherRenderMode.COMPATIBILITY -> R.string.aether_render_mode_compatibility_desc
 }

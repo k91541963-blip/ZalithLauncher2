@@ -70,16 +70,26 @@ Vendor EGL/GLES sürücüsü (Mali, Adreno, …)
 
 `aether_render_choose_config()`:
 
-1. `EGL_WINDOW_BIT | EGL_PBUFFER_BIT`, RGB888, alpha 8, depth 24 ile adayları
-   ister. `EGL_RENDERABLE_TYPE` artık `LIBGL_ES` değerine göre seçilir: GLES 3
+1. `EGL_WINDOW_BIT | EGL_PBUFFER_BIT`, **RGB888 + alpha 8 + depth 24 + stencil 8**
+   ile adayları ister. `EGL_RENDERABLE_TYPE` `LIBGL_ES` değerine göre seçilir: GLES 3
    bağlamı için `EGL_OPENGL_ES3_BIT_KHR`, GLES 2 için `EGL_OPENGL_ES2_BIT`.
-2. AetherRender kapalıysa eskisi gibi ilk adayı döndürür (davranış değişmez).
-3. Açıksa adayları puanlar:
+2. AetherRender kapalıysa veya mod `native` ise stok attribute setiyle ilk adayı
+   döndürür (davranış değişmez).
+3. Açıksa adayları puanlar ve **geçersizleri eler**:
    - `EGL_SAMPLES` / `EGL_SAMPLE_BUFFERS` → ağır ceza,
-   - depth ≥ 24 → artı, depth < 16 → büyük ceza,
-   - `EGL_CONFIG_CAVEAT != EGL_NONE` → ceza,
-   - pencere desteği ve ES2 renderable zorunlu.
-4. Seçilen config'in renk/alpha/depth/samples/visual değerlerini loglar.
+   - pencere desteği ve gerekli renderable bit zorunlu,
+   - RGB888 zorunlu (RGB565 **asla** kabul edilmez),
+   - depth ≥ 24, alpha ≥ 8, stencil ≥ 8 zorunlu (stencil yoksa bir kez şablonsuz
+     denenir),
+   - `EGL_CONFIG_CAVEAT != EGL_NONE` → ceza.
+4. Hiçbir aday kalmazsa stok attribute setine düşer; RGB565 bir config oyuna
+   verilmez.
+5. Seçilen config'in renk/alpha/depth/**stencil**/samples/visual değerlerini loglar.
+
+> **Neden stencil zorunlu?** Minecraft'ın "Fabulous" grafik modu şeffaflık geçişinde
+> stencil buffer kullanır. Stencil'siz (veya 16-bit) bir pencere yüzeyi bazı
+> sürücilerde dünyayı tamamen beyaz çizdi. 3.0.1 bu yüzden 565/alfasız/şablonsuz
+> yolları kaldırdı.
 
 ### 3.3 Renderer modları
 
@@ -90,14 +100,16 @@ Yalnızca launcher'ın gerçekten kontrol ettiği EGL kararlarını değiştirir
 | Mod | EGL davranışı | Not |
 |---|---|---|
 | Aether Native | Stok EGL seçimi, yüzey ipucu yok | Sürücü sorunlarını izole etmek için |
-| Aether Balanced (varsayılan) | MSAA yok, RGB888 + alpha 8, depth 24, `EGL_BUFFER_DESTROYED` | Önceki v1 davranışı |
-| Aether Lite | Ek olarak alpha ve stencil içermeyen config tercih edilir | Daha az piksel durumu/bellek |
-| Aether Performance | RGB565 pencere config'i tercih edilir (opt-in) | Bant genişliği kazancı; renk bantlanması olabilir |
-| Aether Compatibility | Stok EGL seçimi, yüzey ipucu yok | Destek raporları için Native ile aynı |
+| Aether Balanced (varsayılan) | RGB888 + alpha 8 + depth 24 + stencil 8, MSAA yok, `EGL_BUFFER_DESTROYED` | Normal ve "Fabulous" grafikler için doğru yüzey |
+| Aether Compatibility | Gevşek seçim: yine RGB888, ama depth 16 ve isteğe bağlı alpha/stencil; yüzey ipucu yok | 24-bit depth/şablon sunmayan sürücüler için son çare |
 
-Moda özel istek hiçbir config bulamazsa dengeli attribute setine geri düşer;
-başlatma başarısız edilmez. `native`/`compatibility` modlarında EGL seçimi ve
-yüzey davranışı stok yola bırakılır.
+İstek hiçbir config bulamazsa stok attribute setine geri düşer; başlatma başarısız
+edilmez. `native`/`compatibility` modlarında yüzey ipucu uygulanmaz.
+
+> 3.0.1 öncesindeki **Lite** (alfasız/şablonsuz) ve **Performance** (RGB565) modları
+> kaldırıldı: gerçek etkileri tam olarak beyaz dünyaya yol açan yüzeydi. Eski
+> `AETHER_RENDER_MODE=lite|performance` değerleri `balanced` olarak okunur, kayıtlı
+> ayarlar da `BALANCED`'a düşer.
 
 ### 3.4 Yüzey politikası
 
@@ -123,7 +135,7 @@ Beklenen satırlar:
 
 ```
 AetherRender enabled (mode=balanced)
-EGL config: mode=balanced rgb=8/8/8 alpha=8 depth=24 samples=0 sample_buffers=0 visual=0x1
+EGL config: mode=balanced rgb=8/8/8 alpha=8 depth=24 stencil=8 samples=0 sample_buffers=0 visual=0x1
 Surface swap behaviour: EGL_BUFFER_DESTROYED (mode=balanced)
 GPU vendor=ARM renderer=Mali-G57 ... version=OpenGL ES 3.2 ... mode=balanced
 ```
@@ -186,31 +198,34 @@ ayar sunar (değişken adları paketli `libng_gl4es.so` taranarak doğrulandı):
   JVM testlerinde Android/JSON olmadan doğrulanabilir.
 - Çıkış kodu **0** → deneme silinir, `last_good.properties` içine sürüm başına
   renderer yazılır, o renderer'ın hata sayacı sıfırlanır.
-- Çıkış kodu **≠ 0** → hemen; kod hiç raporlanmadıysa (native çökme/LMK) bir
-  sonraki açılışta `ZLApplication` içinde `RendererRecoveryStartup` devreye girer.
-- Zincir: **AetherRender → Krypton Wrapper (`opengles3`) → GL4ES (`opengles2`) →
-  dur**. GLES ana sürümü `ActivityManager.deviceConfigurationInfo`'dan okunur;
-  GLES 2 cihazda AetherRender doğrudan GL4ES'e düşer.
-- Zincirin sonundaki renderer değiştirilmez; aynı çökme iki kez işlenmez. Bilinmeyen
-  (plugin/Zink) renderer'lar da güvenli çekirdeğe düşer.
-- Başarısız sürümün eski "son çalışan" kaydı silinir; böylece kart yanlış bir
-  başarıyı göstermez.
-- Renderer ayarlarındaki kurtarma kartı yalnızca dosya varsa görünür; olay
-  kapatılabilir ve kullanıcı tek dokunuşla AetherRender'a dönebilir. Otomatik
-  yükseltme yoktur: kullanıcıya her zaman geri dönme yolu bırakılır.
+- Çıkış kodu **≠ 0** → `latest.log` kuyruğu OOM için taranır
+  (`LaunchLogClassifier`). OOM varsa olay `MEMORY` olarak yazılır: renderer hatası
+  sayılmaz, sayaç artmaz, "son çalışan" silinmez. Aksi halde olay `RENDERER` olur.
+- Kod hiç raporlanmadıysa (native çökme/LMK) bir sonraki açılışta `ZLApplication`
+  içinde `RendererRecoveryStartup` devreye girer ve olayı `UNKNOWN` olarak yazar.
+- **Hiçbir durumda renderer ayarı otomatik yazılmaz.** Sıfırdan farklı çıkış veya
+  kalan deneme, renderer'ın bozuk olduğunun kanıtı değildir; sessiz düşürme gerçek
+  sorunu (bellek, sürücü) gizler.
+- Öneri zinciri yalnızca gösterilir: **AetherRender → Krypton Wrapper
+  (`opengles3`) → GL4ES (`opengles2`) → dur**. GLES ana sürümü
+  `ActivityManager.deviceConfigurationInfo`'dan okunur; GLES 2 cihazda öneri
+  doğrudan GL4ES olur.
+- Renderer ayarlarındaki kurtarma kartı olayı gösterir: `MEMORY` için önerilen heap'i
+  uygulama düğmesi, `RENDERER` için önerilen renderer'a geçme düğmesi, `UNKNOWN` için
+  yalnızca bilgi. Kullanıcı onaylamadan hiçbir ayar değişmez.
 
 ## 4. Geri Dönüş (Fallback)
 
 - `AETHER_RENDER` yoksa/0 ise tüm yeni kod eski davranışı birebir izler.
-- Moda özel config isteği boş dönerse dengeli attribute setine, o da boş dönerse
-  stok davranışa düşülür; mod seçimi başlatmayı kilitlemez.
+- AetherRender'ın config isteği boş dönerse stok attribute setine düşülür; mod
+  seçimi başlatmayı kilitlemez.
 - Yüzey politikası reddedilirse sessizce devam edilir.
 - Renderer seçimi kullanıcı ayarıdır; AetherRender seçili değilken hiçbir yeni
   ortam değişkeni gönderilmez.
 
-> Otomatik çökme sonrası geri dönüş 3C ile geldi (bkz. 3.9). Cihazda gerçek bir
-> native çökme üretilerek doğrulanmadı; birim testleri karar tablosunu ve dosya
-> yaşam döngüsünü doğrular.
+> Çökme sonrası kurtarma 3C ile geldi (bkz. 3.9) ve 3.0.1'de **yalnızca öneri**
+> olacak şekilde daraltıldı. Cihazda gerçek bir native çökme üretilerek
+> doğrulanmadı; birim testleri karar tablosunu ve dosya yaşam döngüsünü doğrular.
 
 ## 5. Cihaz Doğrulama
 
@@ -229,13 +244,13 @@ ayar sunar (değişken adları paketli `libng_gl4es.so` taranarak doğrulandı):
 
 | Dosya | Görev |
 |---|---|
-| `jni/aetherrender/aether_render.c` | Mod bazlı EGL seçimi, yüzey politikası, telemetri |
+| `jni/aetherrender/aether_render.c` | Mod bazlı EGL seçimi (stencil zorunlu), yüzey politikası, telemetri |
 | `jni/aetherrender/aether_render.h` | C arayüzü |
 | `jni/aetherrender/aether_metrics.c/h` | Takas zaman damgalarından gerçek kare süresi (AetherMetrics) |
 | `jni/ctxbridges/gl_bridge.c` | Entegrasyon noktaları |
 | `jni/ctxbridges/egl_loader.c/h` | `eglSurfaceAttrib` yüklemesi |
 | `game/renderer/renderers/AetherRenderer.kt` | Renderer kaydı, mod ortamı |
-| `setting/enums/AetherRenderMode.kt` | Beş mod ve `AETHER_RENDER_MODE` değerleri |
+| `setting/enums/AetherRenderMode.kt` | Üç mod ve `AETHER_RENDER_MODE` değerleri |
 | `ui/.../settings/AetherRenderModeCard.kt` | Mod seçim arayüzü |
 | `game/performance/GpuInfo.kt` | Launcher tarafı EGL probe + Mali modeli |
 | `game/performance/ThermalInfo.kt` | Batarya/thermal zone okuma |

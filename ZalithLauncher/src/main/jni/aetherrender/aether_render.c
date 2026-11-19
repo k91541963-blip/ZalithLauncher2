@@ -61,8 +61,6 @@
 typedef enum {
     MODE_NATIVE = 0,
     MODE_BALANCED,
-    MODE_LITE,
-    MODE_PERFORMANCE,
     MODE_COMPATIBILITY
 } AetherMode;
 
@@ -85,8 +83,6 @@ static int env_is_enabled(const char *value) {
 static const char *mode_name(AetherMode mode) {
     switch (mode) {
         case MODE_NATIVE: return "native";
-        case MODE_LITE: return "lite";
-        case MODE_PERFORMANCE: return "performance";
         case MODE_COMPATIBILITY: return "compatibility";
         case MODE_BALANCED:
         default: return "balanced";
@@ -96,9 +92,11 @@ static const char *mode_name(AetherMode mode) {
 static AetherMode parse_mode(const char *value) {
     if (value == NULL || value[0] == '\0') return MODE_BALANCED;
     if (strcmp(value, "native") == 0) return MODE_NATIVE;
-    if (strcmp(value, "lite") == 0) return MODE_LITE;
-    if (strcmp(value, "performance") == 0) return MODE_PERFORMANCE;
     if (strcmp(value, "compatibility") == 0) return MODE_COMPATIBILITY;
+    // AetherLite 3.0.1: "lite" and "performance" were removed because their only real
+    // effect was a stencil-less / 16-bit window surface, which rendered the world white.
+    // An old environment value must not resurrect that path, so both mean balanced.
+    if (strcmp(value, "lite") == 0 || strcmp(value, "performance") == 0) return MODE_BALANCED;
     return MODE_BALANCED;
 }
 
@@ -164,8 +162,13 @@ static void apply_swap_interval(EGLDisplay display, EGLSurface surface) {
     }
 }
 
-/** True when the mode only logs and leaves EGL selection to the stock path. */
+/** True when the mode leaves EGL selection entirely to the stock path. */
 static bool mode_is_stock_egl(AetherMode mode) {
+    return mode == MODE_NATIVE;
+}
+
+/** True when the mode must not touch surface attributes: its point is maximum safety. */
+static bool mode_skips_hints(AetherMode mode) {
     return mode == MODE_NATIVE || mode == MODE_COMPATIBILITY;
 }
 
@@ -207,8 +210,16 @@ static EGLConfig choose_stock(EGLDisplay display, const EGLint *attributes,
     return chosen;
 }
 
-/** Scores one config for the active mode. lower-than-LLONG_MIN means "reject". */
-static long score_config(EGLDisplay display, EGLConfig config, AetherMode mode) {
+/**
+ * Scores one config for the active mode. LONG_MIN means "reject".
+ *
+ * Every mode still rejects 16-bit colour: an RGB565 window buffer is what produced a
+ * white/garbled picture on several Android compositors, so it is never a valid trade.
+ * [relaxed] (compatibility mode) only lowers the depth/alpha/stencil requirements that
+ * Minecraft's normal and "Fabulous" modes would otherwise need.
+ */
+static long score_config(EGLDisplay display, EGLConfig config, AetherMode mode,
+                         bool stencil_required, bool relaxed) {
     EGLint surface_type = 0, renderable_type = 0;
     EGLint red = 0, green = 0, blue = 0, alpha = 0, depth = 0, stencil = 0;
     EGLint samples = 0, sample_buffers = 0, caveat = EGL_NONE;
@@ -227,42 +238,37 @@ static long score_config(EGLDisplay display, EGLConfig config, AetherMode mode) 
 
     if ((surface_type & EGL_WINDOW_BIT) == 0) return LONG_MIN;
     if ((renderable_type & required_renderable_bit()) == 0) return LONG_MIN;
-    if (red < 5 || green < 5 || blue < 5) return LONG_MIN;
+    // Window buffers are always 8-bit colour; RGB565 caused white/garbled output on
+    // several Android compositors and is never worth the risk for a game window.
+    if (red < 8 || green < 8 || blue < 8) return LONG_MIN;
+    if (relaxed) {
+        // Last resort for drivers that expose no 24-bit depth / 8-bit stencil config.
+        if (depth < 16) return LONG_MIN;
+    } else {
+        if (depth < 24) return LONG_MIN;
+        // Minecraft's "Fabulous" transparency pass needs a stencil buffer. Without it the
+        // world can composite as a blank/white frame on some drivers.
+        if (stencil_required && stencil < 8) return LONG_MIN;
+        if (alpha < 8) return LONG_MIN;
+    }
 
     long score = 0;
     // Multisampling is the single most expensive mistake on bandwidth-limited GPUs.
     score -= (long) samples * 20;
     score -= (long) sample_buffers * 40;
-    // Minecraft needs a depth buffer; 24 bits avoids z-fighting at distance.
-    score += depth >= 24 ? 60 : (depth >= 16 ? 10 : -100);
     score += caveat == EGL_NONE ? 20 : -20;
-
-    const bool is_565 = red == 5 && green == 6 && blue == 5;
-    const bool is_888 = red >= 8 && green >= 8 && blue >= 8;
+    score += stencil >= 8 ? 60 : 0;
 
     switch (mode) {
-        case MODE_LITE:
-            // Favour opaque, stencil-free configs: fewer bytes per pixel and less state.
-            score += alpha == 0 ? 30 : 0;
-            score += stencil == 0 ? 10 : 0;
-            score += is_888 ? 10 : 0;
-            break;
-
-        case MODE_PERFORMANCE:
-            // Opt-in 16-bit colour: halves the window bandwidth at the cost of banding.
-            score += is_565 ? 150 : 0;
-            score += alpha == 0 ? 20 : 0;
-            score += stencil == 0 ? 10 : 0;
-            score += is_888 ? 5 : 0;
+        case MODE_COMPATIBILITY:
+            // Prefer 24-bit depth when the driver happens to offer it.
+            score += depth >= 24 ? 40 : 0;
             break;
 
         case MODE_BALANCED:
         case MODE_NATIVE:
-        case MODE_COMPATIBILITY:
         default:
-            score += is_888 ? 30 : 0;
             score += alpha >= 8 ? 10 : 0;
-            score += stencil >= 8 ? 2 : 0;
             break;
     }
 
@@ -292,59 +298,112 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
         return config;
     }
 
-    // Lite skips alpha; performance asks for at least RGB565 so 16-bit configs qualify.
-    EGLint attributes[32];
-    int index = 0;
-    attributes[index++] = EGL_BLUE_SIZE;
-    attributes[index++] = (mode == MODE_PERFORMANCE) ? 5 : 8;
-    attributes[index++] = EGL_GREEN_SIZE;
-    attributes[index++] = (mode == MODE_PERFORMANCE) ? 6 : 8;
-    attributes[index++] = EGL_RED_SIZE;
-    attributes[index++] = (mode == MODE_PERFORMANCE) ? 5 : 8;
-    if (mode != MODE_LITE && mode != MODE_PERFORMANCE) {
-        attributes[index++] = EGL_ALPHA_SIZE;
-        attributes[index++] = 8;
+    // AetherRender's own selection always requires RGB888: a 16-bit window buffer is what
+    // made the world render white on several Android compositors.
+    const EGLint stock_attributes[] = {
+            EGL_BLUE_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_RED_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
+            EGL_DEPTH_SIZE, 24,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+            EGL_RENDERABLE_TYPE, required_renderable_bit(),
+            EGL_NONE
+    };
+
+    if (!aether_render_enabled() || mode_is_stock_egl(mode)) {
+        EGLConfig config = choose_stock(display, stock_attributes, out_format);
+        if (!g_config_logged) {
+            __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
+                                "EGL config: stock path (mode=%s)", mode_name(mode));
+            g_config_logged = 1;
+        }
+        return config;
     }
-    attributes[index++] = EGL_DEPTH_SIZE;
-    attributes[index++] = 24;
-    attributes[index++] = EGL_SURFACE_TYPE;
-    attributes[index++] = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
-    attributes[index++] = EGL_RENDERABLE_TYPE;
-    attributes[index++] = required_renderable_bit();
-    attributes[index] = EGL_NONE;
+
+    // Compatibility is the only relaxed policy: it still needs 8-bit RGB, but accepts a
+    // 16-bit depth and a missing alpha/stencil buffer so a strict driver can still start.
+    const bool relaxed = mode == MODE_COMPATIBILITY;
+
+    // Balanced asks for the full layout Minecraft's normal and "Fabulous" modes use:
+    // 8-bit RGBA, 24-bit depth, 8-bit stencil.
+    const EGLint with_stencil[] = {
+            EGL_BLUE_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_RED_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
+            EGL_DEPTH_SIZE, 24,
+            EGL_STENCIL_SIZE, 8,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+            EGL_RENDERABLE_TYPE, required_renderable_bit(),
+            EGL_NONE
+    };
+    // Some drivers expose no stencil config at all; retry without it instead of failing.
+    const EGLint without_stencil[] = {
+            EGL_BLUE_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_RED_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
+            EGL_DEPTH_SIZE, 24,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+            EGL_RENDERABLE_TYPE, required_renderable_bit(),
+            EGL_NONE
+    };
+    const EGLint relaxed_attributes[] = {
+            EGL_BLUE_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_RED_SIZE, 8,
+            EGL_DEPTH_SIZE, 16,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+            EGL_RENDERABLE_TYPE, required_renderable_bit(),
+            EGL_NONE
+    };
+
+    const EGLint *primary = relaxed ? relaxed_attributes : with_stencil;
+    const EGLint *secondary = relaxed ? stock_attributes : without_stencil;
 
     EGLConfig configs[64];
     EGLint num_configs = 0;
+    bool stencil_required = !relaxed;
     if (eglChooseConfig_p == NULL ||
-        eglChooseConfig_p(display, attributes, configs, 64, &num_configs) != EGL_TRUE ||
+        eglChooseConfig_p(display, primary, configs, 64, &num_configs) != EGL_TRUE ||
         num_configs <= 0) {
-        __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
-                            "No config for mode=%s, falling back to balanced attributes",
-                            mode_name(mode));
-        const EGLint fallback[] = {
-                EGL_BLUE_SIZE, 8,
-                EGL_GREEN_SIZE, 8,
-                EGL_RED_SIZE, 8,
-                EGL_ALPHA_SIZE, 8,
-                EGL_DEPTH_SIZE, 24,
-                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-                EGL_RENDERABLE_TYPE, required_renderable_bit(),
-                EGL_NONE
-        };
-        return choose_stock(display, fallback, out_format);
+        if (!relaxed) {
+            __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
+                                "No stencil config for mode=%s, retrying without stencil",
+                                mode_name(mode));
+        }
+        stencil_required = false;
+        num_configs = 0;
+        if (eglChooseConfig_p == NULL ||
+            eglChooseConfig_p(display, secondary, configs, 64, &num_configs) != EGL_TRUE ||
+            num_configs <= 0) {
+            __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
+                                "No config for mode=%s, falling back to stock attributes",
+                                mode_name(mode));
+            return choose_stock(display, stock_attributes, out_format);
+        }
     }
 
     EGLConfig chosen = configs[0];
     long best_score = LONG_MIN;
     for (EGLint i = 0; i < num_configs; i++) {
-        long score = score_config(display, configs[i], mode);
+        long score = score_config(display, configs[i], mode, stencil_required, relaxed);
         if (score != LONG_MIN && score > best_score) {
             best_score = score;
             chosen = configs[i];
         }
     }
+    if (best_score == LONG_MIN) {
+        // eglChooseConfig returned candidates, but none survived our own checks (e.g. an
+        // RGB565-only driver). Never hand out a config the game cannot render with.
+        __android_log_print(ANDROID_LOG_WARN, AETHER_LOG_TAG,
+                            "No config passed validation for mode=%s, using stock attributes",
+                            mode_name(mode));
+        return choose_stock(display, stock_attributes, out_format);
+    }
 
-    EGLint visual = 0, depth = 0, alpha = 0, red = 0, green = 0, blue = 0;
+    EGLint visual = 0, depth = 0, alpha = 0, red = 0, green = 0, blue = 0, stencil = 0;
     EGLint samples = 0, sample_buffers = 0;
     if (eglGetConfigAttrib_p != NULL) {
         eglGetConfigAttrib_p(display, chosen, EGL_NATIVE_VISUAL_ID, &visual);
@@ -353,6 +412,7 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
         eglGetConfigAttrib_p(display, chosen, EGL_RED_SIZE, &red);
         eglGetConfigAttrib_p(display, chosen, EGL_GREEN_SIZE, &green);
         eglGetConfigAttrib_p(display, chosen, EGL_BLUE_SIZE, &blue);
+        eglGetConfigAttrib_p(display, chosen, EGL_STENCIL_SIZE, &stencil);
         eglGetConfigAttrib_p(display, chosen, EGL_SAMPLES, &samples);
         eglGetConfigAttrib_p(display, chosen, EGL_SAMPLE_BUFFERS, &sample_buffers);
     }
@@ -360,8 +420,8 @@ EGLConfig aether_render_choose_config(EGLDisplay display, EGLint *out_format) {
 
     if (!g_config_logged) {
         __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
-                            "EGL config: mode=%s rgb=%d/%d/%d alpha=%d depth=%d samples=%d sample_buffers=%d visual=0x%x",
-                            mode_name(mode), red, green, blue, alpha, depth,
+                            "EGL config: mode=%s rgb=%d/%d/%d alpha=%d depth=%d stencil=%d samples=%d sample_buffers=%d visual=0x%x",
+                            mode_name(mode), red, green, blue, alpha, depth, stencil,
                             samples, sample_buffers, visual);
         g_config_logged = 1;
     }
@@ -377,7 +437,7 @@ void aether_render_on_surface_created(EGLDisplay display, EGLSurface surface) {
     apply_swap_interval(display, surface);
 
     const AetherMode mode = aether_mode();
-    if (mode_is_stock_egl(mode)) {
+    if (mode_skips_hints(mode)) {
         if (!g_surface_logged) {
             __android_log_print(ANDROID_LOG_INFO, AETHER_LOG_TAG,
                                 "Surface hints disabled (mode=%s)", mode_name(mode));

@@ -42,8 +42,8 @@ data class AetherGpuPreset(
  * AetherRender 3 — per-GPU starting points for the parts named in the 3.0 spec.
  *
  * Rules that keep this honest:
- *  - the EGL mode is always [AetherRenderMode.BALANCED]; 16-bit colour is never forced,
- *    because banding is a visible regression on good panels;
+ *  - the EGL mode is always [AetherRenderMode.BALANCED]; a 16-bit or stencil-less window
+ *    surface is never requested (it rendered the world white on affected drivers);
  *  - unknown GPUs get [AetherTuning.CORE_DEFAULT] so the launcher does not invent
  *    optimisation its author cannot test;
  *  - entry-level parts (Mali-G57/G68, common on 3–4 GB phones) get the memory preset

@@ -3210,15 +3210,11 @@
     <string name="aether_render_mode_summary">EGL policy for the AetherRender renderer. Applies on the next game launch.</string>
     <string name="aether_render_mode_native">Aether Native (stock EGL)</string>
     <string name="aether_render_mode_balanced">Aether Balanced</string>
-    <string name="aether_render_mode_lite">Aether Lite (no alpha/stencil)</string>
-    <string name="aether_render_mode_performance">Aether Performance (16-bit colour)</string>
-    <string name="aether_render_mode_compatibility">Aether Compatibility (stock EGL)</string>
-    <string name="aether_render_mode_note">Lite and Performance change the EGL surface only; they do not change Minecraft\'s chunk renderer. Performance may cause colour banding. No FPS is promised.</string>
+    <string name="aether_render_mode_compatibility">Aether Compatibility (relaxed EGL)</string>
+    <string name="aether_render_mode_note">AetherRender never requests a 16-bit or stencil-less window buffer; both made the world render white on affected devices. It changes the EGL surface only, not Minecraft\'s chunk renderer. No FPS is promised.</string>
     <string name="aether_render_mode_native_desc">No AetherRender EGL changes; useful when a driver update breaks the tuned path.</string>
-    <string name="aether_render_mode_balanced_desc">Default: no multisampling, 8-bit colour, 24-bit depth and a discard-after-swap hint.</string>
-    <string name="aether_render_mode_lite_desc">Also prefers opaque, stencil-free surfaces to reduce per-pixel state and memory.</string>
-    <string name="aether_render_mode_performance_desc">Opt-in 16-bit RGB565 window format; saves bandwidth but may band colours.</string>
-    <string name="aether_render_mode_compatibility_desc">Stock EGL selection plus no surface hints, kept for support reports.</string>
+    <string name="aether_render_mode_balanced_desc">Default: 8-bit RGBA, 24-bit depth, an 8-bit stencil buffer (needed by Fabulous), no multisampling and a discard-after-swap hint.</string>
+    <string name="aether_render_mode_compatibility_desc">Relaxed selection for drivers with no 24-bit depth or stencil config: still 8-bit RGB, 16-bit depth allowed. No surface hints.</string>
     <!-- AetherRender 3: core tuning + VSync + Mali profiles -->
     <string name="aether_tuning_title">AetherRender core tuning</string>
     <string name="aether_tuning_summary">Presets for the bundled NG-GL4ES core. Applies on the next game launch.</string>
@@ -3244,12 +3240,11 @@
 
     <!-- AetherRender 3: crash recovery -->
     <string name="renderer_recovery_title">Launch recovery</string>
-    <string name="renderer_recovery_summary">Written by real launch results: a failed launch switches to a safer renderer, a successful one is remembered per version.</string>
-    <string name="renderer_recovery_switched">%1$s did not finish; the launcher switched to %2$s.</string>
+    <string name="renderer_recovery_summary">Written by real launch results. A failed launch only suggests a safer renderer; nothing changes automatically. A successful launch is remembered per version.</string>
+    <string name="renderer_recovery_suggested">%1$s did not finish. Suggested safer renderer: %2$s.</string>
     <string name="renderer_recovery_no_fallback">%1$s did not finish and no safer renderer is left. Check the log before launching again.</string>
     <string name="renderer_recovery_version">Version: %1$s</string>
     <string name="renderer_recovery_dismiss">Understood</string>
-    <string name="renderer_recovery_restore_aether">Switch back to AetherRender</string>
     <string name="renderer_recovery_last_good">Last successful launch: %1$s with %2$s</string>
 
     <!-- AetherUI 3.0: home hero card + widget gallery -->
@@ -3310,4 +3305,13 @@
     <string name="aether_history_verdict_worse">The newer session is worse on both metrics.</string>
     <string name="aether_history_verdict_mixed">Mixed: one metric improved while the other got worse.</string>
     <string name="aether_history_verdict_same">Both sessions are within measurement tolerance (1 FPS / 0.5%% jank).</string>
+    <!-- AetherLite 3.0.1: recovery is advisory; memory failures are reported separately -->
+    <string name="renderer_recovery_unknown">The previous session did not close normally. The renderer was not changed; switch it manually only if the game keeps crashing.</string>
+    <string name="renderer_recovery_memory">The last session ended with an out-of-memory error while the game heap was %1$d MB.</string>
+    <string name="renderer_recovery_memory_recommend">Recommended heap for this instance: %1$d MB.</string>
+    <string name="renderer_recovery_memory_no_room">This device cannot safely give the game more memory. Close background apps or lower the render distance.</string>
+    <string name="renderer_recovery_apply_memory">Set %1$d MB</string>
+    <string name="renderer_recovery_suggest_switch">Switch to %1$s</string>
+    <string name="aether_launch_health_low_allocation">%1$d mods are installed but the game heap is only %2$d MB. Modpacks this size often run out of memory; %3$d MB is recommended.</string>
+    <string name="aether_launch_health_increase_and_launch">Set %1$d MB and launch</string>
 </resources>

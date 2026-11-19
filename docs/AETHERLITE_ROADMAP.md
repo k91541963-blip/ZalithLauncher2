@@ -92,6 +92,7 @@
 | `de55df2` | Yinelenen dize düzeltmesi | ✅ CI 44262769558, 109/109 test, APK yayınlandı |
 | `a96dfc1` | Aşama 3C: çökme kurtarma + sürüm başına son çalışan renderer | ✅ CI 44268954010, 120/120 test, APK yayınlandı |
 | `92f7b60` | Aşama 3B: ana ekran kahraman kartı + son dünya/oturum + widget galerisi | ✅ CI 44271299158, 133/133 test, APK yayınlandı |
+| `848eacf` + `dc03735` | Aşama 3D: oturum geçmişi, karşılaştırma, öneri danışmanı | ✅ CI 44274517130, 163/163 test |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
@@ -130,7 +131,7 @@ APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
 | **3A** | AetherRender 3 çekirdek ön ayarları (batching/VBO/16-bit doku), gerçek VSync, Mali modeline göre öneri kartı; AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal) | ✅ CI 44262769558, 109/109 test |
 | **3B** | Ana ekran 3.0: büyük karakter kartı, seçili sürüm/modpack/son dünya, Play, son oturumlar; widget ekle/kaldır/taşı/boyutlandır + düzen kaydı | ✅ CI 44271299158, 133/133 test |
 | **3C** | AetherRender 3 derinlik: çökme sonrası otomatik geri dönüş, sürüm başına son çalışan renderer, seçilen EGL config dökümü | ✅ CI 44268954010, 120/120 test |
-| **3D** | Performans AI: ölçüme dayalı bulgular (CPU/GPU darboğazı, bellek artışı, shader takılması) + kullanıcı onaylı uygulama; oturum geçmişi ve karşılaştırma | ⏳ |
+| **3D** | Performans AI: ölçüme dayalı bulgular (CPU/GPU darboğazı, bellek artışı, shader takılması) + kullanıcı onaylı uygulama; oturum geçmişi ve karşılaştırma | ✅ CI 44274517130, 163/163 test |
 | **3E** | Mod Hub: güncelleme denetimi, uyumsuz mod uyarısı, `.mrpack` dışa aktarma; World Manager: toplu yedek/geri yükleme, içe/dışa aktarma | ⏳ |
 | **3F** | Overlay 3.0 (taşı/boyutlandır/şeffaflık, panel seçimi) ve AetherTouch 3.0 (profil içe/dışa aktarma, tek elle düzen) | ⏳ |
 | **3G** | Skin Studio, Java Manager yenilemesi, Download Center kuyruğu, Notification Center | ⏳ |
@@ -182,10 +183,50 @@ Cihaz doğrulaması yapılmadı: gerçek bir native çökme üretilip zincirin c
 çalıştığı gösterilmedi. Birim testleri karar tablosunu ve dosya yaşam döngüsünü
 doğrular; bu, cihaz kanıtı yerine geçmez.
 
+3D'de eklenenler:
+
+- **Oturum geçmişi** (`SessionHistoryStore`): `last_session.json` korunur, ayrıca en
+  fazla 20 özet giriş tutulur. Girişler FPS kovaları içermez (dosya şişmesin diye);
+  sürüm, süre, p50/p95/%1 low/jank, CPU/GPU/RAM ve renderer adı saklanır. Bozuk dosya
+  okunamazsa geçmiş boş kabul edilir, başlatma durmaz.
+- **Karşılaştırma** (`SessionComparison`): iki oturumu aynı metrikler üzerinden
+  kıyaslar; ölçülmemiş alan "ölçülmedi" olarak kalır, uydurma değer üretilmez.
+- **Danışman** (`PerformanceAdvisor`): yalnızca ölçülen sinyallerden (CPU baskın, GPU
+  baskın, bellek artışı, shader derleme takılması) bulgu çıkarır ve yalnızca **var
+  olan** ayarları önerir (`AetherTuning.THROUGHPUT`/`MEMORY_SAVER`, VSync kapatma).
+  Hiçbir öneri otomatik uygulanmaz; kullanıcı onayı gerekir. FPS artışı iddia edilmez.
+- Performans Merkezi geçmişi ve karşılaştırmayı gösterir. Cihazda oyun içi ölçümle
+  doğrulanmadı; birim testleri (23 yeni test) mantığı doğrular.
+
+### 3.0.1 — Bildirilen üç hatanın düzeltmesi
+
+1. **"Yetersiz bellek" / oyuna girememe**: `LaunchLogClassifier` `latest.log`
+   kuyruğunda (son 256 KB) OOM izlerini arar. OOM artık renderer hatası sayılmaz:
+   `RecoveryReason.MEMORY` olayı yazılır, renderer değiştirilmez ve heap önerisi
+   gösterilir. Başlatma öncesinde `LaunchHealthCheck`, mod sayısına göre taban uygular
+   (1 mod → 2048 MB, ≥10 → 2560 MB, ≥30 → 3072 MB) ve cihazın güvenli üst sınırını
+   aşmaz; kullanıcı "N MB yap ve başlat" veya "Yine de başlat" seçer.
+2. **Renderer'ın kendiliğinden GL4ES'e geçmesi**: kurtarma akışı artık hiçbir koşulda
+   renderer ayarını yazmaz. Sıfırdan farklı çıkışta yalnızca öneri üretilir; uygulama
+   açılışında kalan deneme `UNKNOWN` olarak raporlanır. Geçiş, ayarlardaki kurtarma
+   kartından kullanıcı onayıyla yapılır.
+3. **AetherRender'da beyaz dünya**: pencere için EGL config artık **RGB888 + alpha 8 +
+   depth 24 + stencil 8** olmak zorunda (Minecraft'ın "Fabulous" geçişi stencil ister).
+   RGB565, alfasız ve şablonsuz istek yolları kaldırıldı; sürücü stencil sunmuyorsa bir
+   kez şablonsuz denenir, o da yoksa stok yola dönülür. Bu nedenle gerçek etkisi yalnızca
+   o hatalı yüzey olan **Lite** ve **Performance** modları kaldırıldı; eski
+   `AETHER_RENDER_MODE=lite|performance` değerleri `balanced` olarak yorumlanır.
+
+Bu üç düzeltme derleme ve birim testleriyle doğrulanabilir; **Mali cihazda yeniden
+üretim testi yapılmadı**. Beyaz dünya sürerse `adb logcat -s AetherRender` çıktısındaki
+`EGL config: ... stencil=...` satırı ve `latest.log` kuyruğu gerekir.
+
 ## 8. Sonraki Adımlar (öncelik sırası)
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
-2. Çökme kurtarma zincirini cihazda gerçek bir başlatma hatasıyla doğrula (3C kodu hazır).
+2. 3.0.1 düzeltmelerini aynı cihazda doğrula: 50 modlu 26.2 kurulumunda OOM guard'ı,
+   beyaz dünya için `EGL config` stencil satırı ve renderer'ın kendiliğinden
+   değişmediği.
 3. Oturum geçmişi + karşılaştırma (3D) ve kahraman kartındaki son oturum satırını
    geçmişle besle.
 4. Oyun içi overlay'e `%1 low` ve P99 kare süresi satırlarını ekle (AetherMetrics

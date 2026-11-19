@@ -33,9 +33,10 @@ import com.movtery.zalithlauncher.setting.enums.AetherRenderMode
  * separate "GL4ES" renderer for legacy versions and GLES 2 devices.
  *
  * AetherRender adds a native EGL layer (`jni/aetherrender/aether_render.c`) that:
- *  - picks a tile-GPU friendly EGL config (no MSAA, 24-bit depth),
+ *  - picks a tile-GPU friendly EGL config (8-bit RGBA, 24-bit depth, 8-bit stencil,
+ *    no MSAA) so Minecraft's normal and "Fabulous" modes both composite correctly,
  *  - asks the driver to discard the back buffer after swap on tile-based GPUs,
- *  - applies one of five honest, selectable EGL policies (see [AetherRenderMode]),
+ *  - applies one of three honest, selectable EGL policies (see [AetherRenderMode]),
  *  - records real frame times for the session report (`aether_metrics.c`),
  *  - logs the real GL strings for support reports.
  *
