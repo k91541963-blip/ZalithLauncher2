@@ -42,6 +42,9 @@ object LaunchLogClassifier {
     private val OUT_OF_MEMORY_MARKERS = listOf(
         "outofmemoryerror",
         "java heap space",
+        // Minecraft's own crash screen uses "has run out of memory"; older logs and some
+        // mods use "ran out of memory".
+        "run out of memory",
         "ran out of memory",
         "gl_out_of_memory"
     )
