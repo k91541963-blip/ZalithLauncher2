@@ -93,6 +93,7 @@
 | `a96dfc1` | Aşama 3C: çökme kurtarma + sürüm başına son çalışan renderer | ✅ CI 44268954010, 120/120 test, APK yayınlandı |
 | `92f7b60` | Aşama 3B: ana ekran kahraman kartı + son dünya/oturum + widget galerisi | ✅ CI 44271299158, 133/133 test, APK yayınlandı |
 | `848eacf` + `dc03735` | Aşama 3D: oturum geçmişi, karşılaştırma, öneri danışmanı | ✅ CI 44274517130, 163/163 test |
+| `5953ec5` + `175908d` | 3.0.1: OOM sınıflandırma + heap guard, öneri tabanlı kurtarma, beyaz dünya için EGL güvenliği | ✅ CI 44477628757, 186/186 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 

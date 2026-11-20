@@ -10,8 +10,11 @@
   EGL seçimi, yüzey politikası, gerçek çekirdek ayar ön ayarları, `eglSwapInterval`
   ile VSync, Mali modeline göre öneri, telemetri)
 - AetherRender 3 çökme kurtarma: başlatma öncesi deneme kaydı, çıkış kodu 0 = başarı,
-  başarısızlıkta güvenli renderer zinciri (AetherRender → Krypton Wrapper → GL4ES →
-  dur) ve sürüm başına "son çalışan renderer" kaydı
+  OOM/gölge bellek hatasında `MEMORY`, raporlanmayan çıkışta `UNKNOWN`; **hiçbir
+  durumda otomatik renderer değişimi yok**, yalnızca kullanıcı onaylı öneri ve sürüm
+  başına "son çalışan renderer" kaydı
+- 3.0.1 bellek koruması: `latest.log` kuyruğunda OOM sınıflandırma, mod sayısına göre
+  heap önerisi ve yoğun mod paketlerinde başlatma öncesi uyarı
 - AetherUI 3.0 ana ekran: kahraman kartı (hesap + seçili sürüm + son dünya + son
   oturum + gerçek Play koşulu), widget galerisi (sürüm/sunucu kartı ekleme)
 - AetherUI 3.0 tema motoru (Titan Dark, Cyber Purple, Arctic Blue, Minimal + mevcut
@@ -33,23 +36,29 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **133 test, 0 başarısız** (CI çalışması
-[44271299158](https://github.com/k91541963-blip/Zlc/actions/runs/44271299158),
-kaynak commit `92f7b60`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
-Test dosyalarındaki `@Test` sayımı 133'tür ve CI aynı filtrelerle yeşildir.
+Sonuç: **186 test, 0 başarısız** (CI çalışması
+[44477628757](https://github.com/k91541963-blip/Zlc/actions/runs/44477628757),
+kaynak commit `175908d`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
+Test dosyalarındaki `@Test` sayımı 186'dır ve CI aynı filtrelerle yeşildir.
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 100 | ✅ geçti |
+| `game.performance` | 153 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **133** | ✅ **geçti** |
+| **Toplam** | **186** | ✅ **geçti** |
 
 Aşama 3C'de CI iki gerçek hata yakaladı ve ikisi de düzeltildi:
 `44266581823` — TR dizelerinde kaçırılmamış kesme işareti (`aapt2`
 `mergeDebugResources` hatası), `44267725095` — kurtarma testinde kalan
 `storeFileRoot` referansı ve "son çalışan" kaydını yanlış sürümde tutan beklenti.
 Düzeltmeler `f7ced04`, `b727757`, `a96dfc1`.
+
+3.0.1 hata düzeltme paketinde CI yine gerçek bir hata yakaladı:
+`44476561826` — `186 testten 1'i` kaldı çünkü Minecraft'ın kendi ekran metni
+"has **run** out of memory"; sınıflandırıcıda yalnızca "ran out of memory"
+marker'ı vardı. Her iki metin de eklendi (`175908d`) ve `44477628757` yeşil
+kapandı.
 
 İlk AetherLite CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
 `parseMaliModel("Mali-T860 MP4")` çekirdek sayısını koruyor ve `classifyMali`
@@ -85,12 +94,23 @@ Yeni eklenenler:
   olmayan klasörün yok sayılması, sıralama/limit, eksik `saves` klasörü, sunucu
   adresi doğrulama (host/port kabul; boşluk, şema, baştaki/sondaki iki nokta ve
   aşırı uzunluk reddi), ad boşken adresin kullanılması (13 test)
-- `RendererRecoveryTest` — GLES 3'te AetherRender→Krypton Wrapper, GLES 2'de
-  AetherRender→GL4ES, zincirin GL4ES'te bitmesi, kimlik eşlemesi, denemenin
+- `RendererRecoveryTest` — öneri zinciri (AetherRender→Krypton Wrapper, GLES 2'de
+  AetherRender→GL4ES, zincirin GL4ES'te bitmesi), kimlik eşlemesi, denemenin
   çözülene kadar okunması, çıkış kodu 0'da denemenin silinmesi ve son çalışanın
-  yazılması, başarısızlıkta olay + güvenli geri dönüş, sayaç artışı/sıfırlanması,
-  olayın kapatılması, başarısız sürümün "son çalışan" kaydını kaybetmesi,
-  kayıt yokken hiçbir şey üretilmemesi (11 test)
+  yazılması, `RENDERER` olayında öneri + sayaç artışı/sıfırlanması, olayın
+  kapatılması, başarısız sürümün "son çalışan" kaydını kaybetmesi, kayıt yokken
+  hiçbir şey üretilmemesi, **`MEMORY` olayının renderer önermemesi ve sayaç/son
+  çalışanı bozmaması**, **`UNKNOWN` (kalan deneme) olayının öneri üretmemesi** (15 test)
+- `MemoryRecommendationTest` — mod sayısına göre heap tabanı (1/10/30 eşikleri),
+  50 modda 2048→3072 önerisi, yeterli heap'te sessiz kalma, küçük artışın
+  önerilmemesi, cihaz üst sınırına kırpma, kullanılamaz üst sınırda öneri yok,
+  64 MB adımına yuvarlama, `mods/` sayımının büyük/küçük harf duyarsız ve yalnız
+  `.jar` olması, eksik klasörde 0 (10 test)
+- `LaunchLogClassifierTest` — `OutOfMemoryError`/`Java heap space`, Minecraft'ın
+  "has run out of memory" ve eski "ran out of memory" metni, `GL_OUT_OF_MEMORY`,
+  sıradan hataların OOM sayılmaması, yalnızca son 256 KB'ın okunması (eski çalıştırmanın
+  izinin yok sayılması), kısa logun tamamının okunması, eksik/dizin dosyada
+  istisna atmama, sıfır pencere reddi (9 test)
 
 ## 3. Derleme
 
@@ -103,8 +123,8 @@ APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.519.752 bayt (≈206,5 MiB) |
-| SHA-256 | `787763e6c754f6c9e544ce028341e009d0339516b23eaeaff00d0a6d7026d779` |
+| Boyut | 216.596.928 bayt (≈206,6 MiB) |
+| SHA-256 | `a9f439c688039a6293fdc73c450c8a9e0b5651526625fbc252db05d9d5e7ce5a` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -114,7 +134,10 @@ APK içeriği doğrulandı:
 - `lib/arm64-v8a/libpojavexec.so` içinde `aether_render_choose_config`,
   `aether_render_on_surface_created`, `aether_render_on_context_created`,
   `AETHER_RENDER`, `AETHER_RENDER_MODE`, `AetherRender`, `EGL_BUFFER_DESTROYED`,
-  `performance` ve `compatibility` dizeleri mevcut.
+  `EGL config: mode=%s rgb=%d/%d/%d alpha=%d depth=%d stencil=%d ...`,
+  `No stencil config for mode=%s, retrying without stencil` ve
+  `No config passed validation for mode=%s, using stock attributes` dizeleri mevcut.
+  `RGB565` dizesi **yok** → 16-bit yolu derlemeden kaldırılmış.
 - Aynı kitaplıkta `aether_metrics_on_frame`, `aether_metrics_copy`,
   `aether_metrics_reset`, `Java_org_lwjgl_glfw_CallbackBridge_getFrameTimeSamples`
   ve `..._resetFrameTimeSamples` sembolleri mevcut (gerçek kare süresi ölçümü).
@@ -140,6 +163,14 @@ APK içeriği doğrulandı:
 - DEX içinde `RendererRecovery`, `RendererRecoveryStore`, `RendererRecoveryStartup`,
   `renderer_recovery` ve kurtarma dosya adları (`pending.properties`,
   `last_good.properties`) var → kurtarma kodu gerçekten paketlenmiş.
+- DEX içinde `RecoveryReason`, `MemoryRecommendation` ve `LaunchLogClassifier`
+  sınıfları var → 3.0.1 bellek/OOM yolu paketlenmiş.
+- `resources.arsc` içinde `aether_launch_health_low_allocation`,
+  `renderer_recovery_memory` ve `renderer_recovery_apply_memory` dizeleri var;
+  kaldırılan `aether_render_mode_lite`, `aether_render_mode_performance` ve
+  `renderer_recovery_switched` dizeleri **yok**.
+- DEX içinde `SessionHistoryStore`, `PerformanceAdvisor` ve `SessionComparison`
+  var → 3D kodu paketlenmiş.
 - ZIP bütünlüğü bozuk giriş içermiyor (`unzip -t`: "No errors detected").
 - SHA-256, GitHub release `digest` alanıyla birebir eşleşiyor.
 - Manifest paket adı ve etiketi yukarıdakiyle aynı; APK v2/v3 imza bloğu mevcut
@@ -180,8 +211,16 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   üretir; mod değişikliği launcher'ı yeniden başlatmayı gerektirmez (kod + test).
 - `aether_render_choose_config()` `AETHER_RENDER` yokken ilk uygun config'i
   döndürür → mevcut davranış korunur (kod incelemesi).
-- `native`/`compatibility` modları stok EGL'ye ve yüzey ipucu yokluğuna düşer;
-  moda özel istek boş dönerse dengeli attribute setine geçilir (kod).
+- `native` modu stok EGL'ye; `compatibility` modu gevşek (RGB888 zorunlu, depth ≥16,
+  isteğe bağlı alpha/stencil) seçime düşer; moda özel istek boş dönerse stok
+  attribute setine geçilir (kod).
+- Pencere için EGL config **RGB888 + alpha 8 + depth 24 + stencil 8** olmak zorunda;
+  RGB565, alfasız ve şablonsuz yollar kaldırıldı. Stencil sunmayan sürücüde bir kez
+  şablonsuz denenir, o da yoksa stok yola dönülür. Seçilen config
+  `EGL config: ... stencil=...` satırıyla loglanır (kod + `-Wall -Wextra` sözdizimi
+  kontrolü; cihazda doğrulanmadı).
+- `AETHER_RENDER_MODE=lite|performance` eski değerleri yerel katmanda `balanced`'a
+  eşlenir; kayıtlı enum ayarı da bilinmeyen değerde `BALANCED`'a düşer (kod + test).
 - `eglSurfaceAttrib` başarısız olursa yalnızca log; başlatma durmaz (kod).
 - Launcher tarafındaki EGL probe `eglTerminate` çağırmaz → Compose renderer'ı
   etkilenmez (kod incelemesi).
@@ -201,15 +240,24 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
 ## 6. Bilinen Açıklar
 
 - Gerçek cihaz ölçümü yok (Mali-G57/G68/G76/G78 testleri bekliyor).
-- Ana ekran "son oturumlar" **geçmişi** yok; yalnızca son ölçülen oturum gösterilir
-  (`last_session.json`). Geçmiş ve karşılaştırma 3D'de.
+- Ana ekran "son oturumlar" satırı yalnızca son ölçülen oturumu gösterir
+  (`last_session.json`); geçmiş ve karşılaştırma Performans Merkezi'ndedir (3D).
 - Widget galerisi sunucu kartı için adres doğrular, ancak erişilebilirliği burada
   ölçmez; kart kendi ping sonucunu gösterir.
 - Dünya adı `level.dat` NBT'sinden değil klasör adından okunur.
-- Otomatik çökme sonrası renderer geri dönüşü **kod olarak var** (3C) ve birim
-  testleriyle doğrulandı, ancak gerçek bir native çökme/LMK senaryosunda cihazda
-  denenmedi. Zincir AetherRender → Krypton Wrapper → GL4ES → dur; bilinmeyen
+- Çökme sonrası kurtarma **kod olarak var** (3C) ve birim testleriyle doğrulandı;
+  3.0.1'de yalnızca öneri üretecek şekilde daraltıldı ve renderer ayarını hiçbir
+  koşulda otomatik yazmıyor. Gerçek bir native çökme/LMK senaryosunda cihazda
+  denenmedi. Öneri zinciri AetherRender → Krypton Wrapper → GL4ES → dur; bilinmeyen
   renderer'lar da güvenli çekirdeğe düşer.
+- **Beyaz dünya düzeltmesi cihazda yeniden üretilmedi.** Kod, EGL config'i RGB888 +
+  depth 24 + stencil 8 ile sınırlıyor ve 565/şablonsuz yolu kaldırıyor; ancak bunun
+  Mali sürücüsünde beyaz dünyayı gerçekten bitirdiği bir cihaz testiyle
+  gösterilmedi. Beyaz dünya sürerse `adb logcat -s AetherRender` çıktısındaki
+  `EGL config: ... stencil=` satırı ve `latest.log` kuyruğu gerekir.
+- **OOM guard'ı cihazda denenmedi.** Sınıflandırma ve heap önerisi birim testleriyle
+  doğrulandı; 50 modlu gerçek bir 26.2 kurulumunda "N MB yap ve başlat" akışının
+  oyunu başlattığı gösterilmedi.
 - Modpack dışa aktarma ve tam dosya doğrulama yok.
 - AetherRender 2.1 NG-GL4ES çekirdeğini kullanır ve `26.3-snapshot-3` aralığını beyan
   eder; ancak bu aralık gerçek cihazda 26.3 ile denenmediği için "doğrulandı"
@@ -218,18 +266,20 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   kalır ve launcher tarafından güvenle okunamaz.
 - Oyun içi overlay henüz %1 low/P99 satırlarını göstermiyor; aynı AetherMetrics
   örnekleri mevcut, arayüz işi yol haritasında.
-- Oturum özeti tek dosyadır (`last_session.json`); geçmiş oturum listesi yok.
-- **AetherLite 3.0 spec'inin bu dilimde olmayan bölümleri:** Ana ekran 3.0 yeniden
-  tasarımı ve widget sistemi, oyun içi Overlay 3.0, Mod Hub güncelleme denetimi,
-  World Manager eklemeleri, Skin Studio, Java Manager yenilemesi, Download Center
-  kuyruğu, Notification Center, Plugin API ve modüler Gradle ayrımı. Bunlar
-  `AETHERLITE_ROADMAP.md` içinde aşamalara bağlanmıştır; bu raporda "yapıldı"
-  sayılmazlar.
+- Oturum geçmişi en fazla 20 özet giriş tutar ve FPS kovalarını saklamaz; tam
+  kare verisi yalnızca `last_session.json` içindedir.
+- **AetherLite 3.0 spec'inin bu dilimde olmayan bölümleri:** oyun içi Overlay 3.0,
+  Mod Hub güncelleme denetimi, World Manager eklemeleri, Skin Studio, Java Manager
+  yenilemesi, Download Center kuyruğu, Notification Center, Plugin API ve modüler
+  Gradle ayrımı. Bunlar `AETHERLITE_ROADMAP.md` içinde aşamalara bağlanmıştır; bu
+  raporda "yapıldı" sayılmazlar.
 - AetherRender 3 ön ayarlarının (batching/VBO/16-bit doku) gerçek etkisi cihazda
   ölçülmedi; yalnızca çekirdeğin bu değişkenleri okuduğu ve ortama yazıldığı
   doğrulandı. FPS/frametime iddiası yoktur.
 
-> Rapor son güncelleme: 2026-11-18, kaynak commit `92f7b60`, CI çalışması
-> [44271299158](https://github.com/k91541963-blip/Zlc/actions/runs/44271299158).
-> APK bu commit ile aynı ağaçtan üretildi ve SHA-256/ZIP/sembol olarak doğrulandı;
-> sonrasında yalnızca bu belge güncellendi.
+> Rapor son güncelleme: 2026-11-20, kaynak commit `175908d`, CI çalışması
+> [44477628757](https://github.com/k91541963-blip/Zlc/actions/runs/44477628757).
+> APK bu commit ile aynı ağaçtan üretildi (216.596.928 bayt, SHA-256
+> `a9f439c6…e7ce5a`); SHA-256 GitHub release `digest` alanıyla birebir eşleşiyor.
+> Cihaz testleri hâlâ yapılmadı; 3.0.1 düzeltmeleri yalnızca derleme, birim testi ve
+> APK sembol/dize kontrolüyle doğrulandı.
