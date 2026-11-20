@@ -95,6 +95,9 @@ import com.movtery.zalithlauncher.game.version.saves.SaveData
 import com.movtery.zalithlauncher.game.version.saves.isCompatible
 import com.movtery.zalithlauncher.game.version.saves.parseLevelDatFile
 import com.movtery.zalithlauncher.game.version.saves.unpackSaveZip
+import com.movtery.zalithlauncher.game.world.RestoreResult
+import com.movtery.zalithlauncher.game.world.WorldArchive
+import com.movtery.zalithlauncher.game.world.WorldBackup
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.base.BaseScreen
@@ -577,13 +580,82 @@ private fun SavesActionsHeader(
                         }
                     )
 
-                    IconButton(
-                        onClick = backupAllSaves
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_archive_filled),
-                            contentDescription = stringResource(R.string.aether_saves_backup_all)
-                        )
+                    Box {
+                        var backupsExpanded by remember { mutableStateOf(false) }
+                        var backups by remember { mutableStateOf<List<WorldBackup>>(emptyList()) }
+                        val restoreContext = LocalContext.current
+                        val restoreScope = rememberCoroutineScope()
+
+                        IconButton(
+                            onClick = {
+                                backups = WorldArchive.listBackups(savesDir)
+                                backupsExpanded = true
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_archive_filled),
+                                contentDescription = stringResource(R.string.aether_saves_backup_all)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = backupsExpanded,
+                            onDismissRequest = { backupsExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(R.string.aether_saves_backup_now)) },
+                                onClick = {
+                                    backupsExpanded = false
+                                    backupAllSaves()
+                                }
+                            )
+                            if (backups.isEmpty()) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = stringResource(R.string.aether_saves_no_backups),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    },
+                                    onClick = {},
+                                    enabled = false
+                                )
+                            } else {
+                                backups.forEach { backup ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = stringResource(
+                                                    R.string.aether_saves_restore_entry,
+                                                    backup.file.nameWithoutExtension,
+                                                    backup.worldNames.size
+                                                )
+                                            )
+                                        },
+                                        onClick = {
+                                            backupsExpanded = false
+                                            restoreScope.launch {
+                                                val result = withContext(Dispatchers.IO) {
+                                                    WorldArchive.restore(backup.file, savesDir)
+                                                }
+                                                val message = when (result) {
+                                                    is RestoreResult.Success -> restoreContext.getString(
+                                                        R.string.aether_saves_restore_done,
+                                                        result.worlds.joinToString(", ")
+                                                    )
+                                                    is RestoreResult.Failure -> restoreContext.getString(
+                                                        R.string.aether_saves_restore_failed
+                                                    )
+                                                }
+                                                Toast.makeText(
+                                                    restoreContext, message, Toast.LENGTH_LONG
+                                                ).show()
+                                                if (result is RestoreResult.Success) refreshSaves()
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     IconTextButton(

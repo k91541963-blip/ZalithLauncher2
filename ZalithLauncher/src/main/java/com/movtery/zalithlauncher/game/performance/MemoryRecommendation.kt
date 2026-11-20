@@ -72,4 +72,59 @@ object MemoryRecommendation {
             file.isFile && file.name.endsWith(".jar", ignoreCase = true)
         } ?: 0
     }
+
+    /** What the user should actually do after an out-of-memory launch. */
+    enum class Kind {
+        /** Raise the heap to [MemoryAdvice.recommendedMb] and retry. */
+        RAISE_HEAP,
+
+        /**
+         * The heap is already at the device's safe maximum (or the failure was in the
+         * GPU/native allocator). A bigger heap is either impossible or useless, so the
+         * honest fix is to lower the world/graphics load.
+         */
+        LOWER_GRAPHICS
+    }
+
+    data class Advice(
+        val kind: Kind,
+        val recommendedMb: Int? = null,
+        /** True when a heap increase was impossible because the device cap was reached. */
+        val atLimit: Boolean = false
+    )
+
+    /**
+     * Chooses between "more heap" and "less world load" from the evidence.
+     *
+     * @param pressure classification of the log tail; [MemoryPressure.GRAPHICS] never
+     *   produces a heap increase because the Java heap is not what ran out.
+     */
+    fun advise(
+        allocatedMb: Int,
+        modCount: Int,
+        maxMb: Int,
+        pressure: MemoryPressure
+    ): Advice {
+        if (pressure == MemoryPressure.GRAPHICS) {
+            return Advice(kind = Kind.LOWER_GRAPHICS)
+        }
+        // A real heap OOM proves the current value is too small even on a vanilla
+        // instance, so fall back to one conservative bump when the mod floor is silent.
+        val recommended = recommendedMb(allocatedMb, modCount, maxMb)
+            ?: postOomIncrease(allocatedMb, maxMb)
+        if (recommended != null) {
+            return Advice(kind = Kind.RAISE_HEAP, recommendedMb = recommended)
+        }
+        // Heap pressure with no safe increase available: the device cap is the limit.
+        val atLimit = maxMb > 0 && allocatedMb >= maxMb - ROUNDING_MB
+        return Advice(kind = Kind.LOWER_GRAPHICS, atLimit = atLimit)
+    }
+
+    /** One 512 MB step (rounded down) after an OOM, never above the device safe maximum. */
+    private fun postOomIncrease(allocatedMb: Int, maxMb: Int): Int? {
+        if (maxMb <= 0) return null
+        val target = minOf(allocatedMb + 512, maxMb)
+        val rounded = (target / ROUNDING_MB) * ROUNDING_MB
+        return rounded.takeIf { it >= allocatedMb + MIN_GAIN_MB }
+    }
 }

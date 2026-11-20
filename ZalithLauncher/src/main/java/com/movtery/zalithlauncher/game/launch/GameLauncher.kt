@@ -174,11 +174,11 @@ class GameLauncher(
         // Exit code 0 means the JVM finished normally; anything else is an abnormal end.
         // Neither case may change the renderer on its own: a memory exhaustion or an LMK
         // kill is not a renderer fault, and a silent downgrade hides the real problem.
-        val outOfMemory = withContext(Dispatchers.IO) {
-            LaunchLogClassifier.logShowsOutOfMemory(version.getLatestLog())
+        val pressure = withContext(Dispatchers.IO) {
+            LaunchLogClassifier.diagnose(version.getLatestLog())
         }
 
-        if (outOfMemory) {
+        if (pressure != null) {
             if (exitCode == 0) {
                 recovery.markSuccess(
                     rendererId = activeRenderer.getRendererId(),
@@ -194,23 +194,25 @@ class GameLauncher(
                 versionName = version.getVersionName(),
                 startedAt = System.currentTimeMillis()
             )
-            val memory = withContext(Dispatchers.IO) {
+            val advice = withContext(Dispatchers.IO) {
                 val allocated = version.getRamAllocation(activity)
                 val modCount = MemoryRecommendation.countMods(version.getGameDir())
                 val maxMb = MemoryAdvisor.advise(HardwareProfile.detect(activity)).maxMb
-                allocated to MemoryRecommendation.recommendedMb(allocated, modCount, maxMb)
+                allocated to MemoryRecommendation.advise(allocated, modCount, maxMb, pressure)
             }
             recovery.handleFailure(
                 attempt = attempt,
                 glEsMajor = RendererRecoveryStartup.detectGlEsMajor(activity),
                 reason = RecoveryReason.MEMORY,
-                allocatedMb = memory.first,
-                recommendedMb = memory.second
+                allocatedMb = advice.first,
+                recommendedMb = advice.second.recommendedMb,
+                pressure = pressure,
+                atLimit = advice.second.atLimit
             )
             Logger.warning(
                 TAG,
-                "Launch ended with an out-of-memory marker (exit $exitCode); " +
-                    "renderer was not changed"
+                "Launch ended with $pressure memory pressure (exit $exitCode); " +
+                    "renderer was not changed, advice=${advice.second.kind}"
             )
         } else if (exitCode == 0) {
             recovery.markSuccess(

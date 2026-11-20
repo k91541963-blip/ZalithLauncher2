@@ -22,6 +22,7 @@ import java.io.File
 import java.nio.file.Files
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -29,6 +30,35 @@ class LaunchLogClassifierTest {
 
     private fun tempFile(name: String = "latest.log"): File =
         File(Files.createTempDirectory("launchlog").toFile(), name)
+
+    @Test
+    fun `java heap exhaustion is reported as heap pressure`() {
+        assertEquals(
+            MemoryPressure.HEAP,
+            LaunchLogClassifier.diagnoseText(
+                "java.lang.OutOfMemoryError: Java heap space\n\tat net.minecraft.client.Minecraft.run"
+            )
+        )
+    }
+
+    @Test
+    fun `gl out of memory is reported as graphics pressure`() {
+        assertEquals(
+            MemoryPressure.GRAPHICS,
+            LaunchLogClassifier.diagnoseText("GL error 0x0505: GL_OUT_OF_MEMORY")
+        )
+        // Confirms the two pools are not confused: a GL failure must not become heap.
+        assertEquals(
+            MemoryPressure.GRAPHICS,
+            LaunchLogClassifier.diagnoseText("eglCreateWindowSurface failed: EGL_BAD_ALLOC")
+        )
+    }
+
+    @Test
+    fun `plain errors have no pressure`() {
+        assertNull(LaunchLogClassifier.diagnoseText("java.lang.NullPointerException"))
+        assertNull(LaunchLogClassifier.diagnoseText(""))
+    }
 
     @Test
     fun `jvm heap exhaustion is recognised`() {

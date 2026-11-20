@@ -21,7 +21,9 @@ package com.movtery.zalithlauncher.game.performance
 import java.io.File
 import java.nio.file.Files
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MemoryRecommendationTest {
@@ -97,5 +99,63 @@ class MemoryRecommendationTest {
     @Test
     fun `missing mods directory means vanilla`() {
         assertEquals(0, MemoryRecommendation.countMods(tempDir()))
+    }
+
+    @Test
+    fun `heap pressure with room proposes a raise`() {
+        val advice = MemoryRecommendation.advise(
+            allocatedMb = 2048,
+            modCount = 50,
+            maxMb = 4096,
+            pressure = MemoryPressure.HEAP
+        )
+
+        assertEquals(MemoryRecommendation.Kind.RAISE_HEAP, advice.kind)
+        assertEquals(3072, advice.recommendedMb)
+        assertFalse(advice.atLimit)
+    }
+
+    @Test
+    fun `heap pressure at the device cap asks for lower graphics instead`() {
+        val advice = MemoryRecommendation.advise(
+            allocatedMb = 3008,
+            modCount = 50,
+            maxMb = 3072,
+            pressure = MemoryPressure.HEAP
+        )
+
+        assertEquals(MemoryRecommendation.Kind.LOWER_GRAPHICS, advice.kind)
+        assertNull(advice.recommendedMb)
+        assertTrue(advice.atLimit)
+    }
+
+    @Test
+    fun `a vanilla heap out of memory still gets one safe bump`() {
+        // floorFor(0) is 0, so the pre-launch path stays silent; after a real OOM the
+        // launcher must still propose something instead of showing no advice at all.
+        val advice = MemoryRecommendation.advise(
+            allocatedMb = 2048,
+            modCount = 0,
+            maxMb = 4096,
+            pressure = MemoryPressure.HEAP
+        )
+
+        assertEquals(MemoryRecommendation.Kind.RAISE_HEAP, advice.kind)
+        assertEquals(2560, advice.recommendedMb)
+    }
+
+    @Test
+    fun `graphics pressure never proposes more heap`() {
+        val advice = MemoryRecommendation.advise(
+            allocatedMb = 2048,
+            modCount = 50,
+            maxMb = 4096,
+            pressure = MemoryPressure.GRAPHICS
+        )
+
+        // More heap would be useless here, even though the number is below the floor.
+        assertEquals(MemoryRecommendation.Kind.LOWER_GRAPHICS, advice.kind)
+        assertNull(advice.recommendedMb)
+        assertFalse(advice.atLimit)
     }
 }

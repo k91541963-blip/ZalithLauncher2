@@ -39,13 +39,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.game.performance.MemoryPressure
+import com.movtery.zalithlauncher.game.performance.MemoryRelief
 import com.movtery.zalithlauncher.game.renderer.recovery.RecoveryReason
 import com.movtery.zalithlauncher.game.renderer.recovery.RendererRecoveryStore
+import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.components.TitleAndSummary
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.CardPosition
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.SettingsCard
+import java.io.File
 
 /**
  * AetherRender 3 — crash recovery card.
@@ -88,11 +92,19 @@ fun RendererRecoveryCard(
             event?.let { failed ->
                 Text(
                     text = when {
-                        failed.reason == RecoveryReason.MEMORY ->
-                            stringResource(
+                        failed.reason == RecoveryReason.MEMORY -> when {
+                            failed.pressure == MemoryPressure.GRAPHICS ->
+                                stringResource(R.string.renderer_recovery_memory_graphics)
+                            failed.atLimit ->
+                                stringResource(
+                                    R.string.renderer_recovery_memory_at_limit,
+                                    failed.allocatedMb ?: 0
+                                )
+                            else -> stringResource(
                                 R.string.renderer_recovery_memory,
                                 failed.allocatedMb ?: 0
                             )
+                        }
                         failed.toName != null ->
                             stringResource(
                                 R.string.renderer_recovery_suggested, failed.fromName, failed.toName
@@ -115,10 +127,15 @@ fun RendererRecoveryCard(
                     val recommended = failed.recommendedMb
                     Text(
                         modifier = Modifier.alpha(0.8f),
-                        text = if (recommended != null) {
-                            stringResource(R.string.renderer_recovery_memory_recommend, recommended)
-                        } else {
-                            stringResource(R.string.renderer_recovery_memory_no_room)
+                        text = when {
+                            recommended != null ->
+                                stringResource(R.string.renderer_recovery_memory_recommend, recommended)
+                            failed.pressure == MemoryPressure.GRAPHICS ->
+                                stringResource(R.string.renderer_recovery_memory_graphics_hint)
+                            failed.atLimit ->
+                                stringResource(R.string.renderer_recovery_memory_at_limit_hint)
+                            else ->
+                                stringResource(R.string.renderer_recovery_memory_no_room)
                         },
                         style = MaterialTheme.typography.labelSmall
                     )
@@ -147,6 +164,19 @@ fun RendererRecoveryCard(
                                         recommended
                                     )
                                 )
+                            }
+                        }
+                        // No safe heap increase (device cap) or a GPU/native failure: the
+                        // only honest lever left is the world/graphics load.
+                        if (failed.recommendedMb == null) {
+                            TextButton(
+                                onClick = {
+                                    applyMemoryRelief(failed.versionName)
+                                    store.dismissEvent()
+                                    revision++
+                                }
+                            ) {
+                                Text(text = stringResource(R.string.renderer_recovery_lower_graphics))
                             }
                         }
                     }
@@ -202,9 +232,7 @@ fun RendererRecoveryCard(
  * override stays per-version; otherwise the global value is updated.
  */
 private fun applyRecommendedRam(versionName: String, mb: Int) {
-    val version = VersionsManager.currentVersion.value
-        ?.takeIf { it.getVersionName() == versionName }
-        ?: VersionsManager.versions.value.find { it.getVersionName() == versionName }
+    val version = resolveVersion(versionName)
 
     val config = version?.getVersionConfig()
     if (config != null && config.ramAllocation >= 256) {
@@ -214,3 +242,18 @@ private fun applyRecommendedRam(versionName: String, mb: Int) {
         AllSettings.ramAllocation.save(mb)
     }
 }
+
+/**
+ * Lowers `renderDistance`/`simulationDistance` (and a fabulous graphics mode) in the
+ * instance's `options.txt`. Only ever lowers values, and does nothing when the file is
+ * missing. The user tapped the button, so no further confirmation is needed.
+ */
+private fun applyMemoryRelief(versionName: String) {
+    val version = resolveVersion(versionName) ?: return
+    MemoryRelief.apply(File(version.getGameDir(), "options.txt"))
+}
+
+private fun resolveVersion(versionName: String): Version? =
+    VersionsManager.currentVersion.value
+        ?.takeIf { it.getVersionName() == versionName }
+        ?: VersionsManager.versions.value.find { it.getVersionName() == versionName }

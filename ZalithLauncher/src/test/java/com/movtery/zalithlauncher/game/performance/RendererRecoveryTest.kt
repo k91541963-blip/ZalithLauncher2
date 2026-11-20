@@ -279,4 +279,47 @@ class RendererRecoveryTest {
         assertEquals(RecoveryReason.RENDERER, event!!.reason)
         assertTrue(event.hasSuggestion)
     }
+
+    @Test
+    fun `memory pressure and the device limit survive a restart`() {
+        val dir = newDir()
+        val store = store(dir)
+        recordAether(store)
+
+        store.handleFailure(
+            attempt = store.pending()!!,
+            glEsMajor = 3,
+            reason = RecoveryReason.MEMORY,
+            allocatedMb = 3008,
+            pressure = MemoryPressure.HEAP,
+            atLimit = true
+        )
+
+        val reopened = store(dir).event()!!
+        assertEquals(RecoveryReason.MEMORY, reopened.reason)
+        assertEquals(MemoryPressure.HEAP, reopened.pressure)
+        assertEquals(3008, reopened.allocatedMb)
+        assertTrue(reopened.atLimit)
+        assertNull(reopened.recommendedMb)
+    }
+
+    @Test
+    fun `graphics pressure is stored separately from heap pressure`() {
+        val dir = newDir()
+        val store = store(dir)
+        recordAether(store)
+
+        store.handleFailure(
+            attempt = store.pending()!!,
+            glEsMajor = 3,
+            reason = RecoveryReason.MEMORY,
+            allocatedMb = 2048,
+            pressure = MemoryPressure.GRAPHICS
+        )
+
+        val reopened = store(dir).event()!!
+        assertEquals(MemoryPressure.GRAPHICS, reopened.pressure)
+        assertFalse(reopened.atLimit)
+        assertNull(reopened.recommendedMb)
+    }
 }

@@ -20,6 +20,7 @@ package com.movtery.zalithlauncher.game.renderer.recovery
 
 import android.app.ActivityManager
 import android.content.Context
+import com.movtery.zalithlauncher.game.performance.MemoryPressure
 import com.movtery.zalithlauncher.game.renderer.renderers.AetherRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.GL4ESRenderer
 import com.movtery.zalithlauncher.game.renderer.renderers.NGGL4ESRenderer
@@ -53,7 +54,11 @@ data class RecoveryEvent(
     val at: Long,
     val reason: RecoveryReason = RecoveryReason.RENDERER,
     val allocatedMb: Int? = null,
-    val recommendedMb: Int? = null
+    val recommendedMb: Int? = null,
+    /** For [RecoveryReason.MEMORY]: which pool ran out, so the card can give real advice. */
+    val pressure: MemoryPressure? = null,
+    /** True when the heap was already at the device's safe maximum. */
+    val atLimit: Boolean = false
 ) {
     /**
      * True when a safer renderer is *suggested*. The renderer setting is never changed
@@ -208,6 +213,8 @@ class RendererRecoveryStore(private val root: File) {
         reason: RecoveryReason = RecoveryReason.RENDERER,
         allocatedMb: Int? = null,
         recommendedMb: Int? = null,
+        pressure: MemoryPressure? = null,
+        atLimit: Boolean = false,
         now: Long = System.currentTimeMillis()
     ): RecoveryEvent? {
         delete(FILE_PENDING)
@@ -250,7 +257,9 @@ class RendererRecoveryStore(private val root: File) {
             at = now,
             reason = reason,
             allocatedMb = allocatedMb,
-            recommendedMb = recommendedMb
+            recommendedMb = recommendedMb,
+            pressure = pressure,
+            atLimit = atLimit
         )
         save(
             FILE_EVENT,
@@ -264,6 +273,8 @@ class RendererRecoveryStore(private val root: File) {
                 setProperty("reason", event.reason.name)
                 event.allocatedMb?.let { setProperty("allocatedMb", it.toString()) }
                 event.recommendedMb?.let { setProperty("recommendedMb", it.toString()) }
+                event.pressure?.let { setProperty("pressure", it.name) }
+                if (event.atLimit) setProperty("atLimit", "true")
             }
         )
         return event
@@ -284,7 +295,11 @@ class RendererRecoveryStore(private val root: File) {
                 RecoveryReason.valueOf(props.getProperty("reason") ?: RecoveryReason.RENDERER.name)
             }.getOrDefault(RecoveryReason.RENDERER),
             allocatedMb = props.getProperty("allocatedMb")?.toIntOrNull(),
-            recommendedMb = props.getProperty("recommendedMb")?.toIntOrNull()
+            recommendedMb = props.getProperty("recommendedMb")?.toIntOrNull(),
+            pressure = props.getProperty("pressure")?.let { raw ->
+                runCatching { MemoryPressure.valueOf(raw) }.getOrNull()
+            },
+            atLimit = props.getProperty("atLimit")?.toBooleanStrictOrNull() ?: false
         )
     }
 

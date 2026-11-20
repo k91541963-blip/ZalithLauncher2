@@ -29,6 +29,19 @@ import java.io.RandomAccessFile
  * written at the end. The check is deliberately literal; a missing or unreadable log
  * never throws and never produces a claim.
  */
+/**
+ * Which memory pool ran out. The remedy is different, so the launcher must not lump
+ * them together: more heap cannot fix a graphics/native allocation failure, and a
+ * smaller render distance cannot fix a Java heap exhaustion on its own.
+ */
+enum class MemoryPressure {
+    /** `OutOfMemoryError: Java heap space` — raise the heap, or lower world load. */
+    HEAP,
+
+    /** GL/native allocation failure — lower render distance/graphics, never just the heap. */
+    GRAPHICS
+}
+
 object LaunchLogClassifier {
 
     /** Enough for the stack trace of an OOM plus the surrounding mod list. */
@@ -49,10 +62,29 @@ object LaunchLogClassifier {
         "gl_out_of_memory"
     )
 
-    fun isOutOfMemory(text: String): Boolean {
-        if (text.isBlank()) return false
+    /**
+     * Markers that prove the GPU/driver allocator failed rather than the Java heap.
+     * Kept narrow on purpose: "Failed to allocate" also appears inside Java OOM messages,
+     * so only GL-specific text counts here.
+     */
+    private val GRAPHICS_MARKERS = listOf(
+        "gl_out_of_memory",
+        "gl error 0x0505",
+        "egl_bad_alloc"
+    )
+
+    fun isOutOfMemory(text: String): Boolean = diagnoseText(text) != null
+
+    /**
+     * Classifies an out-of-memory tail. Returns `null` when the text is not an OOM at all,
+     * so callers never invent a diagnosis.
+     */
+    fun diagnoseText(text: String): MemoryPressure? {
+        if (text.isBlank()) return null
         val lower = text.lowercase()
-        return OUT_OF_MEMORY_MARKERS.any { lower.contains(it) }
+        if (GRAPHICS_MARKERS.any { lower.contains(it) }) return MemoryPressure.GRAPHICS
+        if (OUT_OF_MEMORY_MARKERS.any { lower.contains(it) }) return MemoryPressure.HEAP
+        return null
     }
 
     /** Reads the last [TAIL_BYTES] of [file]; returns an empty string when unreadable. */
@@ -73,5 +105,8 @@ object LaunchLogClassifier {
     }
 
     /** True when the log file's tail contains an out-of-memory marker. */
-    fun logShowsOutOfMemory(file: File): Boolean = isOutOfMemory(readTail(file))
+    fun logShowsOutOfMemory(file: File): Boolean = diagnose(file) != null
+
+    /** Reads the tail once and returns the memory pressure, or `null`. */
+    fun diagnose(file: File): MemoryPressure? = diagnoseText(readTail(file))
 }

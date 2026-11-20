@@ -1305,6 +1305,11 @@
     <string name="aether_saves_backup_all">Tüm dünyaları yedekle</string>
     <string name="aether_saves_backup_done">Tüm dünyalar %1$s dosyasına yedeklendi</string>
     <string name="aether_saves_backup_failed">Dünyalar yedeklenemedi</string>
+    <string name="aether_saves_backup_now">Şimdi yedekle</string>
+    <string name="aether_saves_no_backups">Henüz yedek yok</string>
+    <string name="aether_saves_restore_entry">%1$s · %2$d dünya</string>
+    <string name="aether_saves_restore_done">Geri yüklendi: %1$s</string>
+    <string name="aether_saves_restore_failed">Bu yedek geri yüklenemedi</string>
 
     <string name="aether_launch_health_title">Cihaz oyunu zor çalıştırabilir</string>
     <string name="aether_launch_health_summary">Boş bellek: %1$d MB · Boş depolama: %2$d MB</string>
@@ -1532,6 +1537,11 @@
     <string name="renderer_recovery_memory">Son oturum bellek yetersizliğiyle sona erdi; oyun belleği %1$d MB idi.</string>
     <string name="renderer_recovery_memory_recommend">Bu kurulum için önerilen bellek: %1$d MB.</string>
     <string name="renderer_recovery_memory_no_room">Bu cihaz oyuna güvenli şekilde daha fazla bellek veremiyor. Arka plan uygulamalarını kapatın veya görüş mesafesini düşürün.</string>
+    <string name="renderer_recovery_memory_at_limit">Son oturum bellek yetersizliğiyle sona erdi, ancak bellek (%1$d MB) zaten bu cihazın güvenli üst sınırında.</string>
+    <string name="renderer_recovery_memory_at_limit_hint">Burada daha büyük bir yığın mümkün değil. Bunun yerine görüş mesafesini ve simülasyon mesafesini düşürün.</string>
+    <string name="renderer_recovery_memory_graphics">Son oturumda Java yığını değil, grafik (GPU/yerel) belleği tükendi.</string>
+    <string name="renderer_recovery_memory_graphics_hint">Daha fazla Java belleği işe yaramaz. Görüş mesafesini düşürün, Fabulous grafikleri ve varlık gölgelerini kapatıp yeniden deneyin.</string>
+    <string name="renderer_recovery_lower_graphics">Grafikleri ve görüş mesafesini düşür</string>
     <string name="renderer_recovery_apply_memory">%1$d MB yap</string>
     <string name="renderer_recovery_suggest_switch">%1$s renderer\'ına geç</string>
     <string name="aether_launch_health_low_allocation">%1$d mod kurulu ancak oyun belleği yalnızca %2$d MB. Bu boyuttaki mod paketleri sık sık bellek tüketir; %3$d MB önerilir.</string>

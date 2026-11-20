@@ -3070,6 +3070,11 @@
     <string name="aether_saves_backup_done">All worlds backed up to %1$s</string>
     <!-- Toast shown when the world backup archive could not be created -->
     <string name="aether_saves_backup_failed">Could not back up worlds</string>
+    <string name="aether_saves_backup_now">Back up now</string>
+    <string name="aether_saves_no_backups">No backups yet</string>
+    <string name="aether_saves_restore_entry">%1$s · %2$d worlds</string>
+    <string name="aether_saves_restore_done">Restored: %1$s</string>
+    <string name="aether_saves_restore_failed">Could not restore this backup</string>
 
     <!-- Title of the dialog shown before launch when the device is low on memory, storage or overheated -->
     <string name="aether_launch_health_title">Device may struggle to run the game</string>
@@ -3310,6 +3315,11 @@
     <string name="renderer_recovery_memory">The last session ended with an out-of-memory error while the game heap was %1$d MB.</string>
     <string name="renderer_recovery_memory_recommend">Recommended heap for this instance: %1$d MB.</string>
     <string name="renderer_recovery_memory_no_room">This device cannot safely give the game more memory. Close background apps or lower the render distance.</string>
+    <string name="renderer_recovery_memory_at_limit">The last session ran out of memory, but the heap (%1$d MB) is already at this device\'s safe maximum.</string>
+    <string name="renderer_recovery_memory_at_limit_hint">A larger heap is not possible here. Lower the render distance and simulation distance instead.</string>
+    <string name="renderer_recovery_memory_graphics">The last session ran out of graphics (GPU/native) memory, not Java heap memory.</string>
+    <string name="renderer_recovery_memory_graphics_hint">More Java heap will not help. Lower the render distance, turn off Fabulous graphics and entity shadows, then retry.</string>
+    <string name="renderer_recovery_lower_graphics">Lower graphics and render distance</string>
     <string name="renderer_recovery_apply_memory">Set %1$d MB</string>
     <string name="renderer_recovery_suggest_switch">Switch to %1$s</string>
     <string name="aether_launch_health_low_allocation">%1$d mods are installed but the game heap is only %2$d MB. Modpacks this size often run out of memory; %3$d MB is recommended.</string>
