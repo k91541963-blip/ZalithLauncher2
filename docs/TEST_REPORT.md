@@ -36,17 +36,17 @@ Komut (CI ile aynı):
   --tests "com.movtery.zalithlauncher.game.version.mod.dependency.*"
 ```
 
-Sonuç: **186 test, 0 başarısız** (CI çalışması
-[44477628757](https://github.com/k91541963-blip/Zlc/actions/runs/44477628757),
-kaynak commit `175908d`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
-Test dosyalarındaki `@Test` sayımı 186'dır ve CI aynı filtrelerle yeşildir.
+Sonuç: **208 test, 0 başarısız** (CI çalışması
+[44695468421](https://github.com/k91541963-blip/Zlc/actions/runs/44695468421),
+kaynak commit `3ff8059`; `:ZalithLauncher:testDebugUnitTest` BUILD SUCCESSFUL).
+Test dosyalarındaki `@Test` sayımı 208'dir ve CI aynı filtrelerle yeşildir.
 
 | Paket | Test sayısı | Durum |
 |---|---:|---|
-| `game.performance` | 153 | ✅ geçti |
+| `game.performance` | 175 | ✅ geçti |
 | `game.diagnostics` | 11 | ✅ geçti |
 | `game.version.mod.dependency` | 22 | ✅ geçti |
-| **Toplam** | **186** | ✅ **geçti** |
+| **Toplam** | **208** | ✅ **geçti** |
 
 Aşama 3C'de CI iki gerçek hata yakaladı ve ikisi de düzeltildi:
 `44266581823` — TR dizelerinde kaçırılmamış kesme işareti (`aapt2`
@@ -59,6 +59,10 @@ Düzeltmeler `f7ced04`, `b727757`, `a96dfc1`.
 "has **run** out of memory"; sınıflandırıcıda yalnızca "ran out of memory"
 marker'ı vardı. Her iki metin de eklendi (`175908d`) ve `44477628757` yeşil
 kapandı.
+
+3.0.2 (bellek teşhisi + 3E dünya geri yükleme) `44695468421` ile yeşil kapandı:
+208/208 test, APK yayınlandı. Bu turda CI yeni bir hata yakalamadı; ancak
+düzeltmenin cihazda oyunu gerçekten açtığı **gösterilmedi**.
 
 İlk AetherLite CI çalışması (`43861719985`) iki hatalı test beklentisini ortaya çıkardı:
 `parseMaliModel("Mali-T860 MP4")` çekirdek sayısını koruyor ve `classifyMali`
@@ -100,17 +104,28 @@ Yeni eklenenler:
   yazılması, `RENDERER` olayında öneri + sayaç artışı/sıfırlanması, olayın
   kapatılması, başarısız sürümün "son çalışan" kaydını kaybetmesi, kayıt yokken
   hiçbir şey üretilmemesi, **`MEMORY` olayının renderer önermemesi ve sayaç/son
-  çalışanı bozmaması**, **`UNKNOWN` (kalan deneme) olayının öneri üretmemesi** (15 test)
+  çalışanı bozmaması**, **`UNKNOWN` (kalan deneme) olayının öneri üretmemesi**,
+  **baskı türü ve cihaz sınırının yeniden açılışta korunması** (17 test)
 - `MemoryRecommendationTest` — mod sayısına göre heap tabanı (1/10/30 eşikleri),
   50 modda 2048→3072 önerisi, yeterli heap'te sessiz kalma, küçük artışın
   önerilmemesi, cihaz üst sınırına kırpma, kullanılamaz üst sınırda öneri yok,
   64 MB adımına yuvarlama, `mods/` sayımının büyük/küçük harf duyarsız ve yalnız
-  `.jar` olması, eksik klasörde 0 (10 test)
+  `.jar` olması, eksik klasörde 0, **heap'te yer varken yükseltme**, **cihaz
+  sınırında "grafik düşür"**, **vanilla OOM'unda tek güvenli artış**, **GL
+  baskısında asla heap önermeme** (14 test)
+- `MemoryReliefTest` — render/simulation mesafesi, fabulous→fancy, gölge kapatma,
+  asla yükseltmeme, ilgisiz ayarları koruma, eksik dosya/dizin ve sayısal olmayan
+  değerde dosyayı bozmama (6 test)
 - `LaunchLogClassifierTest` — `OutOfMemoryError`/`Java heap space`, Minecraft'ın
   "has run out of memory" ve eski "ran out of memory" metni, `GL_OUT_OF_MEMORY`,
-  sıradan hataların OOM sayılmaması, yalnızca son 256 KB'ın okunması (eski çalıştırmanın
-  izinin yok sayılması), kısa logun tamamının okunması, eksik/dizin dosyada
-  istisna atmama, sıfır pencere reddi (9 test)
+  **heap ile GL baskısının ayrı sınıflandırılması**, sıradan hataların OOM
+  sayılmaması, yalnızca son 256 KB'ın okunması (eski çalıştırmanın izinin yok
+  sayılması), kısa logun tamamının okunması, eksik/dizin dosyada istisna atmama,
+  sıfır pencere reddi (12 test)
+- `WorldArchiveTest` — çok dünyalı yedek→geri yükleme turu, mevcut dünyayı
+  silmeden `.before-restore-*` olarak saklama, zip-slip reddi, `level.dat`
+  içermeyen arşivin reddi, kök `level.dat` ve `saves/` önekli arşivler, bozuk
+  yedeklerin listeyi bozmaması, eksik arşiv (7 test)
 
 ## 3. Derleme
 
@@ -123,8 +138,8 @@ APK: `AetherLite-arm64-debug.apk`
 
 | Alan | Değer |
 |---|---|
-| Boyut | 216.596.928 bayt (≈206,6 MiB) |
-| SHA-256 | `a9f439c688039a6293fdc73c450c8a9e0b5651526625fbc252db05d9d5e7ce5a` |
+| Boyut | 216.630.464 bayt (≈206,6 MiB) |
+| SHA-256 | `2a60a219a7678ca4c271602d25884bd4e4967a3680143e75458226f5e0c3b9f2` |
 | Paket | `com.aetherlite.launcher.debug` |
 | Uygulama adı | `AetherLite Launcher` |
 | İndirme | https://github.com/k91541963-blip/Zlc/releases/download/apk-latest/AetherLite-arm64-debug.apk |
@@ -165,6 +180,11 @@ APK içeriği doğrulandı:
   `last_good.properties`) var → kurtarma kodu gerçekten paketlenmiş.
 - DEX içinde `RecoveryReason`, `MemoryRecommendation` ve `LaunchLogClassifier`
   sınıfları var → 3.0.1 bellek/OOM yolu paketlenmiş.
+- DEX içinde `MemoryPressure` ve `MemoryRelief` sınıfları var → 3.0.2'nin heap/GL
+  ayrımı ve `options.txt` hafifletmesi paketlenmiş.
+- DEX içinde `WorldArchive` ve `before-restore-` dizesi var; `resources.arsc`
+  içinde `aether_saves_restore_entry`/`aether_saves_restore_done` var → 3E dünya
+  geri yükleme paketlenmiş.
 - `resources.arsc` içinde `aether_launch_health_low_allocation`,
   `renderer_recovery_memory` ve `renderer_recovery_apply_memory` dizeleri var;
   kaldırılan `aether_render_mode_lite`, `aether_render_mode_performance` ve
@@ -221,6 +241,15 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   kontrolü; cihazda doğrulanmadı).
 - `AETHER_RENDER_MODE=lite|performance` eski değerleri yerel katmanda `balanced`'a
   eşlenir; kayıtlı enum ayarı da bilinmeyen değerde `BALANCED`'a düşer (kod + test).
+- OOM teşhisi iki ayrı havuza ayrılır: `GL_OUT_OF_MEMORY`/`EGL_BAD_ALLOC` →
+  `GRAPHICS`, `OutOfMemoryError` → `HEAP`. GL baskısında heap önerilmez; heap zaten
+  cihaz sınırındaysa `atLimit` olayı yazılır (kod + test).
+- `MemoryRelief` yalnızca düşürür: `renderDistance` 8, `simulationDistance` 5,
+  fabulous→fancy, `entityShadows:false`. Dosya yoksa veya zaten düşükse yazmaz
+  (kod + test).
+- `WorldArchive.restore` arşivdeki her dünyayı ayrı klasöre açar; var olan klasörü
+  silmez, `<ad>.before-restore-<ts>` olarak saklar; `..`/mutlak yol girdilerini ve
+  `level.dat` içermeyen arşivleri reddeder (kod + test).
 - `eglSurfaceAttrib` başarısız olursa yalnızca log; başlatma durmaz (kod).
 - Launcher tarafındaki EGL probe `eglTerminate` çağırmaz → Compose renderer'ı
   etkilenmez (kod incelemesi).
@@ -255,9 +284,10 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   Mali sürücüsünde beyaz dünyayı gerçekten bitirdiği bir cihaz testiyle
   gösterilmedi. Beyaz dünya sürerse `adb logcat -s AetherRender` çıktısındaki
   `EGL config: ... stencil=` satırı ve `latest.log` kuyruğu gerekir.
-- **OOM guard'ı cihazda denenmedi.** Sınıflandırma ve heap önerisi birim testleriyle
-  doğrulandı; 50 modlu gerçek bir 26.2 kurulumunda "N MB yap ve başlat" akışının
-  oyunu başlattığı gösterilmedi.
+- **OOM teşhisi ve hafifletme cihazda denenmedi.** Sınıflandırma, heap önerisi ve
+  `options.txt` düzenlemesi birim testleriyle doğrulandı; 50 modlu gerçek bir 26.2
+  kurulumunda "grafikleri ve görüş mesafesini düşür" düğmesinin oyunu açtığı
+  gösterilmedi.
 - Modpack dışa aktarma ve tam dosya doğrulama yok.
 - AetherRender 2.1 NG-GL4ES çekirdeğini kullanır ve `26.3-snapshot-3` aralığını beyan
   eder; ancak bu aralık gerçek cihazda 26.3 ile denenmediği için "doğrulandı"
@@ -277,9 +307,9 @@ cihaz testi bekler. AetherRender için FPS iddiası yoktur. Uygulanacak adımlar
   ölçülmedi; yalnızca çekirdeğin bu değişkenleri okuduğu ve ortama yazıldığı
   doğrulandı. FPS/frametime iddiası yoktur.
 
-> Rapor son güncelleme: 2026-11-20, kaynak commit `175908d`, CI çalışması
-> [44477628757](https://github.com/k91541963-blip/Zlc/actions/runs/44477628757).
-> APK bu commit ile aynı ağaçtan üretildi (216.596.928 bayt, SHA-256
-> `a9f439c6…e7ce5a`); SHA-256 GitHub release `digest` alanıyla birebir eşleşiyor.
-> Cihaz testleri hâlâ yapılmadı; 3.0.1 düzeltmeleri yalnızca derleme, birim testi ve
+> Rapor son güncelleme: 2026-11-20, kaynak commit `3ff8059`, CI çalışması
+> [44695468421](https://github.com/k91541963-blip/Zlc/actions/runs/44695468421).
+> APK bu commit ile aynı ağaçtan üretildi (216.630.464 bayt, SHA-256
+> `2a60a219…b9f2`); SHA-256 GitHub release `digest` alanıyla birebir eşleşiyor.
+> Cihaz testleri hâlâ yapılmadı; 3.0.2 düzeltmeleri yalnızca derleme, birim testi ve
 > APK sembol/dize kontrolüyle doğrulandı.

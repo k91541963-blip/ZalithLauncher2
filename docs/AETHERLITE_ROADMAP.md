@@ -94,6 +94,7 @@
 | `92f7b60` | Aşama 3B: ana ekran kahraman kartı + son dünya/oturum + widget galerisi | ✅ CI 44271299158, 133/133 test, APK yayınlandı |
 | `848eacf` + `dc03735` | Aşama 3D: oturum geçmişi, karşılaştırma, öneri danışmanı | ✅ CI 44274517130, 163/163 test |
 | `5953ec5` + `175908d` | 3.0.1: OOM sınıflandırma + heap guard, öneri tabanlı kurtarma, beyaz dünya için EGL güvenliği | ✅ CI 44477628757, 186/186 test, APK yayınlandı |
+| `3ff8059` | 3.0.2: heap/GL bellek ayrımı, `options.txt` hafifletme, 3E çok dünyalı yedek geri yükleme | ✅ CI 44695468421, 208/208 test, APK yayınlandı |
 
 Ayrıntılar, APK boyutu/SHA-256 ve test sayıları: [`TEST_REPORT.md`](TEST_REPORT.md).
 
@@ -133,7 +134,7 @@ APK olarak doğrulanır. **Yalnızca tamamlanan aşama ✅ işaretlenir.**
 | **3B** | Ana ekran 3.0: büyük karakter kartı, seçili sürüm/modpack/son dünya, Play, son oturumlar; widget ekle/kaldır/taşı/boyutlandır + düzen kaydı | ✅ CI 44271299158, 133/133 test |
 | **3C** | AetherRender 3 derinlik: çökme sonrası otomatik geri dönüş, sürüm başına son çalışan renderer, seçilen EGL config dökümü | ✅ CI 44268954010, 120/120 test |
 | **3D** | Performans AI: ölçüme dayalı bulgular (CPU/GPU darboğazı, bellek artışı, shader takılması) + kullanıcı onaylı uygulama; oturum geçmişi ve karşılaştırma | ✅ CI 44274517130, 163/163 test |
-| **3E** | Mod Hub: güncelleme denetimi, uyumsuz mod uyarısı, `.mrpack` dışa aktarma; World Manager: toplu yedek/geri yükleme, içe/dışa aktarma | ⏳ |
+| **3E** | Mod Hub: güncelleme denetimi, uyumsuz mod uyarısı, `.mrpack` dışa aktarma; World Manager: toplu yedek/geri yükleme, içe/dışa aktarma | 🟡 kısmi — güncelleme/bağımlılık denetimi ve `.mrpack` mevcut; 3.0.2 toplu yedeğin **geri yüklenmesini** ekledi (çok dünyalı zip, silmeden) |
 | **3F** | Overlay 3.0 (taşı/boyutlandır/şeffaflık, panel seçimi) ve AetherTouch 3.0 (profil içe/dışa aktarma, tek elle düzen) | ⏳ |
 | **3G** | Skin Studio, Java Manager yenilemesi, Download Center kuyruğu, Notification Center | ⏳ |
 | **3H** | Plugin API (izin modeli, bilinmeyen eklenti güvenilmez) + modüler Gradle ayrımı | ⏳ |
@@ -222,13 +223,41 @@ Bu üç düzeltme derleme ve birim testleriyle doğrulanabilir; **Mali cihazda y
 üretim testi yapılmadı**. Beyaz dünya sürerse `adb logcat -s AetherRender` çıktısındaki
 `EGL config: ... stencil=...` satırı ve `latest.log` kuyruğu gerekir.
 
+### 3.0.2 — "dünyaya/sunucuya girmiyor" için bellek teşhisi + 3E dünya geri yükleme
+
+3.0.1 bellek hatasını tek tür sayıyordu: OOM gördüğünde hep heap öneriyor, heap
+zaten cihaz sınırındaysa **hiçbir şey önermiyordu**. Kullanıcının "bellek tükendi,
+dünyaya girmiyor" durumunda tam olarak bu boşluk vardı.
+
+- `MemoryPressure { HEAP, GRAPHICS }`: `GL_OUT_OF_MEMORY` / `EGL_BAD_ALLOC` ile
+  `OutOfMemoryError: Java heap space` ayrı sınıflandırılır. GL hatasında daha fazla
+  heap önerilmez, çünkü işe yaramaz.
+- `MemoryRecommendation.advise`: yer varsa 512 MB'lık güvenli artış (vanilla dahil),
+  cihaz sınırındaysa "daha fazla heap mümkün değil" kararı.
+- `MemoryRelief`: `options.txt` içinde `renderDistance` 8, `simulationDistance` 5,
+  `graphicsMode` fabulous→fancy, `entityShadows` kapatılır. Yalnızca **düşürür**,
+  asla yükseltmez, atomik yazar; dosya yoksa hiçbir şey yapmaz.
+- Kurtarma kartı `MEMORY` olayında artık üç ayrı metin/düğme gösterir: heap artır,
+  sınırda "grafikleri ve görüş mesafesini düşür", GL hatasında aynı grafik düğmesi.
+- **3E — dünya geri yükleme:** toplu yedek (`worlds-*.zip`) vardı ama geri yükleme
+  yoktu; genel içe aktarıcı tek `level.dat` arıyordu. `WorldArchive` çok dünyalı
+  yedeği geri yükler, mevcut dünyayı silmek yerine `<ad>.before-restore-<ts>` olarak
+  saklar ve zip-slip girdilerini reddeder. Dünya ekranındaki yedek düğmesi artık
+  yedek listesini açıp geri yükleme sunar.
+
+Cihaz doğrulaması yine yapılmadı: 50 modlu gerçek bir 26.2 kurulumunda "grafikleri
+düşür" düğmesinin oyunu açtığı gösterilmedi. Beyaz dünya gibi bu da kod + birim
+testi + derleme ile sınırlıdır.
+
 ## 8. Sonraki Adımlar (öncelik sırası)
 
 1. Mali cihaz test matrisini çalıştır, `TEST_REPORT.md`'yi ölçümlerle doldur.
-2. 3.0.1 düzeltmelerini aynı cihazda doğrula: 50 modlu 26.2 kurulumunda OOM guard'ı,
-   beyaz dünya için `EGL config` stencil satırı ve renderer'ın kendiliğinden
-   değişmediği.
-3. Oturum geçmişi + karşılaştırma (3D) ve kahraman kartındaki son oturum satırını
+2. 3.0.1/3.0.2 düzeltmelerini aynı cihazda doğrula: 50 modlu 26.2 kurulumunda OOM
+   teşhisi, "grafikleri ve görüş mesafesini düşür" düğmesi, beyaz dünya için
+   `EGL config` stencil satırı ve renderer'ın kendiliğinden değişmediği.
+3. 3E'nin kalanı: tek dünya `.zip` dışa aktarma düğmesi, yedek saklama süresi/otomatik
+   temizlik ve Mod Hub'da güncelleme rozetinin ana ekrana taşınması.
+4. Oturum geçmişi + karşılaştırma (3D) ve kahraman kartındaki son oturum satırını
    geçmişle besle.
 4. Oyun içi overlay'e `%1 low` ve P99 kare süresi satırlarını ekle (AetherMetrics
    aynı örnekleri sağlar; canlı grafik zaten var).
